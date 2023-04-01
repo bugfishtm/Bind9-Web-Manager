@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Bind9 Web Manager (DNSHTTP)</title> <!------------------------------------>
+    <meta name="description" content="This is the Bind9 Web Manager made by Bugfish (Jan-Maurice Dahlmanns). It is a opensource, fully operational DNS Panel. The main focus of this panel is bind9 dns replication over http. Feel free to use the software for any of your purposes and do not hesitate to contact us if you have questions. We wish you the best..."> <!------------------------------------>
+    <meta name="author" content="Bugfish">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	<link rel="canonical" href="https://bugfishtm.github.io/Bind9-Web-Manager" />
+	<meta property="og:title" content="Bind9 Web Manager (DNSHTTP)" />
+	<meta property="og:url" content="https://bugfishtm.github.io/Bind9-Web-Manager" />
+	<meta property="og:image" content="./meta.png" />
+	<style>
+		html { font-size: 62.5%; background: url(bg.jpg); background-size:100%;}
+		body { font-size: 1.5em; line-height: 1.6; font-weight: 400;font-family: "Roboto", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif; color: #FFFFFF; max-width:800px;margin:auto; background: #121212;}
+		header {  background: #242424; padding: 15px;   color:#FFFFFF; }
+
+		ul.main-menu { margin: 0;padding: 0;display: flex;flex-wrap: wrap;justify-content: left;list-style: none;}
+		ul.main-menu li a {margin-right:20px;font-size:2.0rem; border-bottom: solid transparent 3px; color:#cfd2da;}
+		ul.main-menu li a:hover {color:#FFFFFF;}
+		ul.main-menu li a.active { color:#FFFFFF; border-bottom-color:#ff5707;}
+
+		a { font-weight: normal; text-decoration: none;  color:#ff5707;}
+		a:hover {color: white !important;}
+		a:focus {outline: thin dotted;}
+
+		h1 {  margin-top: 0;margin-bottom: 2rem;font-weight: 300;text-rendering: optimizeLegibility;line-height: 1;font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; color:#ff5707; }
+		h2 { font-size: 18px; padding-bottom: 0px; color:#ffffff; }
+
+		.inner { padding: 15px; }
+		#headertitle { text-align: center; width: 100; font-weight: bold; }
+		.inner_section table { width: 100%;}
+		.inner_section hr { border-color: #242424;  }
+		.inner_section th { background: #454545;  }
+		.inner_section tr, .inner_section td { border-top: 2px solid #242424; text-align: left; }
+		.inner_section tr:hover { background:#343434; color: white;  }
+		iframe{ width: 100%; margin-bottom: -5px; }
+		footer{ background: #242424; bottom: 0px; width: 100%; max-width: 800px; padding: 15px;box-sizing: border-box; text-align: center; color:#FFFFFF;}
+	</style>
+  </head>
+  <body>
+<img src="logo.png" style="width: 100%; margin-bottom: -7px;">
+    <header id="header">
+	  
+      <h1>Bind9 Web Manager (DNSHTTP)</h1> <!------------------------------------>
+      
+      <ul class="main-menu">
+        <li><a href="../">Home</a></li>
+        <li><a href="https://github.com/bugfishtm/Bind9-Web-Manager" target="_blank">Github</a></li> <!------------------------------------>
+        <li><a href="https://bugfish-fs.000webhostapp.com/impressum" target="_blank">Impressum</a></li>
+        <li><a href="https://bugfish-fs.000webhostapp.com/privacy" target="_blank">Privacy</a></li>
+      </ul>                 
+    </header>
+   
+    <div>
+             <div class="inner" style="text-align: left;">
+
+
+
+
+<h1 id="bind9-web-manager-dnshttp-">Bind9 Web Manager [DNSHTTP]</h1>
+<h2 id="general-functionality-informations">General Functionality Informations</h2>
+<h3 id="domain-and-record-management">Domain and Record Management</h3>
+<p>With this software you have the possibility so setup domains and replications of bind9. The focus of this software lies in the dns replication, not domain and record management. The Interface is kept simple and functional - so we recommend to use this software with hosting sotware like virtualmin, plesk or misc together on a master server. This Software needs to be setup on the master and slave server.</p>
+<h3 id="slave-server-replication">Slave server replication</h3>
+<p>With this Panel you can Control Replication between Slave and Master Servers, if there is bind9 running on both machines. More informations how to setup Connections below.</p>
+<h3 id="additional-areas-to-check-replication-status">Additional Areas to check Replication Status</h3>
+<p>If you use this webinterface for Master -&gt; Slave replication, than you have a detailed overview, where you can see conflicts. A conflict can be, if a Domain is registered as Master Domain on 2 Different Master Servers, a Slave should replicate from. This errors will be shown in the &quot;Conflits&quot; Section of the webpage. You can control which Master Server should be prefered for Domain Data Replication. But its best to keep the conflict table clear or stop that domains from replicating. In the bind domain section you can disable domains for replication if needed. Than they will be not replicated to Slave servers. This has to be done on the Master Server, which holds the domain.</p>
+<h3 id="conflict-detection-and-solving">Conflict Detection and Solving</h3>
+<p>You can solve DNS Domain Conflicts, if Two Master Servers serve same Domain Informations to Slave Servers, you can choose the preferred master Server for Replication of that domain!</p>
+<h3 id="slave-dns-server-hybrid-support">Slave/DNS Server Hybrid Support</h3>
+<p>One Server can be Slave and Master Server at the same time. If you register a Master Server in the Servers Section. The Server where you registered that, will act as a Slave Server and replicate Domains from that Master Server.</p>
+<h3 id="add-master-slave-replication">Add Master/Slave Replication</h3>
+<p>For the Replication you need a Security Token, set up on both sites - the master and slave server. The Token has to be identical and a token can only exist one time in the webinterface. You can add as many slave/master servers as you want.</p>
+<p>For the Replication to succeed, you need Server A registered as Master Server with Token XXX on DNS Slave Server B. Than Server B needs to be registered with the same token on Master Server A. If Server B acts as master server, besides his work as salve, for other domains, you can enter other servers as slave server in Server B, if needed. Every Server this interface is installed on, can act as Master and Slave Server at the same time. (Hybrid Master/Slave)</p>
+<h3 id="configure-a-slave-master-connection">Configure a Slave/Master Connection</h3>
+<ul>
+<li>Enter the Slave Server in Panel on Master Server with token example: &quot;123&quot; (A Token to Server to Server Connection Token is always unique!)</li>
+<li>Enter Master Server in Slave Server with SAME token (123) used on Master Server</li>
+<li>Domains will be fetched from Master locally, than delivered to the Slave Server in intervalls you can setup by editing the cronjob execution intervalls. API-Token is the Token which needs to be the Same inside a Master/Slave Connection. API-Path is the Path to this Script installed on an External server. For example <a href="https://domain">https://domain</a> OR <a href="http://domain/dnsscriptsubfolder">http://domain/dnsscriptsubfolder</a></li>
+</ul>
+<h3 id="user-management">User Management</h3>
+<p>This software comes with usermanagement in it. You can create/edit/delete users and assign different permissions of different areas to them. </p>
+<h3 id="about-this-software">About this Software</h3>
+<p>I hope you will get a bit of understanding how this process is to be set up with this description. The software is here to make replication with DNS simpler and more transparent and controlable. I made the process to achieve this, as simple as it was possible for me and I hope with my instructions you are able to achieve the goal you are trying to reach with my dns tool, if you have in mind using it.</p>
+<h2 id="installation">Installation</h2>
+<p>As last step of Installation please take a Look at the configuration/settings page of your deployed instance. There you can setup different variables which urgently needs to be setup to run this script! Or at least check them if they are valid. Otherwise this can hurt your system. Get sure that all settings in settings.php are set right. The worst case, that may happen is that your domain record files and listing file gets deleted. So please be very cautious. If you have configured all needed settings in settings.php correctly, there should be no need to worry, as I am using this software in a lot of productive areas.</p>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li>Public IPs on servers is recommended</li>
+<li>Tested on Ubuntu and Debian (may work on other systems, but untested)</li>
+<li>Root Permissions for Cronjob on System</li>
+<li>Apache2 Webserver with PHP 7/8 Support</li>
+<li>Apach2 Modules: rewrite</li>
+<li>PHP Modules: mysql, curl, intl, mbstring, zip, gd</li>
+<li>MySQL Database Connection and user to connect with</li>
+<li>Open Ports 53 (TCP/UDP) [Bind]</li>
+<li>Open Port 80/442 (TCP) [Webinterface]</li>
+</ul>
+<h3 id="deployment">Deployment</h3>
+<ul>
+<li>Upload the files in the &quot;source&quot; directory of this repository to your webspace and check the settings.sample.php file. It is mandatory and important that you check the settings in that file. DNS Zone files will be created and if you have not the right setup than the cronjob may break your DNS Files. Read the instructions about the settings in settings.php carefully. If you have any questions do not hesitate to contact me. In the Settings.php file you will also set the MySQL Login Data.</li>
+<li>You dont need to install any SQL Tables for yourself. The websoftware will automatically install all needed tanbles, if they are not present at the time the website will be opened up. An initial user will created. You can see the login credentials of the initial created user at the end of this manual.</li>
+<li>Setup the Cronjob as described below. Without the cronjob, DNS Replication and Bind Synchronisation will not take place.</li>
+</ul>
+<h3 id="cronjobs-mandatory-">Cronjobs (Mandatory)</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Interval</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PATH_TO_WEBROOT/_cronjon/daily.php &gt;/dev/null 2&gt;&1;</td>
+<td>daily</td>
+<td>Resets Blacklisted IPs (Optional but Recommended)</td>
+</tr>
+<tr>
+<td>PATH_TO_WEBROOT/_cronjon/sync.php &gt;/dev/null 2&gt;&1;</td>
+<td>hourly</td>
+<td>Needed for DNS Server Configuration Operations and Database Synchronisation + Replication</td>
+</tr>
+</tbody>
+</table>
+<h3 id="adjust-bind9-configuration">Adjust Bind9 Configuration</h3>
+<h4 id="named-conf-options">named.conf.options</h4>
+<pre><code>This Operations here are just an example how to <span class="hljs-keyword">set</span> up
+a <span class="hljs-keyword">slave</span> <span class="hljs-keyword">server</span> <span class="hljs-keyword">with</span> bind9. <span class="hljs-keyword">DO</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">USE</span> THEM <span class="hljs-keyword">ON</span> A RUNNING  
+<span class="hljs-keyword">MASTER</span> <span class="hljs-keyword">SERVER</span>, YOU CAN LEAVE THE <span class="hljs-keyword">SETTINGS</span> THERE UNCHANGED!
+</code></pre><p>Keep the information above in mind!</p>
+<pre><code>options {
+    directory <span class="hljs-string">"/var/lib/bind"</span>;
+    dnssec-validation auto;
+    listen-on-v6 { any; };
+    version <span class="hljs-string">"None Available"</span>;
+    recursion no;
+    querylog yes;
+  listen-on { 0.0.0.0/0; };
+allow-update { 127.0.0.1;};
+allow-query { any; };
+
+// Enable DNSSec<span class="hljs-built_in">
+check-names </span>master ignore;<span class="hljs-built_in">
+check-names </span>slave ignore;
+notify no;
+allow-transfer {127.0.0.1;};<span class="hljs-built_in">
+check-names </span>response ignore;
+};
+</code></pre><h4 id="named-conf">named.conf</h4>
+<pre><code>This step is mandatory <span class="hljs-keyword">and</span> needs <span class="hljs-built_in">to</span> be done <span class="hljs-built_in">to</span> all <span class="hljs-built_in">files</span> which   
+<span class="hljs-keyword">contains</span> domain list informations, <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> <span class="hljs-keyword">normal</span> <span class="hljs-keyword">case</span> <span class="hljs-keyword">of</span> <span class="hljs-keyword">a</span> slave
+server this is primary: /etc/bind/dnshttp.conf.<span class="hljs-built_in">local</span> <span class="hljs-keyword">and</span> may 
+named.conf.<span class="hljs-built_in">local</span> <span class="hljs-keyword">as</span> there are <span class="hljs-built_in">local</span> master domains stored normally.
+</code></pre><p>This step is only needed on slave servers,but it does not break something, so we recommend to execute this line on all systems. First execute this command on your system as root user:</p>
+<pre><code>touch /etc/bind/dnshttp<span class="hljs-selector-class">.conf</span><span class="hljs-selector-class">.local</span>
+</code></pre><p>Add the line below to your named.conf.options file for the dnshttp file to be loaded.</p>
+<pre><code>include <span class="hljs-string">"/etc/bind/dnshttp.conf.local"</span><span class="hljs-comment">;</span>
+</code></pre><p>If you have additional files that serve as zone list file (like named.conf.local) they also need to be included using the same syntax in that file.</p>
+<h2 id="issues">Issues</h2>
+<p>If you encounter issues or have questions using this software, do not hesitate write us at our Forum on www.bugfish.eu/forum !</p>
+<h2 id="default-login-for-webinterface">Default Login for Webinterface</h2>
+<p>Username: admin<br>Passwort: changeme</p>
+<hr>
+<p>more at www.bugfish.eu<br>Made by Jan-Maurice Dahlmanns</p>
+
+
+
+
+
+
+
+
+</div>
+
+
+			  <!------------------------------------>
+
+			  <header id="headertitle"><h2>ELECTRO-SWING</h2></header>
+				<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/gBEGS8XI8yE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+				
+			  <header id="headertitle"><h2>GITHUB REPOSITORIES</h2></header><div class="inner">
+			  <ul>		
+				<li><a href="https://github.com/bugfishtm/bugfish-hive" rel="noopener" target="_blank">Bugfish-Hive</a></li>			  
+				<li><a href="https://github.com/bugfishtm/bugfish-framework" rel="noopener" target="_blank">Bugfish-Framework</a></li>
+				<li><a href="https://github.com/bugfishtm/Bind9-Web-Manager" rel="noopener" target="_blank">Bind9 Web Manager</a></li>
+				<li><a href="https://github.com/bugfishtm/Android-Web-App-Example" rel="noopener" target="_blank">Android Web App Example</a></li>
+				<li><a href="https://github.com/bugfishtm/Mail-Relaying-over-DNS" rel="noopener" target="_blank">Mail Relaying over DNS</a></li>
+				<li><a href="https://github.com/bugfishtm/bugfishtm.github.io" rel="noopener" target="_blank">This Github Page</a></li>
+			  </ul></div>
+			<header id="headertitle"><h2>CHILLOUT</h2></header>
+				<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/qbO94VmgBt8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+			  
+			  <header id="headertitle"><h2>MY PROJECT PAGES</h2></header><div class="inner">
+			  <ul>
+				<li><a href="https://bugfish.eu" target="_blank" rel="noopener">Website</a></li>
+				<li><a href="https://bugfishtm.blogspot.com/" target="_blank" rel="noopener">Blog</a></li>
+				<li><a href="https://bugfish-fs.000webhostapp.com/" target="_blank" rel="noopener">Fallback Website</a></li>
+				<li><a href="https://www.youtube.com/c/bugfishtm" target="_blank" rel="noopener">Youtube</a></li>
+				<li><a href="https://www.youtube.com/channel/UC3ikaOiJwdKRfzsKDiFUSyA" target="_blank" rel="noopener">Youtube Artist Account</a></li>
+				<li><a href="https://github.com/bugfishtm" target="_blank" rel="noopener">Github</a></li>
+				<li><a href="https://pixabay.com/de/users/bugfish-15886987/" target="_blank" rel="noopener">Pixabay</a></li>
+				<li><a href="https://bugfish.bandcamp.com/" target="_blank" rel="noopener">Bandcamp</a></li>
+				<li><a href="https://open.spotify.com/artist/22t8XUzb2rVqKywyCaS36k" rel="noopener" target="_blank">Spotify</a></li>
+				<li><a href="https://www.dailymotion.com/bugfish" target="_blank" rel="noopener">Dailymotion</a></li>
+				<li><a href="https://deadseven.bugfish.eu" target="_blank" rel="noopener">Deadseven</a></li>
+				<li><a href="https://www.patreon.com/bugfish" target="_blank" rel="noopener" >Patreon</a></li>
+				<li><a href="https://www.deviantart.com/bxgfxsh" target="_blank" rel="noopener">DeviantArt</a></li>
+				<li><a href="https://jan-maurice-dahlmanns.de" target="_blank" rel="noopener">About Me</a></li>
+			  </ul></div>
+			  <header id="headertitle"><h2>MORE CHILLOUT</h2></header>
+				<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/i8zed0wUlmM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>	   
+    </div>
+    <footer>  Jan-Maurice Dahlmanns [<a href="https://www.bugfish.eu" target="_blank">Bugfish</a>] - Kattowitzerstraße 2b - 41065 Mönchengladbach - contact@bugfish.eu </footer>
+  </body>
+</html>

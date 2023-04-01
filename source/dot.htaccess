@@ -1,0 +1,24 @@
+##########################################
+## Bugfish MRoD HTACCESS File
+
+###########################################
+## Enable Rewriting
+###########################################
+	RewriteEngine On
+
+###########################################
+## HTTP -> HTTPS Rewrite
+###########################################
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+	RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+	RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+###########################################
+## Permissions
+###########################################
+	RewriteRule ^(_app|_instance|_cronjob|_default|_file|_function|_game|_temp|_login|_overwrite|_require|_start) - [F,L]
+	<Files "settings.php">  
+	  Order Allow,Deny
+	  Deny from all
+	</Files>
