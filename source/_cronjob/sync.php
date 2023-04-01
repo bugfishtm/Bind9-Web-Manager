@@ -291,11 +291,11 @@ zone "'.trim($value["domain"]).'" {
 	internal_cronlog("START: Set File Permissions and Restart Bind9 \r\n");
 	if(file_exists(_CRON_BIND_LIB_)) { 
 	
-		internal_cronlog("OK: chown bind:bind "._CRON_BIND_LIB_.";\r\n");
-		@shell_exec("chown bind:bind "._CRON_BIND_LIB_.";");
+		internal_cronlog("OK: chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_LIB_.";\r\n");
+		@shell_exec("chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_LIB_.";");
 
-		internal_cronlog("OK: chmod 770 "._CRON_BIND_LIB_.";\r\n");
-		@shell_exec("chmod 770 "._CRON_BIND_LIB_.";");
+		internal_cronlog("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_.";\r\n");
+		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_.";");
 		
 		internal_cronlog("OK: systemctl restart bind9;\r\n");
 		@shell_exec("systemctl restart bind9; ");
