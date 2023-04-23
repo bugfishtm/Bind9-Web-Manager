@@ -35,9 +35,10 @@
 											  `targetid` varchar(256) DEFAULT NULL COMMENT 'Target ID',
 											  `name` varchar(256) NOT NULL COMMENT 'Autor Name',
 											  `text` text  NOT NULL COMMENT 'Activitie Text',
-											  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date',
+											  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date | Auto Set',
+											  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Modification Date | Auto - Set',
 											  `status` tinyint(1) DEFAULT NULL COMMENT '0:Wait 1:OK 2: Sys 3:Start',
-											  `upvotes` int DEFAULT '0' COMMENT 'Upvote Counter for Starter Status',
+											  `upvotes` int(9) DEFAULT '0' COMMENT 'Upvote Counter for Starter Status',
 											  `section` varchar(64) DEFAULT NULL COMMENT 'Related Section',
 											  PRIMARY KEY (`id`)) ;");}
 		
@@ -162,4 +163,3 @@
 			} 
 		}	
 	} 
-?>

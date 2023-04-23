@@ -20,16 +20,16 @@
 		######################################################
 		private function create_table() {
 			return $this->mysql->query("CREATE TABLE IF NOT EXISTS `".$this->logging_table."` (
-												  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Identificator',
-												  `url` text COMMENT 'Remote URL',
-												  `request`  varchar(64) COMMENT 'Request Type',
-												  `filename` text COMMENT 'Filename if Upload Function',
-												  `settings` text COMMENT 'Settings for this Request',
-												  `output` text COMMENT 'Output for this Request',
-												  `type` varchar(64) COMMENT 'Request Type',
-												  `url` text COMMENT 'PHP Server Request URI',
-												  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation',
-												  PRIMARY KEY (`id`) );");
+										  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Identificator',
+										  `url` text COMMENT 'Remote URL',
+										  `request`  varchar(64) COMMENT 'Request Type Name (Function)',
+										  `filename` text COMMENT 'Filename if Upload Function',
+										  `settings` text COMMENT 'Settings for this Request',
+										  `output` text COMMENT 'Output for this Request',
+										  `type` varchar(64) COMMENT 'Request Type',
+										  `url` text COMMENT 'PHP Server Request URI',
+										  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation',
+										  PRIMARY KEY (`id`) );");
 		}
 		
 		// Conversions
@@ -267,4 +267,4 @@
 			return $output;
 		}*/
 	}
-?>
+	

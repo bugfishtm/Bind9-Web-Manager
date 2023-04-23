@@ -8,17 +8,17 @@
 	########################################################################################################### */
 	/* META Functions
 	########################################################################################################### */
-		function xfp_meta($object, $title, $description, $keywords = false, $robots = false, $cssarray = false, $img = false, $formexpire =  false, $fallbackimage = false, $nocache = true, $canonical = false, $docstart = true, $ext = "", $favicon = false) {
+		function xfp_meta($object, $title, $description, $keywords = false, $robots = false, $cssarray = false, $img = false, $formexpire =  false, $fallbackimage = false, $nocache = true, $canonical = false, $docstart = true, $ext = "", $favicon = false) { $outputvar = "";
 			# Print Document Start
 			if($docstart) {
-				echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+				$outputvar .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 				<html version="-//W3C//DTD XHTML 1.1//EN" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 					  xsi:schemaLocation="http://www.w3.org/1999/xhtml
 										  http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd">
 				  <head>';}
 			
 			# Print Favicon
-			if($favicon) { echo '<link rel="icon" href="'.$favicon.'"/>'; }		
+			if($favicon) { $outputvar .= '<link rel="icon" href="'.$favicon.'"/>'; }		
 			
 			# Title and Description
 			if(defined("_XFP_META_DESC_PRE_")) {	$description =  _XFP_META_DESC_PRE_.xfp_meta_prep($description); }
@@ -29,64 +29,65 @@
 			if(defined("_XFP_META_TITLE_POST_")) {	$title =  xfp_meta_prep($title)._XFP_META_TITLE_POST_; }
 			if(defined("_XFP_META_TITLE_POST_") AND defined("_XFP_META_TITLE_PRE_")) {	$title =  _XFP_META_TITLE_PRE_.xfp_meta_prep($title)._XFP_META_TITLE_POST_; }
 			
-			echo "<title>".$title."</title>";	
-			echo '<meta property="og:title" content="'.$title.'\" />';
-			echo '<meta name="description" content="'.$description.'" />';
-			echo '<meta property="og:description" content="'.$description.'" />';
+			$outputvar .= "<title>".$title."</title>";	
+			$outputvar .= '<meta property="og:title" content="'.$title.'\" />';
+			$outputvar .= '<meta name="description" content="'.$description.'" />';
+			$outputvar .= '<meta property="og:description" content="'.$description.'" />';
 			
 			# Canonical
-			if($canonical != false) { echo "<link rel='canonical' href='".$canonical."' />"; }
+			if($canonical != false) { $outputvar .= "<link rel='canonical' href='".$canonical."' />"; }
 			
 			# No Cache
-			if($nocache != false) { echo '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />'; echo '<meta http-equiv="Pragma" content="no-cache" />'; }	
+			if($nocache != false) { $outputvar .= '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />'; $outputvar .= '<meta http-equiv="Pragma" content="no-cache" />'; }	
 			
 			# Form Expire
-			if($formexpire != false) { echo '<meta name="expires" content="'.$formexpire.'" />'; }
+			if($formexpire != false) { $outputvar .= '<meta name="expires" content="'.$formexpire.'" />'; }
 			
 			# Prepare Meta Image
 			if($img == false) {
-				if($fallbackimage != false) {  echo '<meta property="og:image" content="'.$fallbackimage.'" />'; }
+				if($fallbackimage != false) {  $outputvar .= '<meta property="og:image" content="'.$fallbackimage.'" />'; }
 			} else {
-				if(file_exists(_XFP_PATH_.$img)) { echo '<meta property="og:image" content="'.$img.'" />'; }
-				elseif($fallbackimage != false) {  echo '<meta property="og:image" content="'.$fallbackimage.'" />'; }
+				if(file_exists(_XFP_PATH_.$img)) { $outputvar .= '<meta property="og:image" content="'.$img.'" />'; }
+				elseif($fallbackimage != false) {  $outputvar .= '<meta property="og:image" content="'.$fallbackimage.'" />'; }
 			}
 			
 			# META UTF8
-			echo '<meta http-equiv="content-Type" content="text/html; utf-8" />';			
+			$outputvar .= '<meta http-equiv="content-Type" content="text/html; utf-8" />';			
 			
 			# Robots
-			if($robots != false) { echo '<meta name="robots" content="'.trim($robots).'" />'; }	
+			if($robots != false) { $outputvar .= '<meta name="robots" content="'.trim($robots).'" />'; }	
 			
 			# Prepare CSS
-			if(is_array($cssarray)) { foreach($cssarray as $key => $val) { echo '<link rel="stylesheet" type="text/css" href="'.$val.'" />';  }
-			} elseif($cssarray != false) { echo '<link rel="stylesheet" type="text/css" href="'.trim($cssarray).'" />';	 }			
+			if(is_array($cssarray)) { foreach($cssarray as $key => $val) { $outputvar .= '<link rel="stylesheet" type="text/css" href="'.$val.'" />';  }
+			} elseif($cssarray != false) { $outputvar .= '<link rel="stylesheet" type="text/css" href="'.trim($cssarray).'" />';	 }			
 
 			#Keywords
-			if($keywords != false) { echo '<meta name="keywords" content="'.trim(htmlspecialchars($keywords)).'" />';	}
+			if($keywords != false) { $outputvar .= '<meta name="keywords" content="'.trim(htmlspecialchars($keywords)).'" />';	}
 			
 			# Audience
-			echo '<meta name="audience" content="all" />';
+			$outputvar .= '<meta name="audience" content="all" />';
 			
 			# Set Viewport
-			echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+			$outputvar .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
 			
 			# Set Lang
-			if(defined("_XFP_LANG_")) { echo '<meta http-equiv="content-Language" content="'._XFP_LANG_.'" />'; }
+			if(defined("_XFP_LANG_")) { $outputvar .= '<meta http-equiv="content-Language" content="'._XFP_LANG_.'" />'; }
 			
 			# Admin Info
-			if(defined("_XFP_ADMIN_NAME_")) {echo '<meta name="author" content="'._XFP_ADMIN_NAME_.'" />'; 
-												echo '<meta name="publisher" content="'._XFP_ADMIN_NAME_.'" />'; 
-												echo '<meta name="copyright" content="'._XFP_ADMIN_NAME_.'" />'; }
-			if(defined("_XFP_ADMIN_MAIL_"))  { echo '<meta http-equiv="Reply-to" content="'._XFP_ADMIN_MAIL_.'" />'; }			
+			if(defined("_XFP_ADMIN_NAME_")) {$outputvar .= '<meta name="author" content="'._XFP_ADMIN_NAME_.'" />'; 
+												$outputvar .= '<meta name="publisher" content="'._XFP_ADMIN_NAME_.'" />'; 
+												$outputvar .= '<meta name="copyright" content="'._XFP_ADMIN_NAME_.'" />'; }
+			if(defined("_XFP_ADMIN_MAIL_"))  { $outputvar .= '<meta http-equiv="Reply-to" content="'._XFP_ADMIN_MAIL_.'" />'; }			
 		
 			# External
-			echo $ext;	 echo "</head><body>";	
+			$outputvar .= $ext;	 $outputvar .= "</head><body>";	
+			return $outputvar;
 		}	
 	
-		function xfp_meta_error($object = false, $code = 404, $image = false, $cssarray, $setcode = true, $ext = "", $docstart = true, $favicon = false)) {
+		function xfp_meta_error($object = false, $code = 404, $image = false, $cssarray, $setcode = true, $ext = "", $docstart = true, $favicon = false) { $outputvar = "";
 			# Print Document Start
 			if($docstart) {
-				echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+				$outputvar .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 				<html version="-//W3C//DTD XHTML 1.1//EN" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 					  xsi:schemaLocation="http://www.w3.org/1999/xhtml
 										  http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd">
@@ -104,8 +105,8 @@
 			}
 
 			# Prepare CSS
-			if(is_array($cssarray)) { foreach($cssarray as $key => $val) { echo '<link rel="stylesheet" type="text/css" href="'.$val.'" />';  }
-			} elseif($cssarray != false) { echo '<link rel="stylesheet" type="text/css" href="'.trim($cssarray).'" />';	 }			
+			if(is_array($cssarray)) { foreach($cssarray as $key => $val) { $outputvar .= '<link rel="stylesheet" type="text/css" href="'.$val.'" />';  }
+			} elseif($cssarray != false) { $outputvar .= '<link rel="stylesheet" type="text/css" href="'.trim($cssarray).'" />';	 }			
 			
 			$title = xfp_meta_prep($code, 1000);
 			$description = xfp_meta_prep($code, 1000);
@@ -119,43 +120,44 @@
 			if(defined("_XFP_META_TITLE_POST_") AND defined("_XFP_META_TITLE_PRE_")) {	$title =  _XFP_META_TITLE_PRE_.xfp_meta_prep($code, 1000)._XFP_META_TITLE_POST_; }
 			
 			# Title
-			echo "<title>".$title."</title>";		
-			echo '<meta property="og:title" content="'.$title.'" />';
+			$outputvar .= "<title>".$title."</title>";		
+			$outputvar .= '<meta property="og:title" content="'.$title.'" />';
 			
 			# Description
-			echo '<meta name="description" content="'.$description.'" />';	
-			echo '<meta property="og:description" content="'.$description.'" />';	
+			$outputvar .= '<meta name="description" content="'.$description.'" />';	
+			$outputvar .= '<meta property="og:description" content="'.$description.'" />';	
 			
 			# Set Image
-			if($image) { echo '<meta property="og:image" content="'.$image.'" />'; }	
+			if($image) { $outputvar .= '<meta property="og:image" content="'.$image.'" />'; }	
 			
 			# Set Noindex, Nofollow
-			echo '<meta name="robots" content="noindex, nofollow" />';
+			$outputvar .= '<meta name="robots" content="noindex, nofollow" />';
 			
 			# Set Keywords
-			echo '<meta name="keywords" content="'."error ".$code.'" />';
+			$outputvar .= '<meta name="keywords" content="'."error ".$code.'" />';
 			
 			# Set No Cache
-			echo '<meta http-equiv="Pragma" content="no-cache" />';
-			echo '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />';
+			$outputvar .= '<meta http-equiv="Pragma" content="no-cache" />';
+			$outputvar .= '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />';
 			
 			# Set Text UTF8
-			echo '<meta http-equiv="content-Type" content="text/html; utf-8" />';
+			$outputvar .= '<meta http-equiv="content-Type" content="text/html; utf-8" />';
 			
 			# Set Lang if Set in Constant
-			if(defined("_XFP_LANG_")) { echo '<meta http-equiv="content-Language" content="'._XFP_LANG_.'" />'; }
+			if(defined("_XFP_LANG_")) { $outputvar .= '<meta http-equiv="content-Language" content="'._XFP_LANG_.'" />'; }
 			
 			# Set Viewport
-			echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+			$outputvar .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
 			
 			# Admin Data if Needed
-			if(defined("_XFP_ADMIN_NAME_")) { echo '<meta name="author" content="'._XFP_ADMIN_NAME_.'" />'; 
-						echo '<meta name="publisher" content="'._XFP_ADMIN_NAME_.'" />'; 
-						echo '<meta name="copyright" content="'._XFP_ADMIN_NAME_.'" />'; } 
-			if(defined("_XFP_ADMIN_MAIL_")) { echo '<meta http-equiv="Reply-to" content="'._XFP_ADMIN_MAIL_.'" />';	}
+			if(defined("_XFP_ADMIN_NAME_")) { $outputvar .= '<meta name="author" content="'._XFP_ADMIN_NAME_.'" />'; 
+						$outputvar .= '<meta name="publisher" content="'._XFP_ADMIN_NAME_.'" />'; 
+						$outputvar .= '<meta name="copyright" content="'._XFP_ADMIN_NAME_.'" />'; } 
+			if(defined("_XFP_ADMIN_MAIL_")) { $outputvar .= '<meta http-equiv="Reply-to" content="'._XFP_ADMIN_MAIL_.'" />';	}
 			
 			# External
-			echo $ext; echo "</head><body>";	
+			$outputvar .= $ext; $outputvar .= "</head><body>";	
+			return $outputvar;
 		}
 	
 	########################################################################################################### */
@@ -240,7 +242,7 @@
 		function xfp_footer($text) { echo '</div><div id="xfp_footer">'.$text.'</body></html>'; }	
 	
 		// Display Headline
-		function xfp_headline($a, $b) { echo '<div id="xfp_headline"><h1>'.htmlspecialchars($a).'</h1><font id="xfp_headline_extender"><span id="xfp_headline_h2">'.htmlspecialchars($b).'</span></font></div>';}
+		function xfp_headline($a, $b) { return '<div id="xfp_headline"><h1>'.htmlspecialchars($a).'</h1><font id="xfp_headline_extender"><span id="xfp_headline_h2">'.htmlspecialchars($b).'</span></font></div>';}
 	
 		# Print 1. Button Back to Top
 		function xfp_top_button($cssclasses = "") { echo '<div id="xfp_top_but_1" class="'.$cssclasses.'"><a title="Back" alt="Back"  href="#xfp_content"> ^Top </a></div>'; }
@@ -353,4 +355,3 @@
 		##### Return     ####################################################
 		return $object;
 	}
-?>

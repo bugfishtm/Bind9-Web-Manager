@@ -18,9 +18,9 @@
 										  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Identificator',
 										  `ref` int(10) NOT NULL COMMENT 'Related Reference',
 										  `content` text NOT NULL COMMENT 'Permission Array',
-										  `section` varchar(64) DEFAULT NULL COMMENT 'Related Section',
+										  `section` varchar(128) DEFAULT NULL COMMENT 'Related Section',
 										  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation',
-										  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Modification',
+										  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Modification | Auto - Set',
 										  PRIMARY KEY (`id`),
 										  UNIQUE KEY `Index 2` (`ref`,`section`) );");}
 		
@@ -28,7 +28,7 @@
 		function __construct($mysql, $tablename, $section = "") {
 			$this->mysql	= $mysql;
 			$this->tablename = $tablename;
-			$this->section = $section;
+			$this->section = substr(trim($section), 0, 127);
 			if(!$this->mysql->table_exists($tablename)) { $this->create_table(); $this->mysql->free_all(); }}
 
 		// Check is Requested Perm is inside Permission set If set is Activated (not False)
@@ -108,8 +108,8 @@
 		private function set_perm($ref, $array) { return $this->setPerm($ref, $array); }
 		private function setPerm($ref, $array) {	
 			if(is_numeric($ref)) { 
-				$query = $this->mysql->query("SELECT * FROM ".$this->tablename." WHERE ref = \"".$ref."\" AND section = '".$this->section."'");
-				if ($result	=	mysqli_fetch_array($query) ) { 
+				$query = $this->mysql->select("SELECT * FROM ".$this->tablename." WHERE ref = \"".$ref."\" AND section = '".$this->section."'", false);
+				if ($query ) { 
 					$this->mysql->update("UPDATE ".$this->tablename." SET content = '".$this->mysql->escape(serialize($array))."' WHERE ref = '".$ref."' AND section = '".$this->section."'  ");
 				} else { 
 					$this->mysql->query("INSERT INTO ".$this->tablename." (ref, content, section) VALUES('".$ref."', '".$this->mysql->escape(serialize($array))."', '".$this->section."')"); 
@@ -136,7 +136,7 @@
 		public function remove_perms($ref) { if(is_numeric($ref)) { return $this->setPerm($ref, array()); } return false; }
 		public function clear_perms($ref) { if(is_numeric($ref)) { return $this->setPerm($ref, array()); } return false; }
 		// Delete a Ref from Permission Table	
-		public function delete_ref($ref) { if(is_numeric($ref)) { return $this->mysql->query("DELETE FROM ".$this->tablename." WHERE ref = \"".$this->ref."\" AND section = '".$this->section."'"); } return false; }
+		public function delete_ref($ref) { if(is_numeric($ref)) { return $this->mysql->query("DELETE FROM ".$this->tablename." WHERE ref = \"".$ref."\" AND section = '".$this->section."'"); } return false; }
 		// Get a Ref Object
 		public function item($ref, $permission_set = false) { 
 			if(!is_numeric($ref)) { return false; }
@@ -164,7 +164,7 @@
 		function __construct($mysql, $tablename, $section, $ref, $permission_set, $permissions) {
 			$this->mysql	= $mysql;
 			$this->tablename = $tablename;
-			$this->section = $section;
+			$this->section = @substr(trim($section), 0, 127);
 			$this->ref = $ref;
 			$this->permission_set = $permission_set;
 			$this->permissions = $permissions; }	
@@ -247,8 +247,8 @@
 
 		// Set Ref Permissions		
 		private function set_perm($ref, $array) { 	
-			$query = $this->mysql->query("SELECT * FROM ".$this->tablename." WHERE ref = \"".$this->ref."\" AND section = '".$this->section."'");
-			if ($result	=	mysqli_fetch_array($query) ) { 
+			$query = $this->mysql->select("SELECT * FROM ".$this->tablename." WHERE ref = \"".$this->ref."\" AND section = '".$this->section."'", false);
+			if ($query) { 
 				$this->mysql->update("UPDATE ".$this->tablename." SET content = '".$this->mysql->escape(serialize($array))."' WHERE ref = '".$ref."' AND section = '".$this->section."'  ");
 			} else { 
 				$this->mysql->query("INSERT INTO ".$this->tablename." (ref, content, section) VALUES('".$this->ref."', '".$this->mysql->escape(serialize($array))."', '".$this->section."')"); 
@@ -259,4 +259,3 @@
 		// Delete a Ref from Permission Table	
 		public function delete_ref() { return $this->mysql->query("DELETE FROM ".$this->tablename." WHERE ref = \"".$this->ref."\" AND section = '".$this->section."'");}
 	}
-?>

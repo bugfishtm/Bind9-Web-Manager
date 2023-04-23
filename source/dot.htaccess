@@ -1,6 +1,5 @@
 ##########################################
-## Bugfish MRoD HTACCESS File
-
+## Bugfish DNSHTTP HTACCESS File
 ###########################################
 ## Enable Rewriting
 ###########################################
@@ -9,16 +8,25 @@
 ###########################################
 ## HTTP -> HTTPS Rewrite
 ###########################################
+#  Uncomment Lines below to disables
+#  HTTP to HTTPS Forwarding
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-	RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
-	RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+#  Uncomment Lines below to disables
+#  www to non-www forwarding
+#	RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+#	RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
 ###########################################
 ## Permissions
 ###########################################
-	RewriteRule ^(_app|_instance|_cronjob|_default|_file|_function|_game|_temp|_login|_overwrite|_require|_start) - [F,L]
+	RewriteRule ^(_instance|_cronjob|_temp) - [F,L]
 	<Files "settings.php">  
+	  Order Allow,Deny
+	  Deny from all
+	</Files>
+	
+	<Files "settings.sample.php">  
 	  Order Allow,Deny
 	  Deny from all
 	</Files>

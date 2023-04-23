@@ -63,4 +63,3 @@
 	}
 
 	function x_captcha_key($preecookie = "") { return $_SESSION[$preecookie];	}
-?>

@@ -26,8 +26,14 @@
 		a:hover {color: white !important;}
 		a:focus {outline: thin dotted;}
 
-		h1 {  margin-top: 0;margin-bottom: 2rem;font-weight: 300;text-rendering: optimizeLegibility;line-height: 1;font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; color:#ff5707; }
-		h2 { font-size: 18px; padding-bottom: 0px; color:#ffffff; }
+		h1 {  margin-top: 0;margin-bottom: 2rem;font-weight: 300;text-rendering: optimizeLegibility;line-height: 1;font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; color:#ff5707;   }
+		h2 { font-size: 18px; padding-bottom: 0px; color:#ffffff;color:#ff5707; }
+		
+		/* NEW NEW NEW */
+		.orangetext { color:#ff5707; }
+		thead { background: #323232; }
+		tr:hover { background: #242424; }
+
 
 		.inner { padding: 15px; }
 		#headertitle { text-align: center; width: 100; font-weight: bold; }
@@ -54,62 +60,80 @@
         <li><a href="https://bugfish-fs.000webhostapp.com/privacy" target="_blank">Privacy</a></li>
       </ul>                 
     </header>
-   
-    <div>
-             <header id="headertitle"><h2>REPOSITORY README</h2></header><div class="inner" style="text-align: left;">
-
-<h2>Table of Contents</h2>
-<a href="#general-functionality-informations">General Functionality Informations</a><br />
-<a href="#installation">Installation</a><br />
+    <a href="#header"><div style="z-index:1000; !important; background: black; position: fixed; top: 5px; right: 5px; width: 100px; height: 30px;font-size: 16px;padding: 5px;border-radius: 5px;cursor: pointer;">
+^ Back to Top
+</div></a>
+            <div class="inner" style="text-align: left;">
+<h2 style="color: white;">Table of Contents</h2>
+<a href="#generalinfo">General Functionality Informations</a><br />
+- <a href="#slave-server-replication">Slave server replication</a><br />
+- <a href="#slave-dns-server-hybrid-support">Slave/DNS Server Hybrid Support</a><br />
+- <a href="#user-management">User Management</a><br />
+- <a href="#rights-and-record-management">Rights Management</a><br />
+- <a href="#blacklisting">IP Blacklisting</a><br />
+- <a href="#nondestruct">Rollback Informations</a><br />
+<a href="#install">Installation</a><br />	
+- <a href="#requirements">Requirements</a><br />	
+- <a href="#deployment">Deployment Steps</a><br />	
+- <a href="#installcron">Cronjob Setup</a><br />	
+- <a href="#installbind">Adjust /etc/bind/named.conf</a><br />	
+<a href="#repinfods">Replication and Domain Informations</a><br />
+- <a href="#repinfo">Domains, Replications and Conflicts</a><br />
+- <a href="#repcon">Server Connections</a><br />
+- <a href="#reptok">Server Tokens</a><br />
+- <a href="#disable-repdomain">Disable Replication for Domain</a><br />
+- <a href="#repadd">Add a Slave Server to an Instance</a><br />
+- <a href="#repzc">Zone Validation and Fallback</a><br />
+<a href="#debuginfo">Debug Informations for Developers (mysql)</a><br />
+<a href="#passlost">Login Password Lost</a><br />
+<a href="#serverinfo">Server Status Icon Information</a><br />
+<a href="#domaininfo">Domain Status Icon Information</a><br />
+<a href="#goodurls">Interesting Links</a><br />
+<a href="#morehelp">Help and Tutorial Video</a><br />
 <a href="#issues">Issues</a><br />					 
 <a href="#default-login-for-webinterface">Default Login for Webinterface</a><br />	
-
-
-<h2 id="general-functionality-informations">General Functionality Informations</h2>
-<h3 id="domain-and-record-management">Domain and Record Management</h3>
-<p>With this software you have the possibility so setup domains and replications of bind9. The focus of this software lies in the dns replication, not domain and record management. The Interface is kept simple and functional - so we recommend to use this software with hosting sotware like virtualmin, plesk or misc together on a master server. This Software needs to be setup on the master and slave server.</p>
+<hr>
+<h2 id="generalinfo">General Informations</h2>
+<p>I hope you will get a bit of understanding how this process is to be set up with this description. The software is here to make replication with DNS simpler and more transparent and controlable. I made the process to achieve this, as simple as it was possible for me and I hope with my instructions you are able to achieve the goal you are trying to reach with my dns tool, if you have in mind using it. Below Described are some Features and configuration / use of that Software. If may have a tutorial video on may channel, check out my channels playlist described at the end of the documentation to know more! (I am not sure if i will make one, but if i will do you will find the tutorial video at the end of the documentation with an url to the playlist.)</p>
 <h3 id="slave-server-replication">Slave server replication</h3>
-<p>With this Panel you can Control Replication between Slave and Master Servers, if there is bind9 running on both machines. More informations how to setup Connections below.</p>
-<h3 id="additional-areas-to-check-replication-status">Additional Areas to check Replication Status</h3>
-<p>If you use this webinterface for Master -&gt; Slave replication, than you have a detailed overview, where you can see conflicts. A conflict can be, if a Domain is registered as Master Domain on 2 Different Master Servers, a Slave should replicate from. This errors will be shown in the &quot;Conflits&quot; Section of the webpage. You can control which Master Server should be prefered for Domain Data Replication. But its best to keep the conflict table clear or stop that domains from replicating. In the bind domain section you can disable domains for replication if needed. Than they will be not replicated to Slave servers. This has to be done on the Master Server, which holds the domain.</p>
-<h3 id="conflict-detection-and-solving">Conflict Detection and Solving</h3>
-<p>You can solve DNS Domain Conflicts, if Two Master Servers serve same Domain Informations to Slave Servers, you can choose the preferred master Server for Replication of that domain!</p>
+<p>With this Panel you can Control Replication between Slave and Master Servers, if there is bind9 running on both machines. More informations how to setup Connections below. You will have a detailed overview over conflicts, insights and control about the replication! You can always see the status of the last replication process in the "Replications" Tab of the website! At the Servers page you have different Buttons to check if a Server is responding and security keys are working. </p>
 <h3 id="slave-dns-server-hybrid-support">Slave/DNS Server Hybrid Support</h3>
 <p>One Server can be Slave and Master Server at the same time. If you register a Master Server in the Servers Section. The Server where you registered that, will act as a Slave Server and replicate Domains from that Master Server.</p>
-<h3 id="add-master-slave-replication">Add Master/Slave Replication</h3>
-<p>For the Replication you need a Security Token, set up on both sites - the master and slave server. The Token has to be identical and a token can only exist one time in the webinterface. You can add as many slave/master servers as you want.</p>
-<p>For the Replication to succeed, you need Server A registered as Master Server with Token XXX on DNS Slave Server B. Than Server B needs to be registered with the same token on Master Server A. If Server B acts as master server, besides his work as salve, for other domains, you can enter other servers as slave server in Server B, if needed. Every Server this interface is installed on, can act as Master and Slave Server at the same time. (Hybrid Master/Slave)</p>
-<h3 id="configure-a-slave-master-connection">Configure a Slave/Master Connection</h3>
-<ul>
-<li>Enter the Slave Server in Panel on Master Server with token example: &quot;123&quot; (A Token to Server to Server Connection Token is always unique!)</li>
-<li>Enter Master Server in Slave Server with SAME token (123) used on Master Server</li>
-<li>Domains will be fetched from Master locally, than delivered to the Slave Server in intervalls you can setup by editing the cronjob execution intervalls. API-Token is the Token which needs to be the Same inside a Master/Slave Connection. API-Path is the Path to this Script installed on an External server. For example <a href="https://domain">https://domain</a> OR <a href="http://domain/dnsscriptsubfolder">http://domain/dnsscriptsubfolder</a></li>
-</ul>
 <h3 id="user-management">User Management</h3>
 <p>This software comes with usermanagement in it. You can create/edit/delete users and assign different permissions of different areas to them. </p>
-<h3 id="about-this-software">About this Software</h3>
-<p>I hope you will get a bit of understanding how this process is to be set up with this description. The software is here to make replication with DNS simpler and more transparent and controlable. I made the process to achieve this, as simple as it was possible for me and I hope with my instructions you are able to achieve the goal you are trying to reach with my dns tool, if you have in mind using it.</p>
-<h2 id="installation">Installation</h2>
-<p>As last step of Installation please take a Look at the configuration/settings page of your deployed instance. There you can setup different variables which urgently needs to be setup to run this script! Or at least check them if they are valid. Otherwise this can hurt your system. Get sure that all settings in settings.php are set right. The worst case, that may happen is that your domain record files and listing file gets deleted. So please be very cautious. If you have configured all needed settings in settings.php correctly, there should be no need to worry, as I am using this software in a lot of productive areas.</p>
+<h3 id="rights-and-record-management">Rights Management</h3>
+<p>User Rights management to jail users in theyre operational area, if needed!</p>
+<h3 id="blacklisting">IP Blacklisting</h3>
+<p>You can control IP Blacklisting in the "Blocklist" Area of the webpage. IP Counters get raised for fail logins, fail api token requests. If you want to unblock an ip you can do that in the panel, our automate the process by running the daily.php cronjob daily. This will reset this table on a daily base (optional). If an ip has reached its limit it can not make API Requests anymore and not login to this panel. (No Replication Possible if Server IP is blocked)
+<h3 id="nondestruct">Non-Destructive</h3>
+<p>This software works non-destructive! It does not change the main files, it will create own configuration files for functioning. If something on your system goes wrong with this panel, there always should be a way to rollback! Configuration Files which will may be overwritten by this panel will be secures at the same location they were under a different name to prevent issues. You only have to change one bind file by yourself and we are all good! If you want to rollback, you just need to restore your named.conf file in /etc/bind. Than no changes made by this panel will be in affect anymore. This can save a broken configuration fast if your dns system has errors related to this software (but only on master servers, if you change configuration on slave servers the slave domains wont be registered anymore)</p>
+<hr>
+<h2 id="install">Installation</h2>
+Here are informations on how to install this panel.
 <h3 id="requirements">Requirements</h3>
 <ul>
-<li>Public IPs on servers is recommended</li>
 <li>Tested on Ubuntu and Debian (may work on other systems, but untested)</li>
 <li>Root Permissions for Cronjob on System</li>
 <li>Apache2 Webserver with PHP 7/8 Support</li>
-<li>Apach2 Modules: rewrite</li>
+<li>Apach2 Modules: rewrite, headers</li>
 <li>PHP Modules: mysql, curl, intl, mbstring, zip, gd</li>
-<li>MySQL Database Connection and user to connect with</li>
-<li>Open Ports 53 (TCP/UDP) [Bind]</li>
-<li>Open Port 80/442 (TCP) [Webinterface]</li>
+<li>Access to MySQL Database (with full permission for that database)</li>
+<li>Open Ports 53/953 (TCP/UDP) [DNS]</li>
+<li>Open Port 80/442 (TCP) [WEB]</li>
 </ul>
-<h3 id="deployment">Deployment</h3>
+<h3 id="deployment">Deployment Steps</h3>
 <ul>
-<li>Upload the files in the &quot;source&quot; directory of this repository to your webspace and check the settings.sample.php file. It is mandatory and important that you check the settings in that file. DNS Zone files will be created and if you have not the right setup than the cronjob may break your DNS Files. Read the instructions about the settings in settings.php carefully. If you have any questions do not hesitate to contact me. In the Settings.php file you will also set the MySQL Login Data.</li>
-<li>You dont need to install any SQL Tables for yourself. The websoftware will automatically install all needed tanbles, if they are not present at the time the website will be opened up. An initial user will created. You can see the login credentials of the initial created user at the end of this manual.</li>
-<li>Setup the Cronjob as described below. Without the cronjob, DNS Replication and Bind Synchronisation will not take place.</li>
+<li>Upload the files in the &quot;source&quot; directory of this repository to your webspace.</li>
+<li>Check Settings.sample.php and provide valid MySQL User Informations, the current Nameservers Hostname and others (see comments).</li>
+<li>Check Settings.sample.php and read the Notes and comments to understand what the different settings do, this is very urgent, as this settings will control how the dns service will act and which files will be used.</li>
+<li>Rename settings.sample.php to settings.php</li>
+<li>Login with Default Credentials (see below in this readme)</li>
+<li>Set up the Cronjobs as described below.</li>
+<li>Change your /etc/bind/named.conf to look like this <font color="red">(remove everything else!)</font> :<br /><br /> include "/etc/bind/dnshttp/dnshttp.named.conf";<br /><br /> Make a backup of the old file, if you want to deactivate all functionality of this panel for bind, just rollback to the old file. If you have changed this related file in the code setup you need to ajust this setting. But this setting fits for a default configuration and installation. It is not recommended to change this.</li>
+<li>You are now ready to use all functionalitys of this software! No need to setup MySQL Tables by yourself, the software will do that without installation! You can login now at the domain your website is deployed on...</li>
 </ul>
-<h3 id="cronjobs-mandatory-">Cronjobs (Mandatory)</h3>
+<h3 id="installcron">Setup Cronjobs</h3>
+<font color="red">Please set up both cronjobs as root user!</font>
 <table>
 <thead>
 <tr>
@@ -122,66 +146,147 @@
 <tr>
 <td>PATH_TO_WEBROOT/_cronjon/daily.php &gt;/dev/null 2&gt;&1;</td>
 <td>daily</td>
-<td>Resets Blacklisted IPs (Optional but Recommended)</td>
+<td>Resets Blacklisted IPs for Webinterface and API Requests (Optional but Recommended)</td>
 </tr>
 <tr>
 <td>PATH_TO_WEBROOT/_cronjon/sync.php &gt;/dev/null 2&gt;&1;</td>
 <td>hourly</td>
-<td>Needed for DNS Server Configuration Operations and Database Synchronisation + Replication</td>
+<td>Needed for DNS Server Configuration Operations and Database Synchronisation + Replication + Autosetup<br />This cronjob will restart bind and set permissions to folders and zone files when ready... You can set this cronjob to run in an interaval you wish. One Hour Interval is recommended for 1 hour fast replication.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="adjust-bind9-configuration">Adjust Bind9 Configuration</h3>
-<h4 id="named-conf-options">named.conf.options</h4>
-<pre><code>This Operations here are just an example how to <span class="hljs-keyword">set</span> up
-a <span class="hljs-keyword">slave</span> <span class="hljs-keyword">server</span> <span class="hljs-keyword">with</span> bind9. <span class="hljs-keyword">DO</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">USE</span> THEM <span class="hljs-keyword">ON</span> A RUNNING  
-<span class="hljs-keyword">MASTER</span> <span class="hljs-keyword">SERVER</span>, YOU CAN LEAVE THE <span class="hljs-keyword">SETTINGS</span> THERE UNCHANGED!
-</code></pre><p>Keep the information above in mind!</p>
-<pre><code>options {
-    directory <span class="hljs-string">"/var/lib/bind"</span>;
-    dnssec-validation auto;
-    listen-on-v6 { any; };
-    version <span class="hljs-string">"None Available"</span>;
-    recursion no;
-    querylog yes;
-  listen-on { 0.0.0.0/0; };
-allow-update { 127.0.0.1;};
-allow-query { any; };
+<h3 id="installbind">Adjust Bind Configuration named.conf</h3>
+Keep in mind to edit your /etc/bind/named.conf file to make this panel work. Make a backup of this file before to rollback if anything goes wrong with this dns panel. Or to deactivate it in the future if you dont need it anymore.
+<hr>
+<h2 id="repinfods">Informations About Domains and Replications</h2>
+<h3 id="repinfo">Domains, Replications and Conflicts</h3>
+You can see replicated Domains in the Domains->Slave Domains Section. There are all domains which have been copied from other dns servers, which are registered in the Replication->Manage DNS Servers Area! The data in the interface you see may outdated. It updates every time the cronjob dies execute, you will see the last time of execution on top of the domain pages. There are a lot of icons which describe the status of servers or domains, you can see what the icons mean below in the icon description area!<br /><br />
+If you visit the Replication Area you will be able to get access to the API Logfile, the Replication Logfile and the DNS Server Manager. You can get informations how to set up a DNS Server Connection below. The API Logfile Serves as Log for Requests to and from this server to other dns servers. This log may not be fully reliable, cos not all areas are covered, to prevent useless database storage beeing used by this logs. In some cases, if there are errors, you may get more insights in that area about this area. Entries are marked with [in] or [out]. [in] describes an incoming request, to this server. [out] defines an outgoing request to another server.<br /><br />
+In the Replication Logfile you can see the complete output of the replication process (made by the cronjob sync.php) and get deep insights at the operations which have been executed. The most of this information is covered in the UI and you normally do not need to look inside that files. But it can defenitly help if you are searching errors.<br /><br />
+Besides that in the Domain section, you are able to see domains which have been replicated, or fetched localy. In the Master Domains section you will see Domains which have been locally fetched. This domain will always be threated as master domains. You shall not have other slave domains registered locally, this software predicts that you do only have master domains set up in the local servers named.conf.local and named.conf.default-zones (or the file you set up in settings.php). This is okay for as much as all configurations, if you are using this software to replicate entries. The fetched local Master Domains, which will may be replicated to other servers, can be all seen with the actual status in the Domain->Master Domains Section. More informations about the icons below in the documentation.<br /><br />
+In the Domains section you can click on the button "Slave Domains". You will than see all domains which have been fetched from other DNS Servers, which are markes as "Master Server" in the DNS Server Management. More informations about the status icons below in the documentation.<br /><br />
+You will have a conflict, if a domain exists on the local server as master domain and on a slave server as well, or is  2 slave servers deliver the same master domain. In this case the Conflict will be shown in the "Conflicts" Section. You have the possibility to prefer a domain in the Domain->Master Domains or Domain->Slave Domains section. This domain will than be preferred if there are any conflicts. If you do not solve a conflict, this domain wont be registered to the local bind instance, so it is always neccessary to solve conflicts if the domain should be active. The conflicts section ist just for conflicts overview and theire solutions and which servers are affected (where the conflicst occurs from). You can solve the Conflicts by prefering a domain. unsolved Conflicts are marked yellow and solved conflicts are marked as green.<br /><br />
+If you are in the Domains Section Domains Overview, you can view the zonedata if the domain which has been fetched external at the replication or locally. If there are errors in the zonedata, which is shown by an icon - you can get the output of the named-zonecheck command in the "Details" button window. There you will see any additional informations about this domain and errors that may occured durring the sync.php execution (which handles all stuff which is done in the background).
+You can disable Replication on Local Master Domains, this domains than will not be replicated to other servers, which are asking for replication.<br /><br />
+Keep in mind that the Domain Section only gets updated, when the cronjob sync.php is running. At the top of the page you can see (in green) the date and time where the data has last been updated. If you want to update that data you need to run sync.php manually or wait until your cronjob cycle runs it. (See Installation)
+<h3 id="repcon">Types of Server Connections</h3>
+In the case you have a System with Master Domains and Slave Servers only dedicated for this case, you would install this software on both servers. On the master server you would setup the Slave Server marked as Slave Server, with related Website URL Where this panel is running, an token which is identical to the one on the other server and the servers ip adr. Is is important that the IP Adr. of the external server is valid! Otherwhise the replication Process wont work! You need at least one valid ipv4 or ipv6 where the other nameserver is reachable.<br />On the Slave Server now, you would install that panel as well and set up the master server there in the Replication->Mange DNS Server Area. You can see Status Icons for Server if the connection is possible which are explained below in the documentation.<br /><br />
+Besides that it is possible to use "hybrid" connections. That means that every server running with this panel can act as slave and master server at the same time. The conflict section comes very in handy here.<br /><br />
+<font color="yellow">Informations about Domain Prefering: If you Prefer a Domain on Server 1, it will not be preferred on Server 2. So you may have to prefer a domain on several servers ( depend on the number of your servers ) to solve all conflicts which exist.</font>
+<h3 id="reptok">Server Tokens</h3>
+If you have at Server 1 a Token "123" for example, and on Server 2 the same Token configured "123" on the other server, than the replication process and all other API Requests will work. You need the exact same token for server connections on  both servers existing. Keep sure that the Token you want to use to replicate, exists on both servers.
+<h3 id="disable-repdomain">Disable Replication for Master/User Domains</h3>
+<p>You can disable "to-slave" replication for single master domains in the webinterface.</p>
+<h3 id="repadd">Add a Slave DNS Server</h3>
+Look at the Section "Types of Server Connections" for informations about how to add servers.
+<h3 id="repzc">Zone Checks</h3>
+Every zone file which will be used, will checked with the command named-checkzone before it gets written for the configuration. If that command fails, the last working file gets in affect. If there is no working file the domain will not be active. You will get notification icons on that domain for every case. Look at the status icon information below in the documentation to get informations about this status icons. If a Zone is Using its fallback zonefile, or failing verifying the new file, you can get the error string of "named-checkzone" in the domains details section.
 
-// Enable DNSSec<span class="hljs-built_in">
-check-names </span>master ignore;<span class="hljs-built_in">
-check-names </span>slave ignore;
-notify no;
-allow-transfer {127.0.0.1;};<span class="hljs-built_in">
-check-names </span>response ignore;
-};
-</code></pre><h4 id="named-conf">named.conf</h4>
-<pre><code>This step is mandatory <span class="hljs-keyword">and</span> needs <span class="hljs-built_in">to</span> be done <span class="hljs-built_in">to</span> all <span class="hljs-built_in">files</span> which   
-<span class="hljs-keyword">contains</span> domain list informations, <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> <span class="hljs-keyword">normal</span> <span class="hljs-keyword">case</span> <span class="hljs-keyword">of</span> <span class="hljs-keyword">a</span> slave
-server this is primary: /etc/bind/dnshttp.conf.<span class="hljs-built_in">local</span> <span class="hljs-keyword">and</span> may 
-named.conf.<span class="hljs-built_in">local</span> <span class="hljs-keyword">as</span> there are <span class="hljs-built_in">local</span> master domains stored normally.
-</code></pre><p>This step is only needed on slave servers,but it does not break something, so we recommend to execute this line on all systems. First execute this command on your system as root user:</p>
-<pre><code>touch /etc/bind/dnshttp<span class="hljs-selector-class">.conf</span><span class="hljs-selector-class">.local</span>
-</code></pre><p>Add the line below to your named.conf.options file for the dnshttp file to be loaded.</p>
-<pre><code>include <span class="hljs-string">"/etc/bind/dnshttp.conf.local"</span><span class="hljs-comment">;</span>
-</code></pre><p>If you have additional files that serve as zone list file (like named.conf.local) they also need to be included using the same syntax in that file.</p>
+<hr>
+<h2 id="debuginfo">MySQL Debugging for Developers</h2>
+<p>If you are a developer or you want to change the software you can activate the mysql_debugging mode in the settings.php. This will let the "debug" section appear where you can see mysql errors, if there are some. This section is only for interest for developers. As now this software has been fully tested and this section is pretty much useles for normal users of this software. You can not see any informations about replication or other stuff here. Just MySQL Errors. Do not panic if there are some. The most of these errors occur if the table structure gets regenerated, but they will fix themselves. </p>
+
+<hr>
+<h2 id="passlost">Caution to not lose your login password!</h2>
+<p>Be careful to remember your password, there is no easy way to restore it - if you lose it...<br />
+If you lose your administrator password and you have no access to a user with permission for user mangement, than you have to reset the users table.
+Do this by going into your mysql server and delete the dnshttp_user table. If you visit the page after that, the table will be restored with the initial login information you can see below!<br /><br /><br /><b class="orangetext">In case you dont want to delete your users table</b>:</p>
+<p>If you lose your admin password and you have no other administration account to access the user management, than the only thing you can do is to change the password manually in the database. Look at the users table and replace the string in the password field with a new bcrypt php string with your password. You can find different generators in the internet where you can generate this strings. <br /><br /> If you delete the table, all users will be deleted, but the password and administrative user will be reseted to the default login you can see at the end of the readme. This is an easier way, if you dont have to keep the users table.<br /><br />Inside the webinterface is no password restore function and is not planned, but you can change account passwords if you are able to login.</p>
+<hr>
+<h2 id="serverinfo">Server Status Icon Explanation</h2>
+<div class="content_box" style="max-width: 800px;text-align: left;">
+		<b>Status Icon Informations:</b><br>
+		The status of a server is updated if the cronjob <b>sync.php</b> does execute. Otherwhise you can update the status icons by pressing "recheck" on the server you want to check. It may be good to take a look at this values from time to time, but more important is to take a look at the replications log. All necessarry informations you need to know about the replication are written there. (The Replication Protocol Section unter the tab Replication).<br>
+		<br><b>API Status Icons:</b><br>
+			<div class="label_box" style="background: lime; color: black;float:left;">API-Ping: Ok</div> - API is connectable and OK for Replication<br clear="left">
+			<div class="label_box" style="background: red; color: white;float:left;">API-Ping: Fail</div> - API is not connectable (API Path/URL is Wrong or other instance has errors at the remote server)<br clear="left">
+			<div class="label_box" style="background: yellow; color: black;float:left;">API-Ping: Unchecked</div> - API connectivity has not been checked yet (will be by cronjob or with button "recheck")<br clear="left">
+		<br><b>IP-Ban Status Icons:</b><br>
+			<div class="label_box" style="background: red; color: white;float:left;">IP-Ban: Banned</div> - This server is banned in the others server ip blocklist. You need to remove it on the other servers interface or wait until a remote servers daily cronjob may remove this ban... (May caused by to many tries with wrong tokens!)<br clear="left">
+			<div class="label_box" style="background: yellow; color: black;float:left;">IP-Ban: Unchecked</div> - IP Ban State has not been checked yet (will be by cronjob or with button "recheck")<br clear="left">
+			<div class="label_box" style="background: lime; color: black;float:left;">IP-Ban: Ok</div> - Server is okay for replication, as this server is not banned remotely...<br clear="left">
+		<br><b>Token Status Icons:</b><br>
+			<div class="label_box" style="background: red; color: white;float:left;">Token-Status: Invalid</div> - The configured token for the server does not match the token which is on the remote server for this connection... (They need to match, please check on remote site or change this servers key to the same as on the remote site! This error may also occur, is there is another API Error.<br clear="left">
+			<div class="label_box" style="background: yellow; color: black;float:left;">Token-Status: Unchecked</div> - Token State has not been checked yet (will be by cronjob or with button "recheck")<br clear="left">
+			<div class="label_box" style="background: lime; color: black;float:left;">Token-Status: Ok</div> - Server is okay for replication, as this server has a valid token handshake...<br clear="left">
+		<br><b>Domain Status Icons:</b><br>
+			<div class="label_box" style="background: lime; color: black;float:left;">Domains: [NUMBER]</div> - Number of the Domains existand on the external server!<br clear="left">
+			<div class="label_box" style="background: yellow; color: black;float:left;">Domains: Unchecked</div> - Still not checked for Domains, will be done on cron-run or if you press "recheck"!<br clear="left">
+		</div>
+<hr>
+<h2 id="domaininfo">Domain Status Icon Explanation</h2>
+<div class="content_box" style="text-align: left;" id="showmethepicture">
+		<b>Status Icon Informations:</b><br>
+		The status of a server is updated if the cronjob <b>sync.php</b> does execute. It may be good to take a look at this values from time to time, but more important is to take a look at the replications log. All necessarry informations you need to know about the replication are written there. (The Replication Protocol Section unter the tab Replication).<br>
+
+			
+		<br><b>Domain Status Icons:</b><br>			
+			<div class="sysbutton" style="background: lime; color: black !important;margin: 5px; padding: 2px;max-width: 200px;" href="#">Active</div> If label above is shown, the Domain is active and registered with bind!
+			
+			
+			<br clear="left">
+			<div class="sysbutton" style="background: red;color: white !important;margin: 5px; padding: 2px;max-width: 200px;" href="#">Inactive</div> If lavel above is dhown, the Domain is not registered with bind and not active, this can be due to an error and maybe should been checked.. ;_; (But it is just saying, that this domain is not used in bind currently, and not able to query at the server. If you have no problem with that, leave it like that is.
+			
+			
+			
+			<br clear="left">
+			<div class="sysbutton" style="background: yellow;color: black !important;margin: 5px; padding: 2px;max-width: 200px;" href="#">Waiting for Cron</div> If you see lavel above, the domain is waiting for the next cronjob run to update its status!
+			
+			<br clear="left">
+			<div class="sysbutton" style="background: yellow;color: black !important;margin: 5px; padding: 2px;max-width: 200px;" href="#">Disabled</div> If you see the label above, this domain had been in a conflict which has been solved, by choosing another domain as preferred!
+			
+			<br clear="left">
+		<br><b>Conflict Icons:</b><br>		
+			<div class="sysbutton" style="background: red;color: white !important;margin: 5px; padding: 2px;max-width: 200px;" href="#">Conflicted</div> If label above is shown on domain, it is inactive, because if has a conflict (duplicated domain on another slave server or at this master server). This domain will not be registered to the local system, until the conflict has been solved by preferring a domain via this interface.
+			<br clear="left">
+			
+			<div class="sysbutton" style="background: yellow; color: black !important;margin: 5px; padding: 2px;max-width: 200px;" href="#">Solved Conflict</div> If label above is shown, the domain has a conflict and is duplicated on this servers domain table. But this conflict has been solved by choosing a prefered domain! So all is alright and no steps are required, you can see more information about conflicts and if they are solved in the "Conflicts" Area...
+			<br clear="left">
+			
+			
+		<br><b>Domain Info Icons:</b><br>	
+			<div class="sysbutton" style="background: lightblue; color: black !important;margin: 5px; padding: 2px; max-width: 200px;" href="#">Preferred</div> If label above is shown on domain, this domain is preferred and will be used if there are any conflicts for this specific domain!
+			<br clear="left">
+			
+			<div class="sysbutton" style="background: yellow; color: black !important;margin: 5px; padding: 2px; max-width: 200px;" href="#">Replication Disabled</div> If you see label above on a domain, this domain has been set to "not replicate". This master domain on this local server will than not be replicated to other remote servers, if they are asking for the locals server domains list...
+			<br clear="left">
+			
+		<br><b>Zonedata Status Icons:</b><br>
+			<div class="sysbutton" style="background: red; color: white !important;margin: 5px; padding: 2px; max-width: 200px;">New Zonedata invalid<br>Using Failsafe...</div> If this label above is shown, there is an error in the domains content data and it has not been registered with bind.<br clear="left">
+			<div class="sysbutton" style="background: red; color: white !important;margin: 5px; padding: 2px; max-width: 200px;">Zonedata Error</div> If label above is shown, the domain has a zonedata error on the new domains zonedata, the old (functioning) zonefile will than be used, until the new zonedata is valid...<br clear="left">
+		</div>
+<hr>
+<h2 id="goodurls">Interesting Links</h2>
+You can find  the documentation here:<br />
+<a href="https://bugfishtm.github.io/Bind9-Web-Manager/" rel="noopener" target="_blank">https://bugfishtm.github.io/Bind9-Web-Manager/</a><br />
+<br />
+You can find the github page here:<br />
+<a href="https://github.com/bugfishtm/Bind9-Web-Manager" rel="noopener" target="_blank">https://github.com/bugfishtm/Bind9-Web-Manager</a><br />
+<br />
+  
+My General Github Project Page is here:  <br />
+<a href="https://bugfishtm.github.io" rel="noopener" target="_blank">https://bugfishtm.github.io</a><br />
+
+<hr>
+<h2 id="morehelp">More Informations and Tutorial Videos</h2>
+I am planning to make a youtube turorial video about this software. See my channels page for the video - It should be named like this project is.   <br /><br />
+My Channel URL is here:  <br />
+<a href="https://www.youtube.com/channel/UC3cOjFu-MLj8GGDkpeIhqhQ" rel="noopener" target="_blank">https://www.youtube.com/channel/UC3cOjFu-MLj8GGDkpeIhqhQ</a><br /><br />
+
+The place where i usually store such kind of tutorial videos is here:  <br />
+<a href="https://www.youtube.com/playlist?list=PL6npOHuBGrpBw4hKaalqa1E8tGNNf8KoO" rel="noopener" target="_blank">https://www.youtube.com/playlist?list=PL6npOHuBGrpBw4hKaalqa1E8tGNNf8KoO</a><br /><br />
+  
+If you fo not find a tutorial video inside this playlist, i advise you to keep on using the manual/readme at the github page or my website for help.<br />
+<hr>
 <h2 id="issues">Issues</h2>
 <p>If you encounter issues or have questions using this software, do not hesitate write us at our Forum on www.bugfish.eu/forum !</p>
+<hr>
 <h2 id="default-login-for-webinterface">Default Login for Webinterface</h2>
 <p>Username: admin<br>Passwort: changeme</p>
 <hr>
 <p>more at www.bugfish.eu<br>Made by Jan-Maurice Dahlmanns</p>
 
-
-
-
-
-
-
-
 </div>
-
-
 			  <!------------------------------------>
 
 			  <header id="headertitle"><h2>ELECTRO-SWING</h2></header>
@@ -192,6 +297,8 @@ named.conf.<span class="hljs-built_in">local</span> <span class="hljs-keyword">a
 				<li><a href="https://github.com/bugfishtm/bugfish-hive" rel="noopener" target="_blank">Bugfish-Hive</a></li>			  
 				<li><a href="https://github.com/bugfishtm/bugfish-framework" rel="noopener" target="_blank">Bugfish-Framework</a></li>
 				<li><a href="https://github.com/bugfishtm/Bind9-Web-Manager" rel="noopener" target="_blank">Bind9 Web Manager</a></li>
+				<li><a href="https://github.com/bugfishtm/Simple-Web-Chatbot" rel="noopener" target="_blank">Simple-Web-Chatbot</a></li>
+				<li><a href="https://github.com/bugfishtm/Dovecot-Certificate-Interface" rel="noopener" target="_blank">Dovecot-Certificate-Interface</a></li>
 				<li><a href="https://github.com/bugfishtm/Android-Web-App-Example" rel="noopener" target="_blank">Android Web App Example</a></li>
 				<li><a href="https://github.com/bugfishtm/Mail-Relaying-over-DNS" rel="noopener" target="_blank">Mail Relaying over DNS</a></li>
 				<li><a href="https://github.com/bugfishtm/bugfishtm.github.io" rel="noopener" target="_blank">This Github Page</a></li>

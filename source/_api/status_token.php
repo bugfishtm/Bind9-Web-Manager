@@ -7,8 +7,27 @@
 		 |______  /____/\___  /|__|  |__/____  >___|  /
 				\/     /_____/               \/     \/  Status API with Security Token */
 	require_once("../settings.php");
-	if($ipbl->isblocked()) { echo "ip-blacklisted"; exit(); }
-	if(is_numeric(dnshttp_api_token_relay($mysql, @$_POST["token"]))) {
-	echo "online"; } else { echo "token-error"; $ipbl->raise(); }
+
+	// Class for Logging
+	$log_api	=	new x_class_log($mysql, _TABLE_LOG_, "api");
+	
+	// Check if Request is IP-Blocked
+	if($ipbl->isblocked()) {
+		//$log_api->message("[IN][status_token.php][ip-blacklisted][IP:".@$_SERVER["REMOTE_ADDR"]."]");
+		echo "ip-blacklisted";
+		exit(); 
+	}
+	
+	// Check if Token is Valid
+	if(!api_token_check($mysql, @$_POST["token"])) {
+		//$log_api->message("[IN][status_token.php][token-error][IP:".@$_SERVER["REMOTE_ADDR"]."][TOKEN:".@$_POST["token"]."]");
+		$ipbl->raise(); 
+		echo "token-error";
+		exit();
+	}
+	
+	// Echo Online if all Okay
+	//$log_api->message("[IN][status_token.php][online][IP:".@$_SERVER["REMOTE_ADDR"]."][TOKEN:".@$_POST["token"]."]");
+	echo "online"; 
 	exit();
 ?>

@@ -19,10 +19,10 @@
 		private function create_table() {
 			return $this->mysql->query("CREATE TABLE IF NOT EXISTS `".$this->table."` (
 												  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Identificator',
-												  `type` int(10) DEFAULT '0' COMMENT '0 - Unspecified 1 - Error 2 - Warning - 3 Notification',
-												  `message` text COMMENT 'The Logs Content',
-												  `section` VARCHAR(128) NULL COMMENT 'Related Section',
-												  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation',
+												  `type` int(10) DEFAULT '0' COMMENT '0 - Unspecified | 1 - Error | 2 - Warning | 3 - Notification',
+												  `message` text COMMENT 'Logged Text',
+												  `section` VARCHAR(128) NULL COMMENT 'Logged Category',
+												  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date | Will be Auto-Set',
 												  PRIMARY KEY (`id`) );");
 		}
 		
@@ -92,10 +92,15 @@
 		######################################################
 		// Delete Entries in Logtable List and reset Auto Increment
 		######################################################	
-		public function list_clear() { 
+		public function list_flush_section() { 
 			@$this->mysql->query("DELETE FROM ".$this->table." WHERE section = '".$this->section."';"); 
 			@$this->mysql->auto_increment($this->table, 1); 
 			return true;
 		}	
+		
+		public function list_flush() { 
+			@$this->mysql->query("DELETE FROM ".$this->table.""); 
+			@$this->mysql->auto_increment($this->table, 1); 
+			return true;
+		}
 	}
-?>

@@ -7,36 +7,45 @@
 		 |______  /____/\___  /|__|  |__/____  >___|  /
 				\/     /_____/               \/     \/  API File to Fetch Content of a Domain */
 	require_once("../settings.php");
-	if($ipbl->isblocked()) { echo "ip-blacklisted"; exit(); }
-	if(is_numeric(dnshttp_api_token_relay($mysql, @$_POST["token"]))) { 
-		if($x = dnshttp_bind_domain_name_exists($mysql, @$_POST["domain"])) { 
-			$domar	=	array();
-			$ar = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".$x."", false);
+	
+	// Class for Logging
+	$log_api	=	new x_class_log($mysql, _TABLE_LOG_, "api");	
+	
+	// Check if Request is IP-Blocked
+	if($ipbl->isblocked()) {
+		//$log_api->message("[IN][content.php][ip-blacklisted][IP:".@$_SERVER["REMOTE_ADDR"]."]");
+		echo "ip-blacklisted";
+		exit(); 
+	}
+	
+	// Check if Token is Valid
+	if(!api_token_check($mysql, @$_POST["token"])) {
+		//$log_api->message("[IN][content.php][token-error][IP:".@$_SERVER["REMOTE_ADDR"]."][TOKEN:".@$_POST["token"]."]");
+		$ipbl->raise(); 
+		echo "token-error";
+		exit();
+	}	
+	
+	// Check if Token is Valid
+	if($x = dnshttp_bind_domain_name_exists($mysql, @$_POST["domain"])) {	
+		$ar = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".$x." AND conflict = 0 OR (conflict = 1 AND preferred = 1)", false);
+		if(is_array($ar)) {
+			echo $ar["content"];
+			//$log_api->message("[IN][content.php][OK][IP:".@$_SERVER["REMOTE_ADDR"]."][TOKEN:".@$_POST["token"]."][DOMAIN:".@$_POST["domain"]."]");
+		} else { 	
+			$ar2 = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".$x." ORDER BY id DESC", false);
 			if(is_array($ar)) {
-				if($ar["set_prefer_manual"] == 1) { echo $ar["content"]; }
-				else {
-echo '$TTL        3600
-@       IN      SOA     '._HOSTNMAE_.'. '.$ar["dns_mail"].' (
-                        '.$ar["dns_serial"].'       ; serial, todays date + todays serial #
-                        '.$ar["dns_refresh"].'              ; refresh, seconds
-                        '.$ar["dns_retry"].'              ; retry, seconds
-                        '.$ar["dns_expire"].'              ; expire, seconds
-                        '.$ar["dns_minimum"].' )            ; minimum, seconds
-;					
-';
-					
-			$ar2 = $mysql->select("SELECT * FROM "._TABLE_RECORD_." WHERE fk_domain = ".$ar["id"]."", false);
-			if(is_array($ar2)) {
-				foreach($ar2 as $key => $value) {
-					echo ''.$ar["record_domain"].'   '.$ar["record_ttl"].'      '.$ar["record_type"].'      '.$ar["record_priority"].'      '.$ar["record_value"].'
-					';
-				}
-					
+				echo $ar["content"];
+				//$log_api->message("[IN][content.php][WARN: CONFLICTED][IP:".@$_SERVER["REMOTE_ADDR"]."][TOKEN:".@$_POST["token"]."][DOMAIN:".@$_POST["domain"]."]");
+			} else { 
+				//$log_api->message("[IN][content.php][error-domain-no-exist][IP:".@$_SERVER["REMOTE_ADDR"]."][TOKEN:".@$_POST["token"]."][DOMAIN:".@$_POST["domain"]."]");
+				echo "error-domain-no-exist";
 			}
-					
-				}
-			} else { echo "error-no-content"; }
-		} else { echo "error-domain-no-exist"; }
-	} else { echo "error-token"; $ipbl->raise(); }
-	exit();
+		}
+		exit();
+	} else { 
+		//$log_api->message("[IN][content.php][error-domain-no-exist][IP:".@$_SERVER["REMOTE_ADDR"]."][TOKEN:".@$_POST["token"]."][DOMAIN:".@$_POST["domain"]."]");
+		echo "error-domain-no-exist";
+		exit();
+	}
 ?>

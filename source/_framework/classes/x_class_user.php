@@ -100,11 +100,11 @@ class x_class_user {
 	private $passfilter = false; private $passfilter_signs = 0; private $passfilter_capital = 0; private $passfilter_small = 0; private $passfilter_special = 0; private $passfilter_number = 0;
 	public function passfilter($signs = 6, $capitals = 0, $small = 0, $special = 0, $number = 0) {$this->passfilter_signs = $signs;$this->passfilter_capital = $capitals;$this->passfilter_small = $small;$this->passfilter_special = $special;$this->passfilter_number = $number;}
 	public function passfilter_check($passclear) { $isvalid = true;
-		if($this->passfilter_signs > 0) { if(@strlen(@$passclear) <= $this->passfilter_signs) { $isvalid = false; } }
-		if($this->passfilter_capital > 0) { if(preg_match('/[A-Z]/', $string, $matches)){ if(count($matches) >= $this->passfilter_capital) {  } else { $isvalid = false; } } else { $isvalid = false; } }
-		if($this->passfilter_small > 0) { if(preg_match('/[a-z]/', $string, $matches)){ if(count($matches) >= $this->passfilter_small) {  } else { $isvalid = false; } } else { $isvalid = false; } }
-		if($this->passfilter_special > 0) { if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+-]/', $string, $matches)){ if(count($matches) >= $this->passfilter_special) {  } else { $isvalid = false; } } else { $isvalid = false; } }
-		if($this->passfilter_number > 0) { if(preg_match('/[0-9]/', $string, $matches)){ if(count($matches) >= $this->passfilter_number) {  } else { $isvalid = false; } } else { $isvalid = false; } }
+		if($this->passfilter_signs > 0) { if(@strlen(@$passclear) < $this->passfilter_signs) { $isvalid = false; } }
+		if($this->passfilter_capital > 0) { if(preg_match('/[A-Z]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_capital) { $isvalid = false; } } else { $isvalid = false; } }
+		if($this->passfilter_small > 0) { if(preg_match('/[a-z]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_small) {  $isvalid = false; } } else { $isvalid = false; } }
+		if($this->passfilter_special > 0) { if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+-]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_special) {  $isvalid = false; } } else { $isvalid = false; } }
+		if($this->passfilter_number > 0) { if(preg_match('/[0-9]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_number) {  $isvalid = false; } } else { $isvalid = false; } }
 		return $isvalid;}
 	
 	## Setup Token Generation
@@ -250,7 +250,7 @@ class x_class_user {
 	public function user_add_field($fieldstring) { return $this->mysql->query("ALTER TABLE ".$this->dt_users." ADD ".$fieldstring." ;");}
 	public function user_del_field($fieldname) { return $this->mysql->query("ALTER TABLE ".$this->dt_users." DROP COLUMN ".$fieldname." ;"); }	
 	## Check Time Interval Function	
-	private function check_interval_value($datetimeref, $strstring = '-1 hours') { $new = strtotime($datetimeref) - strtotime($strstring); return $new;}
+	private function check_interval_value($datetimeref, $strstring) { $new = strtotime($datetimeref) - strtotime($strstring); return $new;}
 	## ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	## Get Rrequest Interval Functions
 	public function activation_request_time($user) { return $this->request_time($user, $this->key_activation); }
@@ -334,7 +334,7 @@ class x_class_user {
 				if($res=$this->mysql->fetch_array($r)){
 					if($res["is_active"] != 1) { return false; }
 					if(is_numeric($this->min_mail_edit)) {
-						if(isset($res["creation"])) { if($this->check_interval($res["creation"], ''.$this->min_mail_edit.' minutes')) {return false;} }
+						if(isset($res["creation"])) { if(!$this->check_interval($res["creation"], ''.$this->min_mail_edit.' minutes')) {return false;} }
 					}					
 					return true;
 				} else {return false;}					
@@ -358,7 +358,7 @@ class x_class_user {
 				if($res=$this->mysql->fetch_array($r)){
 					if($res["is_active"] != 1) { return false; }
 					if(is_numeric($this->min_recover)) {
-						if(isset($res["creation"])) { if ($this->check_interval($res["creation"],''.$this->min_recover.' minutes')) {					
+						if(isset($res["creation"])) { if (!$this->check_interval($res["creation"],'-'.$this->min_recover.' minutes')) {					
 							 return false;
 						}}
 					}					
@@ -369,7 +369,7 @@ class x_class_user {
 				if($res=$this->mysql->fetch_array($r)){
 					if($res["is_active"] != 1) { return false; }
 					if(is_numeric($this->min_activation)) {
-						if(isset($res["creation"])) { if ($this->check_interval($res["creation"],''.$this->min_activation.' minutes')) {					
+						if(isset($res["creation"])) { if (!$this->check_interval($res["creation"],'-'.$this->min_activation.' minutes')) {					
 							return false;
 						}}
 					}					
@@ -381,7 +381,8 @@ class x_class_user {
 	### PRIVATE FUNCTIONS PRIVATE FUNCTIONS PRIVATE FUNCTIONS PRIVATE FUNCTIONS PRIVATE FUNCTIONS PRIVATE FUNCTIONS PRIVATE FUNCTIONS PRIVATE FUNCTIONS 
 	######################################################################################################################################################
 	## Check Time Interval Function	
-	private function check_interval($datetimeref, $strstring = '-1 hours') { if (strtotime($datetimeref) < strtotime($strstring)) {return false;} return true;}	
+	private function check_interval($datetimeref, $strstring) {if (strtotime($datetimeref) < strtotime($strstring)) {return false;} return true;}	
+	private function check_intervalx($datetimeref, $strstring) {return strtotime($datetimeref)."-".$strstring."-".strtotime($strstring); if (strtotime($datetimeref) < strtotime($strstring)) {return false;} return true;}	
 	######################################################################################################################################################
 	## Token Creations and Singing
 	private function activation_token_create($user, $token) { return $this->token_create($user, $token, $this->key_activation); }
@@ -1011,4 +1012,3 @@ class x_class_user {
 		}	
 	
 	}
-?>

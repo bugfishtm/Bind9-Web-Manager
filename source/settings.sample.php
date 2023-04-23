@@ -6,96 +6,77 @@
 		 |    |   \  |  / /_/  >  |  |  |\___ \|   Y  \
 		 |______  /____/\___  /|__|  |__/____  >___|  /
 				\/     /_____/               \/     \/  Bind9 Web Manager Configuration File */
-	##########################################################################################################################################
-	# Below are settings which may be changed to adjust the configuration and enter mysql authentication info!
-	##########################################################################################################################################
-	/* ########################################## */
-	/* Website Setup
-	/* ########################################## */				
-	define("_TITLE_", 				"TITLE"); # A Imaginary Server Name to show at Title, can be unchanged	 		
-	define("_COOKIES_",     		"dnshttp_"); # Cookie Prefix // Can be unchanged			
-	define("_MAIN_PATH_",			"/var/www/html/"); # Main Document root for website! Needs to be corrent for website to run!		
-	define("_HOSTNMAE_",			"HOSTNAME"); # This Servers DNS Hostname (example: ns1.example ); Needed if Users create manual domains, not needed for replications	
-				
-	/* ########################################## */
-	/* Database Setup
-	/* ########################################## */				
-	define("_SQL_HOST_", 			"DBHOST"); # Mysql Hostname
+	/* Website Setup */				
+	define("_TITLE_", 				"YOUR_TITLE"); # A Imaginary Server Name to show at Title, can be unchanged
+	define("_IMPRESSUM_",			"YOUR_IMPRESSUM_URL"); # URL to your Impressum Website
+	
+	/* Database Setup */				
+	define("_SQL_HOST_", 			"127.0.0.1"); # Mysql Hostname
 	define("_SQL_USER_", 			"DBUSER"); # Mysqsl User
 	define("_SQL_PASS_", 			"DBPASS"); # MysQL Password
 	define("_SQL_DB_", 				"DBNAME"); # MySQL Database				
 				
-	/* ########################################## */
-	/* Site Security Setup
-	/* ########################################## */				
-	define("_IP_BLACKLIST_DAILY_OP_LIMIT_", 500); # Define Blacklist Limit for IP Bans (500 Recommended) // Can be reseted via daily cronjob.
-	define("_CSRF_VALID_LIMIT_TIME_", 	500); # Define Time for CSRF Validation	(500 Recommended)	 # Can be left unchanged				
-				
 	##########################################################################################################################################
-	# Some Settings about the DNS Manager and User Created Domains
-	##########################################################################################################################################						
-	##########################################################################################################################################
-	# Settings for Permission Follow, this is for the files created by this software (dns zone files and list files)
-	##########################################################################################################################################					
-	# Created Hosts Files Owner User
-	define("_CRON_BIND_LIB_USER_", 			"bind"); // default is bind
-	# Created Hosts Files Owner Group
-	define("_CRON_BIND_LIB_GROUP_", 		"bind"); // default is bind
-	# Created Hosts Files Owner Chmod Permission Number
-	define("_CRON_BIND_LIB_CODE_", 			770); 	 // default is 770
-	# File Ending of DNSHTTP Created Files, can be leaved unchanged!
-	define("_CRON_BIND_LIB_ENDING_", 		".dnshttp"); // default is ".dnshttp"
-
-	##########################################################################################################################################
-	# Folder Where Created Slave Zone Files are Stored
-	##########################################################################################################################################
-	# Where should Files for DNS be stored ? (From master Servers fetched host files)
-	define("_CRON_BIND_LIB_", 				_MAIN_PATH_."/_temp/"); # Can be löeft unchanged	
-			
-	##########################################################################################################################################
-	# Settings for DNS Replication follows, this is urgent to be checked before runnig this software!
+	# Files to Read Master Zones from (Can be left unchanged with usual setup of bind and most crm systems)
+	# These are the Domain Table files, where the domains and the location of the zone files will be fetched from.
+	# You can choose 2 files, this pre-entered settings should mostly be fitting your a default bind9 configuration.
 	##########################################################################################################################################								
-	/* ########################################## */
-	/* File to Fetch Local Master Domains (default: /var/bind/named.conf.local)	
-	/* Path to Domain Listing File (Default is named.conf.local in bind Folder) To Fetch Domains for Slave Servers (can be ignored on slave servers)
-	/* If _CRON_FILES_FOLDER_FETCH_ is set to a folder with zone files, this file will be replaced upon cronjob run with fetched data. More see below.
-	/* Normally, you would type in your named.conf.local file here, if this is the file where your dns CRM or whatever stores your domain list
-	/* If you are not using another crm or dns manager software, leave this to named.conf.local (on a default bind9 installation
-	/* ########################################## */
-	define("_CRON_BIND_FILE_",  			"/etc/bind/named.conf.local");
-	
-	/* ########################################## */
-	/* File to Write Fetched Slave Domains for Bind Into (Like in named.conf but has to be another file!!!!)
-	/* Name of File for DNS Names, has to be included into named.conf.options (see readme!)
-	/* ########################################## */		
-	define("_CRON_BIND_FILE_DNSHTTP_",  	"/etc/bind/dnshttp.conf.local");		
-	
-	/* ########################################## */
-	/* OPTIONAL OPTIONAL OPTIONAL: DNS FIX IF DNS CRM DOES FAIL TO WRITE LIST OF ZONES TO NAMED.CONF.LOCAL
-	/* IF YOU SET FALSE TO THE PATH OF THE TEMPLATE FILES OF YOUR ZONES, THE SCRIPT WILL FETCH LOCAL MASTER FOMAINS
-	/* FROM TEMPLATE FILE NAME AND PUT THEM INTO DATABASE, INSTEAD FETCHING FROM THE NAMED.CONF.LOCAL OR CONFIGURATED FILE
-	/* ABOVE, THE SCRIPT WILL REPLACE THE FILE WITH THE FETCHED DATA IF THE VALUE IS NOT FALSE BELOW. IT WILL FETCH THE 
-	/* DOMAIN INFO FROM FILE INSTEAD, IF OPPOSITE. (i hope you get what i mean, sorry)
-	/* ########################################## */	
-	#define("_CRON_FILES_FOLDER_FETCH_RMSTARTCOUNT_",  			4); // Poststring after Hosts File Name (default is ".hosts")
-	#define("_CRON_FILES_FOLDER_FETCH_RMSENDCOUNT_",  			0); // Poststring after Hosts File Name (default is ".hosts")
-	#define("_CRON_FILES_FOLDER_FETCH_",  						"/etc/bind/zones/"); // Poststring after Hosts File Name (default is ".hosts")
-	#define("_CRON_BIND_FILE_FETCHED_",  						"/etc/bind/named.conf.ispconfig.local");
+	define("_CRON_BIND_FILE_",  			"/etc/bind/named.conf.default-zones");
+	define("_CRON_BIND_FILE_2_",  			"/etc/bind/named.conf.local");
 
-	/* ########################################## */
-	/* DO NOT CHANGE THE VALUES BELOW!
-	/* ########################################## */
-	## Include Functions File - Do not Change!
-	require_once(_MAIN_PATH_."/functions.php");
+	##########################################################################################################################################
+	# Fetch Local Master Domain Names by Zonesfiles in a Folder, Zonesfiles need to have the domain name included in filename.
+	# THIS IS MEANT TO BE A FIX FOR ISPCONFIG, WHICH IS FAILING TO CREATE THE NAMED.CONF.LOCAL
+	# THIS IS A FIX FOR ISPCONFIG BUT CAN BE USED FOR OTHER SYSTEMS
+	# USE IT IF YOU HAVE NO FILES WITH LOCAL DOMAIN TABLES LIKE NAMED.CONF.LOCAL BUT A FOLDER WITH ZONE FILES.
+	# You can leave this untouched if you do not need a fix to create a valid named.conf.local file...
+	##########################################################################################################################################	
+	define("_CRON_FILES_FOLDER_FETCH_RMSTARTCOUNT_",  			4); // Offset Filename off Zonefiles at Start (example cut first 5 letters of zone.domain.file) (default for ispconfig is 4)
+	define("_CRON_FILES_FOLDER_FETCH_RMSENDCOUNT_",  			0); // Offset Filename off Zonefiles at End  (example cut first 5 letters of zone.domain.file)
+	// If the constant below is not -false- the function for search folder is activated.
+	define("_CRON_FILES_FOLDER_FETCH_",  						false); // Folder to Search Files  (default for ispconfig is "/etc/bind/zones/")
+
+	##########################################################################################################################################
+	# Below Settings do not needs to be changed if you are using a default debian bind9/ubuntu system! (and may others)
+	# If your service is called "named" and not "bind" you can change the service name below.
+	# But as said, with a default bind9 installation it works (bind9)
+	##########################################################################################################################################	
+	/* Site Security Setup */				
+	define("_IP_BLACKLIST_DAILY_OP_LIMIT_", 10000); # Define IP Blacklist Limit for IP Bans (10000 Recommended) // Can be reseted via daily cronjob.
 	
-	/* ########################################## */
-	/* Default Values for User Created Domains // IS NOT IN USE
-	/* ########################################## */
-	# single domain zone expire, seconds	
-	define('_USER_DOMAIN_EXPIRE_',    604800);	 # Can be left unchanged / Useless at the Moment
-	# single domain zone retry, seconds
-	define('_USER_DOMAIN_RETRY_',    540);	 # Can be left unchanged   / Useless at the Moment
-	# single domain zone refresh, seconds
-	define('_USER_DOMAIN_REFRESH_',    7200);  # Can be left unchanged	  / Useless at the Moment
-	# single domain zone minimum, seconds
-	define('_USER_DOMAIN_MINIMUM_',    3600);	 # Can be left unchanged	 / Useless at the Moment 	
+	// Will be raised on wrong login and wrong token api requests! # Can be left unchanged	
+	define("_CSRF_VALID_LIMIT_TIME_", 	10000); # Define Time for CSRF Validation	(10000 Recommended)	 # Can be left unchanged	
+	
+	// This is a key for form security!	 # Can be left unchanged	
+	define("_COOKIES_",     		"dnshttp_"); # Cookie Prefix // Can be left unchanged
+	
+	// File Creation Related Settings
+	define("_CRON_BIND_LIB_USER_", 			"bind"); // default is bind # Can be left unchanged	 # Created Hosts Files Owner User
+	define("_CRON_BIND_LIB_GROUP_", 		"bind"); // default is bind # Can be left unchanged	 # Created Hosts Files Owner Group
+	define("_CRON_BIND_LIB_CODE_", 			770); 	 // default is 770 # Can be left unchanged	 # Created Hosts Files Owner Chmod Permission Number
+	define("_CRON_BIND_LIB_ENDING_", 		".dnshttp"); // default is ".dnshttp"	 # Can be left unchanged # File Ending of DNSHTTP Created Files, can be leaved unchanged!
+	
+	## Local Nameserver Service Settings
+	define("_BIND_SERVICE_NAME_",  "bind9"); # Can be left unchanged / Name of the nameserver server (bind, named)
+	
+	# Command Name to Check Zones - Can be left unchagend!
+	define("_BIND_CHECKZONE_COMMAND_",  "/usr/sbin/named-checkzone");
+	
+	# Command to Compile Zones # Can be left unchanged
+	define("_BIND_COMPILEZONE_COMMAND_",  "/usr/sbin/named-compilezone");
+	
+	## Enable MySQL Logging page and MySQL Error Logging in Database at All?
+	define("_MYSQL_LOGGING_", true); # Can be left unchanged!
+	
+	# Where should Files for DNS be stored ? (From master Servers fetched host files)
+	define("_CRON_BIND_LIB_", 				"/etc/bind/dnshttp/"); # Can be left unchanged		
+	
+	## Determine Document Root - Leave unchanged!
+	$current_dir = dirname(__FILE__);
+	if(!file_exists($current_dir."/settings.php")) { $current_dir = $current_dir."/../";}
+	if(!file_exists($current_dir."/settings.php")) { $current_dir = $current_dir."../";}
+	if(!file_exists($current_dir."/settings.php")) { $current_dir = $current_dir."../";}
+	define('_MAIN_PATH_', $current_dir);
+	
+	## Include Functions File - Do not Change!
+	require_once(_MAIN_PATH_."/_instance/initialize.php");

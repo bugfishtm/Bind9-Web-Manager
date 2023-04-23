@@ -31,6 +31,7 @@
 			|    |__(  <_> ) /_/  > /_/  >  |   |  \/ /_/  >
 			|_______ \____/\___  /\___  /|__|___|  /\___  / 
 					\/    /_____//_____/         \//_____/ 		*/
+			private $logfile_messages = false; public function logfile_messages($bool = false) { $this->logfile_messages = $bool; }
 			private $logging_active = false; private $logging_table = ""; private $logging_section = ""; private $logging_all = false;
 			public function log_disable() { $this->logging_active = false; }
 			public function log_enable() { $this->logging_active = true; }
@@ -41,7 +42,13 @@
 				$this->logging_section = $section;
 				if(!$this->table_exists($this->logging_table)) { $this->create_table(); $this->free_all(); } }
 			private function log($output, $sqlerror, $exception, $init, $boolsuccess, $nolog = false) { if($this->logging_active AND !$nolog) {
+				if(!$this->logging_all AND (!@$exception OR (trim($sqlerror) == "" OR !$sqlerror))) { return false; }
 				if(!$this->logging_all AND $boolsuccess != 0) { return false; }
+				
+				if( $this->logfile_messages) {
+					error_log("X_CLASS_MYSQL_ERROR: [INIT] ".@serialize(@$init)." [EXCEPTION] ".@serialize(@$exception)." [SQLERROR] ".@serialize(@$sqlerror)." [OUTPUT] ".@serialize(@$output)." ");
+				}
+				
 				$mysql = $this->log_con();
 				$inarray["section"] = $this->logging_section;
 				$inarray["url"] = @trim(@$_SERVER["REQUEST_URI"]);
@@ -194,7 +201,7 @@
 			$row = mysqli_fetch_row($res);
 			$data.= $row[1].";\n";
 			$result = $this->query("SELECT * FROM `{$table}`");
-			$num_rows = mysqli_num_rows($result);    
+			$num_rows = @mysqli_num_rows($result);    
 			if($withdata) {
 				if($num_rows>0){
 				  $vals = Array(); $z=0;
@@ -413,9 +420,9 @@
 				// Default Query
 				$result = false;
 				try { $result = $this->handler(mysqli_query($this->mysqlcon, $query), false, "select#query: ".$query, false); } catch (Exception $e) { return $this->handler(false, $e, "select#query: ".$query, false); }
-				if($result) {
+				if(is_object($result)) {
 					$rows = 0;
-					$rows = mysqli_num_rows($result);
+					try { $rows = @mysqli_num_rows($result); } catch (Exception $e) { $rows = 0; }
 					if ($rows > 0) {
 						if(!$multiple) { 
 							// Single Return
@@ -433,7 +440,7 @@
 							return $row;
 						}
 					} else {return false;}
-				} else {return false;}
+				} else {return false;} 
 			}
 		}
 			
@@ -571,4 +578,3 @@
 				}
 			} catch (Exception $e){ return $this->handler(false, $e, "insert#all: ".$table, false); }}
 	}
-?>

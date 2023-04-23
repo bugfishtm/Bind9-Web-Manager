@@ -18,6 +18,7 @@
 	.xfpe_nopaddingleft_f { padding-left: 0px !important; }
 	.xfpe_nopaddingright { padding-right: 0px; }
 	.xfpe_nopaddingright_f { padding-right: 0px !important; }
+	.xfpe_paddingbottom5px { padding-bottom: 5px; } 
 	.xfpe_paddingbottom10px { padding-bottom: 10px; }
 	.xfpe_paddingbottom20px { padding-bottom: 20px; }
 	.xfpe_paddingbottom30px { padding-bottom: 30px; }
@@ -98,6 +99,13 @@
 	.xfpe_paddingtopm35px_f { padding-top: -35px !important; }
 	.xfpe_paddingtopm45px_f { padding-top: -45px !important; }
 	.xfpe_paddingtopm55px_f { padding-top: -55px !important; }
+
+	/* ################################################################## */
+	/* Display
+	/* ################################################################## */
+	.xfpe_dispinlineblock { display: inline-block; }
+	.xfpe_dispinline { display: inline; }
+	.xfpe_dispblock { display: block; }
 	
 	/* ################################################################## */
 	/* Margin

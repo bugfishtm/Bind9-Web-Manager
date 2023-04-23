@@ -37,7 +37,7 @@
 					<meta name="expires" content="0" />	
 				</head>
 				<body>
-					<div id="dberrorwrapper"><font size="+5">Error 503</font><br/><font size="+3">Site under Maintenance...</font><br />Please check in later! x)<br />Error: '.htmlspecialchars($text).'</div>
+					<div id="dberrorwrapper"><font size="+5">Error 503</font><br/><font size="+3">Site under Maintenance...</font><br />Please check in later! x)<br /><br /><b>Error</b>: '.htmlspecialchars($text).'</div>
 				</body></html>';}
 				
 		public function required_php_modules($array = array(), $errorscreen = false) {
@@ -51,7 +51,7 @@
 				if(!$found) { array_push($notfoundarray, $value); } 
 			}
 			
-			if($errorscreen AND count($notfoundarray) > 0) { $this->error_screen("Missing Modules: <br />".@serialize(@$notfoundarray)); exit(); } else { return $notfoundarray;}
+			if($errorscreen AND count($notfoundarray) > 0) { $this->error_screen("Missing PHP Module: <br />".@serialize(@$notfoundarray)); exit(); } else { return $notfoundarray;}
 		}
 		public function required_php_module($name, $errorscreen = false) {
 			$ar = $this->php_modules();
@@ -68,4 +68,3 @@
 		public function upload_max_filesize() { return ini_get('upload_max_filesize'); }
 		public function timer() { $endtime = microtime(true); $newstart = $endtime - $this->microtime_start; $newstart = round($newstart, 3); return $newstart; }
 	}
-?>

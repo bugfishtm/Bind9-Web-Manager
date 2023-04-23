@@ -1,0 +1,4 @@
+# Configuration
+source/settings.php
+# htaccess
+source/.htaccess

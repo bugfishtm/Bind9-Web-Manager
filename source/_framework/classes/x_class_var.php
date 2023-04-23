@@ -18,25 +18,25 @@
 		// Table Initialization
 		private function create_table() {
 			return $this->variable_msqlcon->query("CREATE TABLE IF NOT EXISTS `".$this->variable_table."` (
-												  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+												  `id` int(9) NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
 												  `descriptor` varchar(256) NOT NULL COMMENT 'Descriptor for Constant',
 												  `value` text COMMENT 'Value for Constant',
 												  `description` text COMMENT 'Description for Constant',
-												  `section` varchar(256) DEFAULT '' COMMENT 'Section for Constant',
-												  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date',
-												  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Modification Date',
+												  `section` varchar(128) DEFAULT '' COMMENT 'Section for Constant (For Multi Site)',
+												  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date of Entry | Will be Auto-Set',
+												  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Modification Date of Entry with Auto-Update on Change',
 												  PRIMARY KEY (`id`),
 												  UNIQUE KEY `Unique` (`section`,`descriptor`) USING BTREE);");}
 		// Construct
 		function __construct($mysql, $tablename, $section = "", $descriptor = "descriptor", $value = "value", $description = "description", $sectionfield = "section", $idfield = "id") { 
 			if (session_status() !== PHP_SESSION_ACTIVE) {@session_start();}
 			$this->variable_msqlcon = $mysql; 
-			$this->db_r_c_title     = $descriptor; 
-			$this->db_r_c_value     = $value; 
-			$this->db_r_c_descr     = $description; 
-			$this->db_r_c_section   = $sectionfield; 
-			$this->db_r_c_id    	= $sectionfield; 
-			$this->sections_name    = $section; 
+			$this->db_r_c_title     = @substr(trim($descriptor), 0, 255); 
+			$this->db_r_c_value     = @substr(trim($value), 0, 255); 
+			$this->db_r_c_descr     = @substr(trim($description), 0, 255); 
+			$this->db_r_c_section   = @substr(trim($sectionfield), 0, 255); 
+			$this->db_r_c_id    	= @substr(trim($sectionfield), 0, 255); 
+			$this->sections_name    = @substr(trim($section), 0, 127); 
 			$this->variable_table   = $tablename; 
 			if(!$this->variable_msqlcon->table_exists($tablename)) { $this->create_table(); $this->variable_msqlcon->free_all();  } }
 			
@@ -184,4 +184,3 @@
 			</div>
 		<?php }	
 	}
-?>

@@ -45,4 +45,3 @@
 				"logo": {"@type": "ImageObject","url": "'.$publisher_logo.'"}}}</script>';						
 	}
 
-?>
