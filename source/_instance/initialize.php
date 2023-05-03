@@ -561,7 +561,7 @@
 					$bind[2]["value"] = $value["type"];	
 					$bind[3]["type"] = "s";
 					$bind[3]["value"] = $content;					
-					$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_."(domain, zone_path, domain_type, last_update, content) VALUES(?, ?, ?, CURRENT_TIMESTAMP(), ?);", $bind);unset($bind);
+					$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_."(domain, zone_path, domain_type, last_update, content, preferred) VALUES(?, ?, ?, CURRENT_TIMESTAMP(), ?, 1);", $bind);unset($bind);
 				}
 			}	
 		}

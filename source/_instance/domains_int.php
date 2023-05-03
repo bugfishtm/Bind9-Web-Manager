@@ -253,8 +253,8 @@ $run = false;
 					//echo "<a  class='sysbutton' href='./?site=".$currentFormloc."&dodeldom=".$curissuer["id"]."'>Delete (Fix)</a> ";
 					if($curissuer["set_no_replicate"] != 1 AND isset($curissuer["domain_type"]))  { echo "<a  class='sysbutton' style='background: red;color: white;' href='./?site=".$currentFormloc."&repoff=".$curissuer["id"]."&csrf=".$csrf->get()."'>Disable Replication</a> "; }
 					elseif(isset($curissuer["domain_type"]))  { echo "<a  class='sysbutton' style='background: lime;' href='./?site=".$currentFormloc."&repon=".$curissuer["id"]."&csrf=".$csrf->get()."'>Enable Replication</a> "; }
-					if($curissuer["preferred"] == 1)  { echo "<a  class='sysbutton' style='background: red;color: white;' href='./?site=".$currentFormloc."&nopref=".$curissuer["id"]."&csrf=".$csrf->get()."'>Not Prefer Domain</a> "; }
-					elseif($curissuer["preferred"] != 1 AND $curissuer["conflict"] == 1)  { echo "<a  class='sysbutton' style='background: lime;' href='./?site=".$currentFormloc."&dopref=".$curissuer["id"]."&csrf=".$csrf->get()."'>Prefer Domain</a> "; } echo "<br clear='left'>";
+					if($curissuer["preferred"] == 1)  { echo "<a  class='sysbutton' style='background: red;color: white;' href='./?site=".$currentFormloc."&nopref=".$curissuer["id"]."&csrf=".$csrf->get()."'>Disable Prefer</a> "; }
+					elseif($curissuer["preferred"] != 1)  { echo "<a  class='sysbutton' style='background: lime;' href='./?site=".$currentFormloc."&dopref=".$curissuer["id"]."&csrf=".$csrf->get()."'>Enable Prefer</a> "; } echo "<br clear='left'>";
 					//else  { echo "<a  class='sysbutton' style='background: lime;' href='./?site=binddomains&repon=".$curissuer["id"]."'>Enable Replication</a> "; }
 					echo "</div><br clear='left'>"; 
 				
