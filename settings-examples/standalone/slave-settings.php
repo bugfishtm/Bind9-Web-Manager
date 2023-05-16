@@ -6,19 +6,24 @@
 		 |    |   \  |  / /_/  >  |  |  |\___ \|   Y  \
 		 |______  /____/\___  /|__|  |__/____  >___|  /
 				\/     /_____/               \/     \/  Bind9 Web Manager Configuration File */
+				//
+				
+	// This is a sample Configuration File for a Slave Server with bind9 installed [Only for Slave DNS Purpose]
+				
+	
 	##########################################################################################################################################
 	# Website Title and Impressum URL
 	##########################################################################################################################################			
-	define("_TITLE_", 				"YOUR_TITLE"); # A Imaginary Server Name to show at Title, can be unchanged
-	define("_IMPRESSUM_",			"YOUR_IMPRESSUM_URL"); # URL to your Impressum Website
+	define("_TITLE_", 				"NS2"); # A Imaginary Server Name to show at Title, can be unchanged
+	define("_IMPRESSUM_",			"https://impressum"); # URL to your Impressum Website
 	
 	##########################################################################################################################################
 	# MySQL Access Data
 	##########################################################################################################################################	
 	define("_SQL_HOST_", 			"127.0.0.1"); # Mysql Hostname
-	define("_SQL_USER_", 			"DBUSER"); # Mysqsl User
-	define("_SQL_PASS_", 			"DBPASS"); # MysQL Password
-	define("_SQL_DB_", 				"DBNAME"); # MySQL Database				
+	define("_SQL_USER_", 			""); # Mysqsl User
+	define("_SQL_PASS_", 			""); # MysQL Password
+	define("_SQL_DB_", 				""); # MySQL Database					
 			
 	##########################################################################################################################################
 	# Needed and fitting config for most Systems

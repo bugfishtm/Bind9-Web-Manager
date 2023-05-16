@@ -9,16 +9,16 @@
 	##########################################################################################################################################
 	# Website Title and Impressum URL
 	##########################################################################################################################################			
-	define("_TITLE_", 				"YOUR_TITLE"); # A Imaginary Server Name to show at Title, can be unchanged
-	define("_IMPRESSUM_",			"YOUR_IMPRESSUM_URL"); # URL to your Impressum Website
+	define("_TITLE_", 				"NS1"); # A Imaginary Server Name to show at Title, can be unchanged
+	define("_IMPRESSUM_",			"https://impressum"); # URL to your Impressum Website
 	
 	##########################################################################################################################################
 	# MySQL Access Data
 	##########################################################################################################################################	
 	define("_SQL_HOST_", 			"127.0.0.1"); # Mysql Hostname
-	define("_SQL_USER_", 			"DBUSER"); # Mysqsl User
-	define("_SQL_PASS_", 			"DBPASS"); # MysQL Password
-	define("_SQL_DB_", 				"DBNAME"); # MySQL Database				
+	define("_SQL_USER_", 			""); # Mysqsl User
+	define("_SQL_PASS_", 			""); # MysQL Password
+	define("_SQL_DB_", 				""); # MySQL Database			
 			
 	##########################################################################################################################################
 	# Needed and fitting config for most Systems
@@ -26,8 +26,8 @@
 	# These are the Domain Table files, where the domains and the location of the zone files will be fetched from.
 	# You can choose 2 files, this pre-entered settings should mostly be fitting your a default bind9 configuration.
 	##########################################################################################################################################		
-	define("_CRON_BIND_FILE_",  			"/etc/bind/named.conf.default-zones");
-	define("_CRON_BIND_FILE_2_",  			"/etc/bind/named.conf.local");
+	define("_CRON_BIND_FILE_2_",  			"/etc/bind/named.conf.default-zones");
+	define("_CRON_BIND_FILE_",  			"/etc/bind/named.conf.local");
 
 	##########################################################################################################################################
 	# If you use ISPConfig change _CRON_FILES_FOLDER_FETCH_ to "/etc/bind/zones/"
@@ -38,10 +38,10 @@
 	# USE IT IF YOU HAVE NO FILES WITH LOCAL DOMAIN TABLES LIKE NAMED.CONF.LOCAL BUT A FOLDER WITH ZONE FILES.
 	# You can leave this untouched if you do not need a fix to create a valid named.conf.local file...
 	##########################################################################################################################################	
-	define("_CRON_FILES_FOLDER_FETCH_RMSTARTCOUNT_",  			4); // Offset Filename off Zonefiles at Start (example cut first 5 letters of zone.domain.file) (default for ispconfig is 4)
+	define("_CRON_FILES_FOLDER_FETCH_RMSTARTCOUNT_",  			0); // Offset Filename off Zonefiles at Start (example cut first 5 letters of zone.domain.file) (default for ispconfig is 4)
 	define("_CRON_FILES_FOLDER_FETCH_RMSENDCOUNT_",  			0); // Offset Filename off Zonefiles at End  (example cut first 5 letters of zone.domain.file)
 	// If the constant below is not -false- the function for search folder is activated.
-	define("_CRON_FILES_FOLDER_FETCH_",  						false); // Folder to Search Files  (default for ispconfig is "/etc/bind/zones/")
+	define("_CRON_FILES_FOLDER_FETCH_",  						"/var/named/run-root/var"); // Folder to Search Files  (default for ispconfig is "/etc/bind/zones/")
 
 	##########################################################################################################################################
 	# If you are using Webmin/Virtualmin set this both to true, otherwhise to false!

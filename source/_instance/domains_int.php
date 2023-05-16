@@ -178,6 +178,7 @@ $run = false;
 				echo "<div style='width: 30%;float:left;'>Status</div>";
 				echo "<div style='width: 70%;float:left;'>Domain</div>";
 			echo "<br clear='left' />"; 
+			if($curissue) {
 		while ($curissuer	=	mysqli_fetch_array($curissue) ) { 
 				if( @$curissuer["domain_type"] == "user" AND $currentFormloc == "binddomains") { continue; }
 				if( @$curissuer["domain_type"] != "user" AND $currentFormloc == "userdomains") { continue; }
@@ -264,7 +265,7 @@ $run = false;
 
 
 
-		} if(!$run) { echo "Currently there are no domains...! x(";}
+			} } if(!$run) { echo "Currently there are no domains...! x(";}
 		
 	echo '</div>';		
 		

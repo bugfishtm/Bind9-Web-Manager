@@ -31,7 +31,7 @@
 	<a href="./?site=binddomains" class="sysbutton">View Master Domains</a>
 </div>
 <?php
-	$count = $mysql->select("SELECT * FROM "._TABLE_CONFLICT_." WHERE solved = 0", true);
+	$count = $mysql->select("SELECT * FROM "._TABLE_CONFLICT_." WHERE solved = '0'", true);
 	if(is_array($count)) { $count = count($count); } else { $count = 0; } 
 	
 	$count1 = $mysql->select("SELECT * FROM "._TABLE_CONFLICT_." WHERE solved <> '0'", true);

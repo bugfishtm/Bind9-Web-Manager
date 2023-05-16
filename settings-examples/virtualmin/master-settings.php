@@ -9,16 +9,16 @@
 	##########################################################################################################################################
 	# Website Title and Impressum URL
 	##########################################################################################################################################			
-	define("_TITLE_", 				"YOUR_TITLE"); # A Imaginary Server Name to show at Title, can be unchanged
-	define("_IMPRESSUM_",			"YOUR_IMPRESSUM_URL"); # URL to your Impressum Website
+	define("_TITLE_", 				"NS1"); # A Imaginary Server Name to show at Title, can be unchanged
+	define("_IMPRESSUM_",			"https://impressum"); # URL to your Impressum Website
 	
 	##########################################################################################################################################
 	# MySQL Access Data
 	##########################################################################################################################################	
 	define("_SQL_HOST_", 			"127.0.0.1"); # Mysql Hostname
-	define("_SQL_USER_", 			"DBUSER"); # Mysqsl User
-	define("_SQL_PASS_", 			"DBPASS"); # MysQL Password
-	define("_SQL_DB_", 				"DBNAME"); # MySQL Database				
+	define("_SQL_USER_", 			""); # Mysqsl User
+	define("_SQL_PASS_", 			""); # MysQL Password
+	define("_SQL_DB_", 				""); # MySQL Database			
 			
 	##########################################################################################################################################
 	# Needed and fitting config for most Systems
@@ -26,8 +26,8 @@
 	# These are the Domain Table files, where the domains and the location of the zone files will be fetched from.
 	# You can choose 2 files, this pre-entered settings should mostly be fitting your a default bind9 configuration.
 	##########################################################################################################################################		
-	define("_CRON_BIND_FILE_",  			"/etc/bind/named.conf.default-zones");
-	define("_CRON_BIND_FILE_2_",  			"/etc/bind/named.conf.local");
+	define("_CRON_BIND_FILE_2_",  			"/etc/bind/named.conf.default-zones");
+	define("_CRON_BIND_FILE_",  			"/etc/bind/named.conf.local");
 
 	##########################################################################################################################################
 	# If you use ISPConfig change _CRON_FILES_FOLDER_FETCH_ to "/etc/bind/zones/"
@@ -51,7 +51,7 @@
 	// The software will then use the _CRON_BIND_FILE_2_ too File to load domains.
 	// All domains will be written then to _CRON_BIND_FILE_
 	// If this is true, you need to include the _CRON_BIND_FILE_ in named.conf of bind! (and dnshttp.named.conf)
-	define("_CRON_BIND_FILE_REWRITE_",  	false); 
+	define("_CRON_BIND_FILE_REWRITE_",  	true); 
 
 	##########################################################################################################################################
 	# Below Settings do not needs to be changed if you are using a default debian bind9/ubuntu system! (and may others)

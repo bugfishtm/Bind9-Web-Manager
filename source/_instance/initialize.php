@@ -10,7 +10,7 @@
 	/* Variables */	
 	define('_HELP_',    "https://bugfishtm.github.io/Bind9-Web-Manager/"); 
 	define("_SLAVE_AS_MASTER_DOMAIN_",  false); // Not Configured DO NEVER CHANGE!	
-	define("_FOOTER_", '<div id="footer">DnsHTTPv3.4 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
+	define("_FOOTER_", '<div id="footer">DnsHTTPv3.5.0 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
 	define("_CRON_DEBUG_", 2);
 	define("_CRON_BIND_FILE_CONFIG_DNSHTTP_",  	_CRON_BIND_LIB_);	# Can be left unchanged	/ Path to save Configuration Files to
 	# The Initial Bind9 Configuration
@@ -289,6 +289,19 @@
 		$localIP = @getHostByName(php_uname('n'));
 		$localmasterservers .= " ".@$localIP.";";
 		logging_add("INFO: Added Local IP to Master Server IPs: "); logging_add("$localmasterservers\r\n");
+		#######################################################################################################################################
+		// List of All Server IPs
+		$allserverlist = "";$array = $mysql->select("SELECT * FROM "._TABLE_SERVER_."", true);
+		if(is_array($array)) {
+			foreach($array as $key => $value) {
+				if(filter_var(@$value["ip"], FILTER_VALIDATE_IP) !== false) { $allserverlist .= " ".@$value["ip"].";"; }
+				if(filter_var(@$value["ip6"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) { $allserverlist .= " ".@$value["ip6"].";"; }
+			}
+		}	
+		logging_add("INFO: Master Server IPs: "); logging_add("$allserverlist\r\n");
+		$localIP = @getHostByName(php_uname('n'));
+		$allserverlist .= " ".@$localIP.";";
+		logging_add("INFO: Added Local IP to Master Server IPs: "); logging_add("$allserverlist\r\n");
 		####################################################################################################################################### 
 		// Recreate DNS Config File Structure if not Exists
 		#--------------------------------------------------------------------------------------------------------------------------------------
@@ -306,7 +319,7 @@
 				 logging_add("OK: Domain Table File created: "._CRON_BIND_FILE_TABLE_."\r\n"); 
 			} else {  logging_add("ERROR: Domain Table File creation failed: "._CRON_BIND_FILE_TABLE_."\r\n");  }
 			@fclose($myfile);
-		} else {  logging_add("OK: Domain Table File does exist: "._CRON_BIND_FILE_TABLE_."\r\n");  }	
+		} else { logging_add("OK: Domain Table File does exist: "._CRON_BIND_FILE_TABLE_."\r\n"); }	
 		#--------------------------------------------------------------------------------------------------------------------------------------
 		if(!@file_exists(_CRON_BIND_FILE_CONFIG_)) {
 			$output = $file_pre_per;
@@ -328,13 +341,24 @@
 		} else {  logging_add("OK: DNSHTTP Temp File does exist: "._CRON_BIND_FILE_TEMP_."\r\n");  }	 
 		#--------------------------------------------------------------------------------------------------------------------------------------
 		if(!@file_exists(_CRON_BIND_FILE_LOAD_)) {
-			$output = $file_pre_per."include \""._CRON_BIND_FILE_CONFIG_."\";\r\ninclude \""._CRON_BIND_FILE_TABLE_."\";\r\n\r\n";
+			if(!_CRON_BIND_FILE_REWRITE_) { $output = $file_pre_per."include \""._CRON_BIND_FILE_CONFIG_."\";\r\ninclude \""._CRON_BIND_FILE_TABLE_."\";\r\n\r\n"; }
+			else { $output = $file_pre_per."include \""._CRON_BIND_FILE_CONFIG_."\";\r\n\r\n"; }
 			$myfile = @fopen(_CRON_BIND_FILE_LOAD_, "w");
 			if(@fwrite($myfile, $output)) {
 				 logging_add("OK: DNSHTTP Include File created: "._CRON_BIND_FILE_LOAD_."\r\n"); 
 			} else {  logging_add("ERROR: DNSHTTP Include File creation failed: "._CRON_BIND_FILE_LOAD_."\r\n");  }
 			@fclose($myfile);
-		} else {  logging_add("OK: DNSHTTP Include File does exist: "._CRON_BIND_FILE_LOAD_."\r\n");  }	 		
+		} else {  logging_add("OK: DNSHTTP Include File does exist: "._CRON_BIND_FILE_LOAD_."\r\n");  }	 
+		#--------------------------------------------------------------------------------------------------------------------------------------
+		if(!@file_exists(_CRON_BIND_CONFNAME_)) {
+			if(!_CRON_BIND_FILE_REWRITE_) { $output = $file_pre_per."include \""._CRON_BIND_FILE_LOAD_."\";\r\n\r\n"; }
+			else { $output = $file_pre_per."include \""._CRON_BIND_FILE_LOAD_."\";\r\ninclude \""._CRON_BIND_FILE_."\";\r\n\r\n"; }
+			$myfile = @fopen(_CRON_BIND_CONFNAME_, "w");
+			if(@fwrite($myfile, $output)) {
+				 logging_add("OK: Bind Main Config Include File created: "._CRON_BIND_CONFNAME_."\r\n"); 
+			} else {  logging_add("ERROR: Bind Main Config Include File creation failed: "._CRON_BIND_CONFNAME_."\r\n");  }
+			@fclose($myfile);
+		} else {  logging_add("OK: Bind Main Config Include File does exist: "._CRON_BIND_CONFNAME_."\r\n");  }	 
 		#--------------------------------------------------------------------------------------------------------------------------------------
 		if(!@file_exists(_CRON_BIND_LIB_)) {
 			if(@mkdir(_CRON_BIND_LIB_, _CRON_BIND_LIB_CODE_, true)) {
@@ -397,6 +421,14 @@
 		/* GET DOMAIN TABLE FROM DOMAIN TABLE FILE */		
 		if(_CRON_BIND_FILE_ != false) {	
 			logging_add("START: Reading Zone Table File.\r\n");
+			
+			// Prepare Backup
+			if(!file_exists(_CRON_BIND_FILE_TEMP_."file1_backup")) { @copy(_CRON_BIND_FILE_, _CRON_BIND_FILE_TEMP_."file1_backup"); logging_add("INFO: File Backup Created \r\n"); }
+			
+			// File to Diff
+			@unlink(_CRON_BIND_FILE_TEMP_."file1_tmp");
+			@copy(_CRON_BIND_FILE_, _CRON_BIND_FILE_TEMP_."file1_tmp");
+			
 			logging_add("INFO: File to read is '"._CRON_BIND_FILE_."' \r\n");
 			$handle = fopen(_CRON_BIND_FILE_, "r"); if ($handle) {
 				while (($line = fgets($handle)) !== false) {
@@ -461,6 +493,14 @@
 		/* GET DOMAIN TABLE FROM DOMAIN TABLE FILE */		
 		if(_CRON_BIND_FILE_2_ != false) { 
 			logging_add("START: Reading Zone Table File (2nd option).\r\n");
+			
+			// Prepare Backup
+			if(!file_exists(_CRON_BIND_FILE_TEMP_."file2_backup")) { @copy(_CRON_BIND_FILE_2_, _CRON_BIND_FILE_TEMP_."file2_backup"); logging_add("INFO: File Backup Created \r\n"); }
+
+			// File to Diff
+			@unlink(_CRON_BIND_FILE_TEMP_."file2_tmp");
+			@copy(_CRON_BIND_FILE_2_, _CRON_BIND_FILE_TEMP_."file2_tmp");
+			
 			logging_add("INFO: File to read is '"._CRON_BIND_FILE_2_."' \r\n");	
 			$handle = fopen(_CRON_BIND_FILE_2_, "r"); if ($handle) {
 				while (($line = fgets($handle)) !== false) {
@@ -756,12 +796,12 @@
 				$filenamecleared = str_replace("//", "/", $filenamecleared );	
 				$newzoneok = false;
 				if($value["okonce"]) { 
-					if(file_exists(_CRON_BIND_FILE_TEMP_)) { @unlink(_CRON_BIND_FILE_TEMP_); } 
-					@file_put_contents(_CRON_BIND_FILE_TEMP_, $value["content"]);
-					@chown(_CRON_BIND_FILE_TEMP_, _CRON_BIND_LIB_USER_);
-					@chgrp(_CRON_BIND_FILE_TEMP_, _CRON_BIND_LIB_GROUP_);
-					@chmod(_CRON_BIND_FILE_TEMP_, _CRON_BIND_LIB_CODE_);		
-					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_);
+					if(file_exists(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])))) { @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"]))); } 
+					@file_put_contents(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), $value["content"]);
+					@chown(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_USER_);
+					@chgrp(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_GROUP_);
+					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_CODE_);		
+					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));
 					if(strpos(strtolower($cout), ": loaded serial") > -1) { 
 						$newzoneok = true;
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET oldzonefallback = 0 WHERE id = '".$value["id"]."'");
@@ -772,7 +812,7 @@
 						$bind[0]["type"] = "s";	
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET zonecheck_failmessage = ? WHERE id = '".$value["id"]."'", $bind);
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET oldzonefallback = 1 WHERE id = '".$value["id"]."'");
-					}
+					} @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));
 				}
 				if($newzoneok == true) { 
 					if(file_exists($filenamecleared)) { @unlink($filenamecleared); } 
@@ -796,7 +836,7 @@
 					$isnowregister = true;				
 					$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET zonecheck = 1, okonce = 1, registered = 1 WHERE id = '".$value["id"]."'");
 					//if(!_SLAVE_AS_MASTER_DOMAIN_) {
-						$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype slave;\r\n\tmasterfile-format text;\r\n\tmasters { ".trim($relay["ip"])."; };\r\n\tallow-transfer { ".$localmasterservers." };\r\n\tfile \"".$filenamecleared."\";\r\n};\r\n";	
+						$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype slave;\r\n\tmasterfile-format text;\r\n\tmasters { ".trim($relay["ip"])."; };\r\n\tallow-transfer { ".$allserverlist." };\r\n\tfile \"".$filenamecleared."\";\r\n};\r\n";	
 					//} else {
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
@@ -824,12 +864,12 @@
 				$filenamecleared = str_replace("//", "/", $filenamecleared );				
 				$newzoneok = false;
 				if($value["okonce"]) { 
-					if(file_exists(_CRON_BIND_FILE_TEMP_)) { @unlink(_CRON_BIND_FILE_TEMP_); } 
-					@file_put_contents(_CRON_BIND_FILE_TEMP_, $value["content"]);
-					@chown(_CRON_BIND_FILE_TEMP_, _CRON_BIND_LIB_USER_);
-					@chgrp(_CRON_BIND_FILE_TEMP_, _CRON_BIND_LIB_GROUP_);
-					@chmod(_CRON_BIND_FILE_TEMP_, _CRON_BIND_LIB_CODE_);				
-					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_);		
+					if(file_exists(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])))) { @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"]))); } 
+					@file_put_contents(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), $value["content"]);
+					@chown(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_USER_);
+					@chgrp(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_GROUP_);
+					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_CODE_);				
+					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));		
 					if(strpos(strtolower($cout), ": loaded serial") > -1) { 
 						$newzoneok = true;
 						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET oldzonefallback = 0 WHERE id = '".$value["id"]."'");
@@ -840,7 +880,7 @@
 						$bind[0]["type"] = "s";	
 						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck_failmessage = ? WHERE id = '".$value["id"]."'", $bind);
 						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET oldzonefallback = 1 WHERE id = '".$value["id"]."'");
-					}
+					} @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));
 				}
 				if($newzoneok == true) { 
 					if(file_exists($filenamecleared)) { @unlink($filenamecleared); } 
@@ -868,7 +908,7 @@
 					//} else {
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
-					$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$localmasterservers." };\r\n};";
+					$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";
 				} else {
 					$isnowregister = false;		
 					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 0, okonce = 0, registered = 0 WHERE id = '".$value["id"]."'");
@@ -884,8 +924,24 @@
 		}
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		if(file_exists(_CRON_BIND_FILE_TABLE_)) { @unlink(_CRON_BIND_FILE_TABLE_); }
+		@file_put_contents(_CRON_BIND_FILE_TABLE_, $conf_buildstring);	
 		logging_add("OK: Trying to write Zone Table File: "._CRON_BIND_FILE_TABLE_."\r\n");
-		@file_put_contents(_CRON_BIND_FILE_TABLE_, $conf_buildstring);		
+		if(_CRON_BIND_FILE_REWRITE_ AND _CRON_BIND_FILE_) { 
+			logging_add("INFO: _CRON_BIND_FILE_ is set and _CRON_BIND_FILE_REWRITE_ is set!\r\n");
+			logging_add("INFO: Now rewriting the _CRON_BIND_FILE_ if nothing has changed in the meantime.!\r\n");
+			if(file_exists(_CRON_BIND_FILE_)) { 
+				@unlink(_CRON_BIND_FILE_TEMP_."file1_tmp");
+				@copy(_CRON_BIND_FILE_, _CRON_BIND_FILE_TEMP_."file1_tmp");
+				//check if file same
+				if(md5_file(_CRON_BIND_FILE_TEMP_."file1_tmp") === md5_file(_CRON_BIND_FILE_)) {
+					@unlink(_CRON_BIND_FILE_);
+					@file_put_contents(_CRON_BIND_FILE_, $conf_buildstring);	
+					logging_add("OK: Trying to write Zone Table File: "._CRON_BIND_FILE_."\r\n");
+				} else {
+					logging_add("ERROR: File has been changed, waiting for next cron to reload zone table: "._CRON_BIND_FILE_."\r\n");
+				}
+			}
+		}
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		logging_add("........................................................................................................................................\r\n");
 		##################################################################################################################
@@ -914,6 +970,9 @@
 		logging_add("OK: chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_FILE_LOAD_.";\r\n"); 
 		@shell_exec("chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_FILE_LOAD_.";");		
 
+		logging_add("OK: chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_CONFNAME_.";\r\n"); 
+		@shell_exec("chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_CONFNAME_.";");	
+		
 		// Chmod 
 		if(file_exists(_CRON_BIND_LIB_)) {  
 			logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_.";\r\n"); 
@@ -936,7 +995,10 @@
 
 		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_LOAD_.";\r\n"); 
 		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_LOAD_.";");
-			
+
+		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_CONFNAME_.";\r\n"); 
+		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_CONFNAME_.";");
+		
 		// Restart Named Service
 		logging_add("OK: systemctl restart "._BIND_SERVICE_NAME_.";\r\n"); 
 		@shell_exec("systemctl restart "._BIND_SERVICE_NAME_."; ");

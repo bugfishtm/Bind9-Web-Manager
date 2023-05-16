@@ -15,7 +15,7 @@
 		
 	// Logout on Request
 	if($user->loggedIn) {			
-		switch($_GET["site"]) {
+		switch(@$_GET["site"]) {
 			case "logout": $user->logout(); x_eventBoxPrep("You have been logged out!", "ok", _COOKIES_); Header("Location: ./"); exit(); break;
 		};
 	}?>
@@ -53,7 +53,7 @@
 <?php }
 	# Load Content
 	if($user->loggedIn) {			
-		switch($_GET["site"]) {
+		switch(@$_GET["site"]) {
 			case "logout": $user->logout(); x_eventBoxPrep("You have been logged out!", "ok", _COOKIES_); Header("Location: ./"); exit(); break;
 			case "apidomains": require_once("./_instance/site_apidomains.php"); break;
 			case "binddomains": require_once("./_instance/site_binddomains.php"); break;
