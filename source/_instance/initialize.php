@@ -10,7 +10,7 @@
 	/* Variables */	
 	define('_HELP_',    "https://bugfishtm.github.io/Bind9-Web-Manager/"); 
 	define("_SLAVE_AS_MASTER_DOMAIN_",  false); // Not Configured DO NEVER CHANGE!	
-	define("_FOOTER_", '<div id="footer">DnsHTTPv3.5.0 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
+	define("_FOOTER_", '<div id="footer">DnsHTTPv3.5.1 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
 	define("_CRON_DEBUG_", 2);
 	define("_CRON_BIND_FILE_CONFIG_DNSHTTP_",  	_CRON_BIND_LIB_);	# Can be left unchanged	/ Path to save Configuration Files to
 	# The Initial Bind9 Configuration
@@ -602,6 +602,7 @@
 					$bind[3]["type"] = "s";
 					$bind[3]["value"] = $content;					
 					$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_."(domain, zone_path, domain_type, last_update, content, preferred) VALUES(?, ?, ?, CURRENT_TIMESTAMP(), ?, 1);", $bind);unset($bind);
+					$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0  WHERE LOWER(domain) = '".trim(strtolower($value["domain"]))."'");
 				}
 			}	
 		}
@@ -692,12 +693,14 @@
 				$apipath	=	dnshttp_server_get($mysql, $value["fk_server"])["api_path"]."/_api/content.php";
 				$returncurl =   dnshttp_api_getcontent($mysql, $apipath, dnshttp_server_get($mysql, $value["fk_server"])["api_token"], $value["domain"]);
 				$domain = $value["domain"];
-				if($returncurl) {
+				if($returncurl AND $returncurl != "error-domain-no-exist") { 
 					//echo $returncurl;
 					$bind[0]["type"] = "s";
 					$bind[0]["value"] = $returncurl;
 					$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET content = ?, modification = CURRENT_TIMESTAMP() WHERE id = '".$value["id"]."';", $bind);
 					logging_add("OK: Fetched content for: $domain\r\n");	
+				} elseif($returncurl == "error-domain-no-exist") {
+					$mysql->query("DELETE FROM "._TABLE_DOMAIN_API_." WHERE id = ".$value["id"].";");
 				} else { logging_add("ERROR: Can not get Content for $domain : Invalid Return Data!\r\n"); }
 			} 
 		} logging_add("FINISHED: LAST OPERATION\r\n");
