@@ -163,7 +163,7 @@ if(!$permsobj->hasPerm($user->user_id, "domainmgr") AND $user->user_rank != 0) {
 	endof33ex:
 
 		echo '<div class="content_box">';
-	$ar = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE section = 'replication' ORDER BY id DESC", false);
+	$ar = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE section = 'replication' ORDER BY id DESC LIMIT 1", false);
 	if($currentFormloc == "apidomains") {
 		echo "<b>Slave Domains</b><br />Here you can see all domains, which have been replicated out of remote servers to this local server. The information you see here updates every time the cronjob sync.php has been executed. You can get some help about the status icons and more <a href='#showmethepicture'>here</a>...<br />";
 		echo 'The current data you see has been last updated: <font color="lime">'.@$ar["creation"].'</font>';

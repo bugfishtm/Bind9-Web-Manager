@@ -7,8 +7,6 @@
 		 |______  /____/\___  /|__|  |__/____  >___|  /
 				\/     /_____/               \/     \/  File with Replication Area Selection */
 	if($permsobj->hasPerm($user->user_id, "serversmgr") OR $user->user_rank == 0) {
-	$count = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE section='replication'", true);
-	if(is_array($count)) { $count = count($count); } else { $count = 0; } 
 ?>	
 
 <div class="content_box" >
@@ -16,9 +14,7 @@
 	<div style="text-align: left;">
 	Here you can see the status of replications and the logfile for API Requests!
 	If you need more help about the replication visit the "<a href="<?php echo _HELP_; ?>"  rel="noopener" target="_blank">Help</a>" section!<br />
-	</div>
-
-	<font color="lightgrey"><?php echo $count; ?> Replications so far...</font><br />
+	</div><br />
 	<a href="./?site=logs" class="sysbutton">View Replication Protocols</a> <a href="./?site=logsapi" class="sysbutton">View API Logfile</a>
 </div>
 <?php

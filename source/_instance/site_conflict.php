@@ -23,7 +23,7 @@
 	
 	if(!$permsobj->hasPerm($user->user_id, "domainmgr") AND $user->user_rank != 0) {  echo "<div class='content_box'>No Permission!</div>"; } else {
 		
-		$ar = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE section = 'replication' ORDER BY id DESC", false);
+		$ar = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE section = 'replication' ORDER BY id DESC LIMIT 1", false);
 		
 	echo '<div class="content_box">Here you can see and solve domain conflicts. Unsolved conflicts will be marked yellow! See more at the <a href="'._HELP_.'" target="_blank" rel="noopener">Documentation</a>. You can solve conflicts in the "<a href="./?site=domains">Domains</a>" Section at the Master or Slave Domain overview, you can choose a preferred domain there...<br /><b>Keep in mind, this site only gets updated, if the cronjob sync.php is executed! The current data you see has been last updated: <font color="lime">'.@$ar["creation"].'</font></b></div><div class="content_box"> ';
 
