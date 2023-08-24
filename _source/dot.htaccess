@@ -1,0 +1,38 @@
+##########################################
+## Bugfish DNSHTTP HTACCESS File
+###########################################
+## Enable Rewriting
+###########################################
+	RewriteEngine On
+
+###########################################
+## HTTP -> HTTPS Rewrite
+###########################################
+#  Uncomment Lines below to disables
+#  HTTP to HTTPS Forwarding
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#  Uncomment Lines below to disables
+#  www to non-www forwarding
+#	RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+#	RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+###########################################
+## Permissions
+###########################################
+	RewriteRule ^(_instance|_cronjob|_temp) - [F,L]
+	<Files "settings.php">  
+	  Order Allow,Deny
+	  Deny from all
+	</Files>
+	
+	<Files "settings.sample.php">  
+	  Order Allow,Deny
+	  Deny from all
+	</Files>
+	
+ErrorDocument 400 /_error/404.html
+ErrorDocument 401 /_error/401.html
+ErrorDocument 403 /_error/403.html
+ErrorDocument 404 /_error/404.html
+ErrorDocument 500 /_error/500.html

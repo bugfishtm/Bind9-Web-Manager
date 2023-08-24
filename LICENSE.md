@@ -1,4 +1,7 @@
-MIT License
+# MIT License  
+Please mind Licenses of Frameworks in \_framework.  
+Licenses which are not MIT, are not used in this project, but may  
+be existant in functions library!
 
 Copyright (c) 2021 Jan-Maurice Dahlmanns
 

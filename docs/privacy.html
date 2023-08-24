@@ -10,29 +10,7 @@
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<meta name="robots" content="index, follow">
 	<meta property="og:image" content="./meta.jpg" />
-	<style>
-		html { font-size: 62.5%; background: url(bg.jpg); background-size:100%;}
-		body { font-size: 1.5em; line-height: 1.6; font-weight: 400;font-family: "Roboto", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif; color: #FFFFFF; max-width:800px;margin:auto; background: #121212;}
-		header {  background: #242424; padding: 15px;   color:#FFFFFF; }
-
-		ul.main-menu { margin: 0;padding: 0;display: flex;flex-wrap: wrap;justify-content: left;list-style: none;}
-		ul.main-menu li a {margin-right:20px;font-size:2.0rem; border-bottom: solid transparent 3px; color:#cfd2da;}
-		ul.main-menu li a:hover {color:#FFFFFF;}
-		ul.main-menu li a.active { color:#FFFFFF; border-bottom-color:#ff5707;}
-
-		a { font-weight: normal; text-decoration: none;  color:#ff5707;}
-		a:hover {color: white !important;}
-		a:focus {outline: thin dotted;}
-
-		h1 {  margin-top: 0;margin-bottom: 2rem;font-weight: 300;text-rendering: optimizeLegibility;line-height: 1;font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; color:#ff5707; }
-		h2 { font-size: 18px; padding-bottom: 0px; color:#ffffff; }
-
-		.inner { padding: 15px; }
-		#headertitle { text-align: center; width: 100; font-weight: bold; }
-
-		iframe{ width: 100%; margin-bottom: -5px; }
-		footer{ background: #242424; bottom: 0px; width: 100%; max-width: 800px; padding: 15px;box-sizing: border-box; text-align: center; color:#FFFFFF;}
-	</style>
+		<link rel="stylesheet" href="./stylesheet.css">
   </head>
   <body>
 <img src="logo.png" style="width: 100%; margin-bottom: -7px;">
@@ -43,12 +21,10 @@
       <ul class="main-menu">
         <li><a href="./index.html">Back</a></li>
         <li><a href="./impressum.html">Impressum</a></li>
-        <li><a href="./privacy.html" style="color: white">Privacy</a></li>
+        <li><a href="./privacy.html" class="navon">Privacy</a></li>
       </ul>                 
     </header>
-    <a href="#header"><div style="z-index:1000; !important; background: black; position: fixed; top: 5px; right: 5px; width: 110px; height: 30px;font-size: 16px;padding: 5px;border-radius: 5px;cursor: pointer;">
-<b>^ Back to Top</b>
-</div></a>    
+    <a href="#header"><div class="gobacktotop"><b>^ Back to Top</b></div></a>     
     <div>
 <div class="xfp_content_box_text" style="padding: 15px;">
 <h2>Allgemeine Hinweise</h2> <p>Die folgenden Hinweise geben einen einfachen &Uuml;berblick dar&uuml;ber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie pers&ouml;nlich identifiziert werden k&ouml;nnen. Ausf&uuml;hrliche Informationen zum Thema Datenschutz entnehmen Sie unserer unter diesem Text aufgef&uuml;hrten Datenschutzerkl&auml;rung.</p>
@@ -89,6 +65,5 @@ E-Mail: requests@bugfish.eu</p>
 <p>Quelle: <a rel="noopener noreferrer" href="https://www.e-recht24.de">https://www.e-recht24.de</a></p></div>
 			  
     </div>
-    <footer>  Jan-Maurice Dahlmanns [<a href="https://www.bugfish.eu/aboutme" target="_blank">Bugfish</a>] - Kattowitzerstraße 2b - 41065 Mönchengladbach - <a href="mailto:contact@bugfish.eu">contact@bugfish.eu</a> </footer>
   </body>
 </html>
