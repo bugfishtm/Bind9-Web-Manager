@@ -1,5 +1,6 @@
-
-![DNS](https://img.shields.io/badge/DNS-Software) ![Bugfish](https://img.shields.io/badge/Bugfish-Software) ![Server](https://img.shields.io/badge/Server-Software)
+![Bugfish](https://img.shields.io/badge/Bugfish-Software-orange)
+![Status](https://img.shields.io/badge/Status-Finished-green)
+![License](https://img.shields.io/badge/License-MIT-black)
 # Bind9 Web Manager [DNSHTTP]
 
 For Documentation see the file index.html in the docs folder!  
