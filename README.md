@@ -16,7 +16,7 @@ My General Github Project Page is here:
 https://bugfishtm.github.io
 
 ## Example Image
-![plot](./_images/replication.png)
+![plot](./_images/domains.png)
 
 ## Example Settings File
 Example settings File for Installation can be found in _settings folder!

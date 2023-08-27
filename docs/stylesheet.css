@@ -83,7 +83,7 @@
 		.navon {
 			color: #ff0c02 !important;
 		}
-		ul.main-menu { margin: 0;padding: 0;display: flex;flex-wrap: wrap;justify-content: left;list-style: none;}
+		ul.main-menu { width: 100% !important; margin: 0;padding: 0;display: flex;flex-wrap: wrap;justify-content: left;list-style: none;}
 		ul.main-menu li a {margin-right:20px;font-size:2.0rem; border-bottom: solid transparent 3px; color:#cfd2da;}
 		ul.main-menu li a:hover {color:#FFFFFF;}
 		ul.main-menu li a.active { color:#FFFFFF; border-bottom-color:#ff5707;}
@@ -137,4 +137,8 @@
 		.inner_section tr, .inner_section td { border-top: 2px solid #242424; text-align: left; }
 		.inner_section tr:hover { background:#343434; color: white;  }		
 		
-		
+		#header{
+			margin: auto;
+			max-width: 1300px;
+			width: 100% !important;
+		}
