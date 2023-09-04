@@ -63,6 +63,11 @@
 				<th>Description</th>
 			</tr>
 				<tr>
+					<td>05.09.2023</td>
+					<td>3.7</b></td>
+					<td>Addded notify.php Cronjob for Notification Per Mail with Newest Domain Change Informations! (Readable Easy)</td>
+				</tr>
+				<tr>
 					<td>22.08.2023</td>
 					<td>3.6</b></td>
 					<td>Initial Commit</td>
@@ -250,6 +255,11 @@ As described in the installation steps, you changed file named.conf. You shall h
 			<td>PATH_TO_WEBROOT/_cronjon/daily.php &gt;/dev/null 2&gt;&1;</td>
 			<td>daily</td>
 			<td>Resets Blacklisted IPs for Web Interface and API Requests (Optional but Recommended)</td>
+		</tr>
+		<tr>
+			<td>PATH_TO_WEBROOT/_cronjon/notify.php &gt;/dev/null 2&gt;&1;</td>
+			<td>daily</td>
+			<td>Cronjob that returns in text format actual replication news which may are important (you could send this to yourself per mail for example) (Optional)</td>
 		</tr>
 		<tr>
 			<td>PATH_TO_WEBROOT/_cronjon/sync.php &gt;/dev/null 2&gt;&1;</td>

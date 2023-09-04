@@ -10,7 +10,7 @@
 	/* Variables */	
 	define('_HELP_',    "https://bugfishtm.github.io/Bind9-Web-Manager/"); 
 	define("_SLAVE_AS_MASTER_DOMAIN_",  false); // Not Configured DO NEVER CHANGE!	
-	define("_FOOTER_", '<div id="footer">DnsHTTPv3.6 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
+	define("_FOOTER_", '<div id="footer">DnsHTTPv3.7 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
 	define("_CRON_DEBUG_", 2);
 	define("_CRON_BIND_FILE_CONFIG_DNSHTTP_",  	_CRON_BIND_LIB_);	# Can be left unchanged	/ Path to save Configuration Files to
 	# The Initial Bind9 Configuration
@@ -39,8 +39,9 @@
 	define('_TABLE_PERM_',			_TABLE_PREFIX_."perms");
 	define('_TABLE_CONFLICT_',		_TABLE_PREFIX_."conflict");
 	define('_TABLE_LOG_',			_TABLE_PREFIX_."log");	
+	define('_TABLE_NOTIFY_',		_TABLE_PREFIX_."notify");	
 	define('_TABLE_LOG_MYSQL_',		_TABLE_PREFIX_."mysql_log");		
-	
+		
 	/* Rename dot.htaccess to .htaccess if Main Path is in Website Folder */		
 	if(@file_exists(_MAIN_PATH_."/dot.htaccess") AND !file_exists(_MAIN_PATH_."/.htaccess")) { @unlink(_MAIN_PATH_."/.htaccess"); @rename(_MAIN_PATH_."/dot.htaccess", _MAIN_PATH_."/.htaccess"); }	
 	
@@ -238,6 +239,8 @@
 		  $log_output = "";
 		  
 	function full_cron($mysql, $xx8734iuasd = false) {
+		$log_rm	 =	new x_class_log($mysql, _TABLE_NOTIFY_, "removed");
+		$log_add =	new x_class_log($mysql, _TABLE_NOTIFY_, "added");
 		global $log_output;
 		define("_SAD73UASD_", $xx8734iuasd);
 		#######################################################################################################################################
@@ -482,6 +485,7 @@
 						if($deleteable) {
 							logging_add("OK: Removed Domain: ".$valuex["domain"]."\r\n");			 
 							$mysql->query("DELETE FROM "._TABLE_DOMAIN_BIND_." WHERE id = '".$valuex["id"]."' AND domain_type = 'file'"); 
+							$log_rm->info($valuex["domain"]);
 						}
 					} 
 				} 
@@ -554,6 +558,7 @@
 						if($deleteable) {
 							logging_add("OK: Removed Domain: ".$valuex["domain"]."\r\n");			 
 							$mysql->query("DELETE FROM "._TABLE_DOMAIN_BIND_." WHERE id = '".$valuex["id"]."' AND domain_type = 'file2'"); 
+							$log_rm->info($valuex["domain"]);
 						}
 					} 
 				} 		
@@ -603,6 +608,7 @@
 					$bind[3]["value"] = $content;					
 					$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_."(domain, zone_path, domain_type, last_update, content, preferred) VALUES(?, ?, ?, CURRENT_TIMESTAMP(), ?, 1);", $bind);unset($bind);
 					$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0  WHERE LOWER(domain) = '".trim(strtolower($value["domain"]))."'");
+					$log_add->info($value["domain"]);
 				}
 			}	
 		}
@@ -637,6 +643,7 @@
 							logging_add("OK: Still Existing Slave Domain: ".$y."\r\n");
 						} else {						
 							$mysql->query("INSERT INTO "._TABLE_DOMAIN_API_."(domain, fk_server) VALUES(?, '".$value["id"]."');", $bind);	
+							$log_add->info(strtolower(trim($y)));
 							logging_add("OK: Inserted Slave Domain: ".$y."\r\n");
 						}
 					}
@@ -653,6 +660,7 @@
 							if($deleteable) { 
 								logging_add("OK: Removed Expired Slave Domain: $y\r\n");					
 								$mysql->query("DELETE FROM "._TABLE_DOMAIN_API_." WHERE id = '".$valuex["id"]."' WHERE fk_server = '".$value["id"]."'");
+								$log_rm->info($valuex["domain"]);
 							}
 						}
 					}
@@ -680,6 +688,7 @@
 				} else {
 					logging_add("OK: Unrelated Domain Deleted: ".$value["domain"]." from server-id: ".$value["fk_server"]."\r\n");
 					$mysql->query("DELETE FROM "._TABLE_DOMAIN_API_." WHERE id = '".$value["id"]."';");
+					$log_rm->info($value["domain"]);
 				}
 			} 
 		} 
@@ -703,6 +712,7 @@
 					logging_add("OK: Fetched content for: $domain\r\n");	
 				} elseif($returncurl == "error-domain-no-exist") {
 					$mysql->query("DELETE FROM "._TABLE_DOMAIN_API_." WHERE id = ".$value["id"].";");
+					$log_rm->info($value["domain"]);
 				} else { logging_add("ERROR: Can not get Content for $domain : Invalid Return Data!\r\n"); }
 			} 
 		} logging_add("FINISHED: LAST OPERATION\r\n");
