@@ -1,10 +1,24 @@
-<?php
-	/*	__________ ____ ___  ___________________.___  _________ ___ ___  
-		\______   \    |   \/  _____/\_   _____/|   |/   _____//   |   \ 
-		 |    |  _/    |   /   \  ___ |    __)  |   |\_____  \/    ~    \
-		 |    |   \    |  /\    \_\  \|     \   |   |/        \    Y    /
-		 |______  /______/  \______  /\___  /   |___/_______  /\___|_  / 
-				\/                 \/     \/                \/       \/  Variables Control Class */
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish Framework Codebase // MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 	class x_class_var {
 		// Class Variables
 		private $variable_msqlcon   = false; 
@@ -164,52 +178,79 @@
 			return false;
 		}		
 
+		// Form new CSRF
+		public function form_start($precookie = "") {
+			$_SESSION[$precookie."x_class_var"] = mt_rand(10000000, 90000000);
+			if(!is_numeric(@$_SESSION[$precookie."x_class_var_csrf"])) { $_SESSION[$precookie."x_class_var_csrf"] = mt_rand(10000000, 90000000); }
+		}
+		public function form_end($precookie = "") {
+			$_SESSION[$precookie."x_class_var_csrf"] = $_SESSION[$precookie."x_class_var"];
+		}
+		
+		
 		// Setup Int
 		public function form($varname, $type = "int", $selectarray = array(), $precookie = "", $button_class="btn btn-warning waves-effect waves-light", $itemclass = "form-control", $editbuttonname = "Edit") {	
 			$outputform = 0;
 			if(!$this->exists($varname)) { return "error-var-not-found";}
-			if(!isset($_SESSION[$precookie."x_class_var"])) {$_SESSION[$precookie."x_class_var"] = mt_rand(1000, 999999); }
+			if(!isset($_SESSION[$precookie."x_class_var"])) {$_SESSION[$precookie."x_class_var"] = mt_rand(10000000, 90000000); }
 			$tmp_var = $this->get_full($varname);
 			$varnamenew = $precookie."x_class_var_submit_".$tmp_var[$this->db_r_c_id];
 			$varnamenews = $precookie."x_class_var_submit_val".$tmp_var[$this->db_r_c_id];
 			if(isset($_POST[$varnamenew])) {
-				if($_POST[$precookie."x_class_var_csrf"] == $_SESSION[$precookie."x_class_var"]) {
+				if($_POST[$precookie."x_class_var_csrf"] == $_SESSION[$precookie."x_class_var_csrf"]) {
 					$finalvalue = false;
 					switch($type) {
 						case "int": $finalvalue = @$_POST[$varnamenews]; break;	
 						case "text": $finalvalue = @$_POST[$varnamenews]; break;	
 						case "string": $finalvalue = @$_POST[$varnamenews]; break;	
 						case "select": $finalvalue = @$_POST[$varnamenews]; break;		
-						case "bool": if(@$_POST[$varnamenews]) {$finalvalue =1;} else {$finalvalue =0;}  break;		
+						//case "bool": if(@$_POST[$varnamenews]) {$finalvalue =1;} else {$finalvalue =0;}  break;		
 					} 		
-					if($this->set($varname, $finalvalue, false, true, true)) {
-						$text = "<b><font color='lime'>Changed successfully!</font></b>";
-					} else {$text = "<b><font color='red'>Could not be changed!</font></b>";}	
-				} else { $text = "<b><font color='red'>CSRF Error Try Again!</font></b>"; }
+					if(@$_POST[$varnamenews] != $tmp_var[$this->db_r_c_value]) {
+						if($this->set($varname, $finalvalue, false, true, true)) {
+							$text = "<div class='x_class_var_change_ok'>Changed successfully!</div>";
+						} else {$text = "<div class='x_class_var_change_fail'>Could not be changed!</div>";}	
+					} else {$text = "<div class='x_class_var_change_ok'>Changed successfully!</div>";}	
+				} else { $text = "<div class='x_class_var_change_fail'>CSRF Error Try Again!</div>"; }
 			} $current = $this->get_full($varname);  ?>
 			<section id="<?php echo $precookie; ?>x_class_var_anchor_<?php echo $current[$this->db_r_c_id]; ?>"></section><br />
 			<div class="x_class_var" >
 				<form method="post" action="#<?php echo $precookie; ?>x_class_var_anchor_<?php echo $current[$this->db_r_c_id]; ?>">
-					<?php if(is_string($current[$this->db_r_c_title])) { echo "<b>".$current[$this->db_r_c_title]."</b>"; echo "<br />"; } ?>
-					<?php if(is_string($current[$this->db_r_c_descr])) { echo $current[$this->db_r_c_descr]; echo "<br />"; } ?>
-					<?php if(is_string(@$text) AND strlen(@$text) > 5) { echo @$text; echo "<br />"; } ?>
+					<?php if(is_string($current[$this->db_r_c_title])) { echo "<div class='x_class_var_setup_title'>".$current[$this->db_r_c_title].""; echo "</div>"; } ?>
+					<?php if(is_string($current[$this->db_r_c_descr])) { echo "<div class='x_class_var_setup_descr'>".$current[$this->db_r_c_descr]; echo "</div>"; } ?>
+					<?php if(is_string(@$text) AND strlen(@$text) > 5) { echo @$text; echo ""; } ?>
 						<!-- Int -->
 						<?php if($type == "int") { ?> <input class="<?php echo $itemclass; ?>"  type="number" value="<?php if(is_array($current)) { echo @htmlentities($current[$this->db_r_c_value]); } ?>" name="<?php echo $varnamenews; ?>"><br /><?php } ?>				
 						<!-- String -->
 						<?php if($type == "string") { ?> <input class="<?php echo $itemclass; ?>"  type="text" value="<?php if(is_array($current)) { echo @htmlentities($current[$this->db_r_c_value]); } ?>" name="<?php echo $varnamenews; ?>"><br /><?php } ?>					
 						<!-- Text -->
-						<?php if($type == "text") { ?> <textarea class="<?php echo $itemclass; ?>"  name="<?php echo $varnamenews; ?>"><?php if(is_array($current)) { echo $current[$this->db_r_c_value]; } ?></textarea><br /><?php } ?>
+						<?php if($type == "text") { ?> <textarea class="<?php echo $itemclass; ?>"  name="<?php echo $varnamenews; ?>"><?php if(is_array($current)) { echo @htmlspecialchars($current[$this->db_r_c_value]); } ?></textarea><br /><?php } ?>
 						<!-- Bool -->
-						<?php if($type == "bool" AND is_array($current) AND $current[$this->db_r_c_value] == 1) { $xxx = "checked"; } else { $xxx = ""; } ?>	
-						<?php if($type == "bool") { ?>Configure: <input class="<?php echo $itemclass; ?>" type="checkbox" name="<?php echo $varnamenews; ?>" <?php echo $xxx; ?>><?php } ?>		
+						<?php if(false AND is_array($current) AND $current[$this->db_r_c_value] == 1) { $xxx = "checked"; } else { $xxx = ""; } ?>	
+						<?php if(false) { ?>Configure: <input class="<?php echo $itemclass; ?>" type="checkbox" name="<?php echo $varnamenews; ?>" <?php echo $xxx; ?>><?php } ?>		
 						<!-- Select -->
 						<?php if($type == "select") { ?>
 							<select class="<?php echo $itemclass; ?>"  name="<?php echo $varnamenews; ?>">
-							<option value="<?php echo htmlentities($current[$this->db_r_c_value]); ?>">No Change: <?php echo @htmlentities($current[$this->db_r_c_value]); ?></option>
-								<?php
-									foreach($selectarray AS $key => $value) {
-										echo '<option value="'.$value[1].'">'.$value[0]."</option>";
+							<option value="<?php echo htmlentities($current[$this->db_r_c_value]); ?>"><?php 
+								$nochange = @htmlentities($current[$this->db_r_c_value]);
+								if(is_array($selectarray)) {
+									foreach($selectarray AS $kk => $vv) {
+										if(is_array($vv)) {
+											if($vv[1] == $current[$this->db_r_c_value]) {
+												$nochange = @htmlentities($vv[0]);
+											}
+										}
 									}
+								}
+								echo $nochange; 
+							
+							?></option>
+								<?php
+									 foreach($selectarray AS $key => $value) { if(is_array($value)) {
+										echo '<option value="'.$value[1].'">'.$value[0]."</option>";
+									} else {
+											echo '<option value="'.$value.'">'.$value."</option>";	
+									} }
 								?>
 							</select><br />
 						<?php } ?>

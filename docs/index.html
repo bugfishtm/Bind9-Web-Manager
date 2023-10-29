@@ -1,83 +1,84 @@
-<!doctype html>
-<html>
-  <head>
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <!-- META RELATED -->
     <meta charset="utf-8">
-    <title>Bind9 Web Manager (DNSHTTP) - Bugfish Documentation</title> <!------------------------------------>
-    <meta name="description" content="This is the Bind9 Web Manager Documentation made by Bugfish (Jan-Maurice Dahlmanns). It is a opensource, fully operational DNS Panel. The main focus of this panel is bind9 dns replication over http. Feel free to use the software for any of your purposes and do not hesitate to contact us if you have questions. We wish you the best..."> <!------------------------------------>
-    <meta name="author" content="Bugfish">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-    <link href="style.css" rel="stylesheet" type="text/css" />
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
-	<link rel="canonical" href="https://bugfishtm.github.io/Bind9-Web-Manager/index.html" />
-	<link rel="stylesheet" href="./stylesheet.css">
-	 <script src="./jquery.js"></script> 
-	 <script src="./datatable.js"></script> 
-	 <script>
-		function internal_show(newshowvar, thiselement) {
-			$(".internal_show").hide();
-			$(".test").hide();
-			$("#"+newshowvar).show();
-			$(".navitts").css('color', '');
-			thiselement.css('color', '#ff0c02');
-		}
-		
-		
-		$( document ).ready(function() {
-			$(".internal_show").hide();
-			$("#show_info").show();
-			$(".startactivenav").css('color', '#ff0c02');
-		});		
-	 </script>
-  </head>
-  <body>
-<img src="logo.png" style="width: 100%; margin-bottom: -7px;">
-    <header id="header">
-	  
-      <h1>Bind9 Web Manager (DNSHTTP)</h1>Information and Documentation <!------------------------------------>
-       <ul class="main-menu">
-        <li><a href="https://bugfishtm.github.io/index.html" >Back</a></li>
-        <li><a href="#" class="navon">DNSHTTP</a></li>
-        <li><a href="https://github.com/bugfishtm/Bind9-Web-Manager" target="_blank">Github</a></li>
-        <li><a target="_blank" href="https://bugfish.eu">Bugfish</a></li>
-        <li><a href="./impressum.html">Impressum</a></li>
-        <li><a href="./privacy.html">Privacy</a></li>
-      </ul><hr>     
-      <ul class="main-menu submm">
-        <li><a href="#" class="startactivenav navitts" onclick="internal_show('show_info', $(this))">Informations</a></li>
-        <li><a href="#" class="navitts" onclick="internal_show('show_install', $(this))">Installation</a> </li>
-        <li><a href="#" class="navitts" onclick="internal_show('show_f', $(this))">Functionality</a> </li>
-        <li><a href="#" class="navitts" onclick="internal_show('show_ccc', $(this))">Changelog</a> </li>
-        <li><a href="#" class="navitts" onclick="internal_show('show_license', $(this))">License</a></li> 
-      </ul>                 
-    </header>
-    <a href="#header"><div class="gobacktotop"><b>^ Back to Top</b></div></a>    
-            <div class="inner" style="text-align: left;">
-<div class="internal_show" id="show_ccc">
- <div class="inner inner_section">
-<h2>Changelog</h2>
-			  
-	    <table>
-			<tr>
-				<th>Date</th>
-				<th>Version</th>
-				<th>Description</th>
-			</tr>
-				<tr>
-					<td>05.09.2023</td>
-					<td>3.7</b></td>
-					<td>Addded notify.php Cronjob for Notification Per Mail with Newest Domain Change Informations! (Readable Easy)</td>
-				</tr>
-				<tr>
-					<td>22.08.2023</td>
-					<td>3.6</b></td>
-					<td>Initial Commit</td>
-				</tr>
-		</table>
-</div>
-</div>
-<div class="internal_show" id="show_info">
-<h2 id="generalinfo">General Informations</h2>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+	<meta property="og:image" content="https://bugfishtm.github.io/assets/meta.png" />
+	<meta name="subject" content="documentation">
+	<meta name="copyright" content="bugfish">
+	<meta name='language' content='en'>
+	<meta name='robots' content='index,follow'>
+	<meta name='author' content='bugfish, ynvnzmlzaa@gmail.com'>
+	<!-- LINK RELATED -->
+	<script defer src="assets/fontawesome/js/all.min.js"></script>    
+	<link rel="stylesheet" href="assets/css/atom-one-dark.min.css">
+	<link rel="stylesheet" href="assets/plugins/simplelightbox/simple-lightbox.min.css">
+	<link rel="icon" type="image/x-icon" href="assets/favicon.ico">	
+	<link id="theme-style" rel="stylesheet" href="assets/css/stylesheet.css">
+    <script src="assets/js/jq.3.6.min.js"></script>	
+    <script src="assets/js/jquery.highlight.js"></script>
+    <script src="assets/js/jquery.scrollto.js"></script>
+    <script src="assets/js/jquery.finder.js"></script>
+	<!-- Descriptions -->
+    <title>Bind9 Web Manager [DNSHTTP] - BugfishDocs</title>
+	<meta property="og:title" content="Bind9 Web Manager [DNSHTTP] - BugfishDocs"/>
+	<meta name="description" content="This is the Bind9 Web Manager Documentation made by Bugfish (Jan-Maurice Dahlmanns). It is a opensource, fully operational DNS Panel. The main focus of this panel is bind9 dns replication over http. Feel free to use the software for any of your purposes and do not hesitate to contact us if you have questions. We wish you the best...">
+</head> 
+<body class="docs-page" data-finder-wrapper>    
+    <header class="header fixed-top">	    
+        <div class="branding docs-branding">
+            <div class="container-fluid position-relative py-2">
+                <div class="docs-logo-wrapper">
+					<button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
+	                    <span></span>
+	                    <span></span>
+	                    <span></span>
+	                </button>
+	                <div class="site-logo"><a class="navbar-brand" href="https://bugfishtm.github.io"><img class="logo-icon me-2" src="assets/logo.png" alt="logo" width="25"><span class="logo-text">Bugfish<span class="text-alt">Docs</span></span></a></div>    
+                </div><!--//docs-logo-wrapper-->
+	            <div class="docs-top-utilities d-flex justify-content-end align-items-center">
+	            </div><!--//docs-top-utilities-->
+            </div><!--//container-->
+        </div><!--//branding-->
+    </header><!--//header-->
+    <div class="docs-wrapper" >
+	    <div id="docs-sidebar" class="docs-sidebar">
+		    <nav id="docs-nav" class="docs-nav navbar">
+			    <ul class="section-items list-unstyled nav flex-column pb-3">
+				    <li class="nav-item section-title"><a class="nav-link scrollto active" href="#section-1"><span class="theme-icon-holder me-2"><i class="fas fa-map-signs"></i></span>Bind9 Web Manager</a></li>
+				    <li class="nav-item"><a class="nav-link scrollto" href="#item-1-1">Informations</a></li>
+				    <li class="nav-item"><a class="nav-link scrollto" href="#item-1-2">Installation</a></li>
+				    <li class="nav-item"><a class="nav-link scrollto" href="#item-1-3">Replication</a></li>
+				    <li class="nav-item"><a class="nav-link scrollto" href="#item-1-4">Initial Login</a></li>
+					<!-- Various Informations -->
+				    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-9"><span class="theme-icon-holder me-2"><i class="fas fa-hashtag"></i></span>Various</a></li>
+				    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-1" target="_blank">How to get support?</a></li>
+				    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-2" target="_blank">License</a></li>
+					<!-- Impressum and Bugfish Link -->
+				    <li class="nav-item section-title mt-3"><a class="nav-link"><span class="theme-icon-holder me-2"><i class="fas fa-link"></i></span>Links</a></li>
+				    <li class="nav-item"><a class="nav-link" href="https://www.bugfish.eu" target="_blank">My Website</a></li>
+				    <li class="nav-item"><a class="nav-link" href="https://bugfishtm.github.io" target="_blank">Documentations</a></li>
+				    <li class="nav-item"><a class="nav-link" href="https://bugfishtm.blogspot.com/2023/05/impressum.html" target="_blank">Impressum</a></li>
+				    <li class="nav-item"><a class="nav-link" href="https://bugfishtm.blogspot.com/2023/05/privacy.html" target="_blank">Privacy</a></li>
+			    </ul>
 
+		    </nav><!--//docs-nav-->
+	    </div><!--//docs-sidebar-->
+	    <div class="docs-content" data-finder-content>
+		    <div class="container">
+			    <article class="docs-article" id="section-1">
+				    <header class="docs-header">
+					    <h1 class="docs-heading">Bind9 Web Manager [DNSHTTP]<span class="docs-time">Documentations</span></h1>
+					    <section class="docs-intro">
+						    <p>This is the Documentation for the Bind9 Web Manager [DNSHTTP] Websoftware!</p>
+						<a href="https://github.com/bugfishtm/Bind9-Web-Manager/archive/refs/heads/main.zip" class="btn btn-primary"  target="_blank"><i class="fas fa-download me-2"></i> Download</a>
+						<a href="https://github.com/bugfishtm/Bind9-Web-Manager" class="btn btn-info" target="_blank"><i class="fas fa-link me-2" ></i> Github</a>
+						</section><!--//docs-intro-->
+				    </header>
+<section class="docs-section" id="item-1-1">
+<h2 id="generalinfo">General Informations</h2>
 <p>I trust that this description will provide you with a comprehensive understanding of the setup process. The purpose of this web-based software, known as "Bind9 Web Manager," is to streamline and enhance the replication process through DNS, offering increased transparency and control. My endeavor was to create a procedure that is both straightforward and efficient, ensuring a seamless experience when used in conjunction with the BIND9 DNS server.<br /><br />
 
 This software, "Bind9 Web Manager," is designed with versatility in mind. It has been engineered to work harmoniously with various hosting software platforms, such as Plesk, Virtualmin, ISPConfig, and even as a standalone solution. This level of compatibility allows for a wide range of integration options, catering to diverse hosting environments and preferences.<br /><br />
@@ -85,9 +86,11 @@ This software, "Bind9 Web Manager," is designed with versatility in mind. It has
 By following the instructions outlined here, you should be well-equipped to attain your desired outcome using my DNS tool, which is not only optimized for collaboration with the BIND9 DNS server but also offers a flexible approach to integration with different hosting software configurations.<br /><br />
 
 Within the subsequent sections, you will find an overview of the software's features, as well as guidance on configuration and usage, specifically tailored to its compatibility with various hosting software platforms. Furthermore, I have created a tutorial video available on my channel, which you can access through the playlist mentioned in the concluding section of this documentation. This resource is intended to offer you further insights into the functionality of the software within the context of its collaboration with different hosting environments.<br /><br />
-Here is an example image:<br /><img src="./x.png"><br /><br />Should you have any further inquiries or require additional assistance, please do not hesitate to reach out.</p>
-<h2 id="generalinfo">Compatibility</h2>
-<p>						This software has been tested on different linux system with postfix in standalone mode and with bind together if auto-domain-fetching for domain relaying is needed.<br />
+Should you have any further inquiries or require additional assistance, please do not hesitate to reach out.</p>
+
+
+<h3 id="generalinfo">Compatibility</h3>
+<p>This software has been tested on different linux system with postfix in standalone mode and with bind together if auto-domain-fetching for domain relaying is needed.<br />
 <b>Tested on:</b> Debian 8/9/10/11<br />
 <b>Tested on:</b> Ubuntu 16/18/20/22<br />
 <b>Tested on:</b> Different Bind Versions (Standalone)<br />
@@ -95,7 +98,32 @@ Here is an example image:<br /><img src="./x.png"><br /><br />Should you have an
 <b>Tested on:</b> Different Virtualmin/Webmin Versions (With Virtualmin/Webmin Settings for Virtualmin/Webmin Users [example integrated])<br />
 <b>Tested on:</b> Different Plesk Versions (With Plesk Settings for Plesk Users [example integrated])
 </p>
-<h2 id="slave-server-replication">Slave server replication</h2>
+
+<h3 id="generalinfo">Screenshots</h3>
+
+<div class="simplelightbox-gallery row mb-3">
+	<div class="col-12 col-md-4 mb-3">
+		<a href="1.png"><img class="figure-img img-fluid shadow rounded" src="1.png" alt="" title="Screenshot"></a>
+	</div>
+	<div class="col-12 col-md-4 mb-3">
+		<a href="2.png"><img class="figure-img img-fluid shadow rounded" src="2.png" alt="" title="Screenshot"></a>
+	</div><!--//col-->
+	<div class="col-12 col-md-4 mb-3">
+		<a href="3.png"><img class="figure-img img-fluid shadow rounded" src="3.png" alt="" title="Screenshot"></a>
+	</div><!--//col-->
+	<div class="col-12 col-md-4 mb-3">
+		<a href="4.png"><img class="figure-img img-fluid shadow rounded" src="4.png" alt="" title="Screenshot"></a>
+	</div><!--//col-->
+	<div class="col-12 col-md-4 mb-3">
+		<a href="5.png"><img class="figure-img img-fluid shadow rounded" src="5.png" alt="" title="Screenshot"></a>
+	</div><!--//col-->
+	<div class="col-12 col-md-4 mb-3">
+		<a href="6.png"><img class="figure-img img-fluid shadow rounded" src="6.png" alt="" title="Screenshot"></a>
+	</div><!--//col-->
+</div>
+
+
+<h3 id="slave-server-replication">Slave server replication</h3>
 <p>Within this section, you will gain comprehensive control over the replication process between your Slave and Master Servers, assuming that BIND9 is operational on both systems. This robust feature set empowers you to effectively manage the intricate replication dynamics. To facilitate your understanding of the setup procedure, further details on establishing connections are provided below.<br /><br />
 
 By utilizing this panel, you will acquire a meticulously detailed overview of replication-related conflicts, granting you invaluable insights into the intricacies of the replication process. Additionally, you will wield substantial control over the replication mechanism, ensuring a refined and optimized replication experience.<br /><br />
@@ -105,26 +133,25 @@ The "Replications" Tab within the website furnishes you with an up-to-the-minute
 Navigating to the Servers page, you will encounter a range of distinct buttons designed to assess server responsiveness and verify the efficacy of security keys. These functional elements contribute to the reassurance of a secure and dependable server environment.<br /><br />
 
 Through the combination of comprehensive insights, detailed control, and real-time status updates, this panel stands as an indispensable asset in the orchestration of seamless replication interactions. Your ability to effectively manage the replication process ensures the continuity and reliability of your DNS infrastructure. Should you encounter any queries or require further guidance, do not hesitate to seek assistance; we are here to support your success.</p>
-<h2 id="slave-dns-server-hybrid-support">Slave/DNS Server Hybrid Support</h2>
+<h3 id="slave-dns-server-hybrid-support">Slave/DNS Server Hybrid Support</h3>
 <p>The flexibility of this platform extends to the realm of Slave/DNS Server hybridization. It is entirely possible for a single server to concurrently serve as both a Master and a Slave Server. By registering a Master Server within the dedicated Servers Section, you initiate a distinct configuration wherein the registered server assumes the role of a Slave Server. This multifaceted functionality empowers the designated Slave Server to engage in domain replication from the specified Master Server.<br /><br />
 
 This innovative capability presents a remarkable opportunity for streamlined and resource-efficient management of your DNS architecture. The intricacies of orchestrating replication interactions between servers are further simplified through this versatile hybrid approach. It is our commitment to equip you with powerful tools and functionalities that cater to your evolving DNS needs.<br /><br />
 
 As you explore the potential of Slave/DNS Server hybrid support, rest assured that our documentation and support channels are available to clarify any queries or provide assistance in navigating this advanced configuration. Your success in harnessing the capabilities of this hybrid model is our priority.</p>
-<h2 id="user-management">User Management</h2>
+<h3 id="user-management">User Management</h3>
 <p>Integral to this software is a robust user management system, affording you complete control over user-related operations. Within this framework, you possess the authority to create, edit, and delete users, thus curating an environment tailored to your organizational structure. A defining facet of this system is the ability to allocate distinct permissions across various functional domains to individual users.<br /><br />
 
 By virtue of this granular permission assignment, you exercise precision in delegating responsibilities, ensuring that each user is equipped with access only to the areas pertinent to their role. This level of control establishes an ecosystem characterized by both security and efficiency, optimizing workflow while safeguarding sensitive aspects of your DNS infrastructure.<br /><br />
 
 As you engage with the user management features, the software ensures a seamless experience, simplifying administrative tasks while maintaining the integrity of your system. Should you require further guidance or clarification regarding the intricacies of user management, our support resources are readily available to aid you in harnessing the full potential of this robust functionality.</p>
-Here is an example image:<br /><img src="./users.png">
-<h2 id="rights-and-record-management">Rights Management</h2>
+<h3 id="rights-and-record-management">Rights Management</h3>
 <p>A key aspect of this software is the sophisticated user rights management functionality, which empowers you to establish precise controls over user activities within their designated operational areas. This capability extends to the ability to confine users to specific operational confines, a process often referred to as "jailing." This feature proves invaluable when it becomes necessary to restrict users to their designated domains of operation.<br /><br />
 
 Through the utilization of this rights management framework, you wield the authority to curate a secure and structured environment where user actions are confined to the realms they are authorized to access. The judicious implementation of jailing ensures operational integrity while minimizing the risk of unintended modifications or disruptions to other domains.<br /><br />
 
 By embracing this robust rights management system, you are investing in a comprehensive approach to user oversight that underscores your commitment to operational efficiency, security, and accountability. As you navigate this feature, remember that our support network is poised to assist you in maximizing the benefits of rights management within your DNS infrastructure.</p>
-<h2 id="blacklisting">IP Blacklisting</h2>
+<h3 id="blacklisting">IP Blacklisting</h3>
 <p>Within the framework of this software, you wield comprehensive control over IP blacklisting through the dedicated "Blocklist" area on the webpage. This sophisticated feature operates through the tracking and accumulation of IP counters, which are incremented for instances of failed logins and unsuccessful API token requests. This strategic approach to blacklisting empowers you to effectively mitigate potential security threats by promptly identifying and addressing suspicious or unauthorized activities.<br /><br />
 
 Should the need arise to lift an IP ban, the user-friendly panel affords you the means to swiftly reverse the blacklisting. Alternatively, for those seeking a streamlined and automated approach, the execution of the daily.php cronjob on a regular basis can reset the IP blacklisting table, promoting a dynamic and responsive security posture. This reset mechanism, configurable as an optional daily task, ensures that your system maintains its vigilance against security risks.<br /><br />
@@ -132,22 +159,21 @@ Should the need arise to lift an IP ban, the user-friendly panel affords you the
 It's crucial to note that when an IP reaches its predetermined limit within the blacklisting system, it is consequently restricted from initiating API requests and accessing the login panel. Notably, this measure extends to replication processes as well, rendering it impossible for a server with a blocked IP to participate in replication activities.<br /><br />
 
 This robust IP blacklisting system stands as a testament to our commitment to fortifying your software experience with dynamic and effective security measures. Should you require further elucidation or assistance with leveraging this feature, our support channels remain at your disposal.</p>
-Here is an example image:<br /><img src="./blocklist.png">
-<h2 id="nondestruct">Self Explaining</h2>
+
+<h3 id="nondestruct">Self Explaining</h3>
 We've endeavored to create a user-centric experience that simplifies the process of understanding and using our software. Central to this effort is the provision of comprehensive documentation and instructions, seamlessly integrated within the web interface itself. This deliberate approach ensures that the resources you need to navigate the software are readily available within the environment where you interact with it.<br /><br />
 
 By housing the documentation and instructions directly within the web interface, we eliminate the need for external references or cumbersome switches between interfaces. This design choice streamlines the learning curve and empowers you to explore the software's functionalities with ease. Whether you're seeking guidance on configuration, exploring features, or troubleshooting issues, you'll find the relevant information at your fingertips.<br /><br />
 
 This self-contained approach reflects our commitment to user convenience and efficiency. We believe that the best software experiences are intuitive and accessible, and by embedding comprehensive documentation within the web interface, we aim to provide you with a seamless and self-explaining journey. As you embark on your software utilization, remember that the information you need is always within reach, right where you need it.
-<h2 id="nondestruct">Replication Insights</h2>
+<h3 id="nondestruct">Replication Insights</h3>
 <p>The software's standout feature resides in its ability to provide detailed insights into the intricate dynamics of replication and domain information. Users can benefit from an in-depth perspective on the replication process, complete with real-time updates and comprehensive visibility into various aspects.<br /><br />
 
 By utilizing the software, users gain access to an extensive range of data that delves beyond surface-level metrics. This comprehensive dataset encompasses crucial details, including replication statuses, potential conflicts, and intricate domain information. These insights empower users to make well-informed decisions, proactively address challenges, and optimize their overall replication strategy.<br /><br />
 
 The software's commitment to clarity and precision is evident across all its functionalities. As users engage with the replication insights offered, they can discover a valuable resource that not only streamlines replication management but also enhances their understanding of their DNS ecosystem.<br /><br />
 
-Users are invited to explore the array of replication insights provided by the software. This comprehensive perspective is poised to enhance users' confidence in managing the replication process adeptly. For further guidance or clarification on specific insights, the support team is readily available to assist users in deriving maximum value from this robust feature.</p> Here is an example image:<br />
-<img src="./replication.png">
+Users are invited to explore the array of replication insights provided by the software. This comprehensive perspective is poised to enhance users' confidence in managing the replication process adeptly. For further guidance or clarification on specific insights, the support team is readily available to assist users in deriving maximum value from this robust feature.</p> 
 <h2 id="nondestruct">Rollback Ease and Precision</h2>
 <p>An intrinsic attribute of this software is its non-destructive nature. The software operates without altering your core files; rather, it establishes its own configuration files for seamless functionality. This design philosophy is rooted in the principle of safeguarding the integrity of your existing system.<br /><br />
 
@@ -162,87 +188,48 @@ By embracing this non-destructive methodology, we prioritize the stability and f
 <p>In the event that you encounter any challenges or have inquiries while using this software, we encourage you to reach out for assistance. Our dedicated support platform is available through our forum located at www.bugfish.eu/forum. This specialized forum serves as a central hub for addressing any issues, seeking solutions, and engaging in discussions related to the software's functionality.<br /><br />
 
 Rest assured that our team is committed to promptly addressing your concerns and providing the guidance necessary to ensure a seamless software experience. Your feedback is invaluable in our ongoing efforts to refine and enhance the software, and we welcome your contributions to our community.<br /><br />
-
-By leveraging the resources and expertise available on our forum, you are tapping into a collaborative environment where your questions are met with attentive support. We appreciate your commitment to optimizing your experience with this software and stand ready to assist you every step of the way.</p>
-<h2 id="goodurls">Interesting Links</h2>
-You can find  the documentation here:<br />
-<a href="https://bugfishtm.github.io/Bind9-Web-Manager/" rel="noopener" target="_blank">https://bugfishtm.github.io/Bind9-Web-Manager/</a><br />
-<br />
-You can find the github page here:<br />
-<a href="https://github.com/bugfishtm/Bind9-Web-Manager" rel="noopener" target="_blank">https://github.com/bugfishtm/Bind9-Web-Manager</a><br />
-<br />
-  
-My General Github Project Page is here:  <br />
-<a href="https://bugfishtm.github.io" rel="noopener" target="_blank">https://bugfishtm.github.io</a><br /></div>
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="internal_show" id="show_install">
-<h2 id="install">Installation</h2>
-Here are informations on how to install this panel.
-<h2 id="requirements">Requirements</h2>
+</section> <section class="docs-section" id="item-1-2">
+<h2 id="requirements">Installation</h2>
+<p>What follows are instructions how to install this software and what is required to run it! </p>
+<h3 id="requirements">Requirements</h3>
 <ul>
 	<li>Elevated permissions (root) required for cronjob execution</li>
 	<li>Apache2 web server with robust PHP 7/8 support is mandatory</li>
 	<li>
 		Apache2 Modules:
 		<ul>
-			<li>rewrite</li>
-			<li>headers</li>
+			<li>rewrite, headers</li>
 		</ul>
 	</li>
 	<li>
 		PHP Modules:
 		<ul>
-			<li>mysql</li>
-			<li>curl</li>
-			<li>intl</li>
-			<li>mbstring</li>
-			<li>zip</li>
-			<li>gd</li>
+			<li>mysql, curl, intl, mbstring, zip, gd</li>
 		</ul>
 	</li>
 	<li>Unrestricted access to a MySQL database, with full permissions</li>
 	<li>Ports 53/953 (TCP/UDP) for DNS must be open</li>
 	<li>Port 80/442 (TCP) for web access should be open</li>
 </ul>
-
-
-
-
-<h2 id="deployment">Installation Steps</h2>
+<h3 id="deployment">Installation Steps</h3>
 <ul>
 	<li>Begin by uploading the files located in the "_source" directory of this repository to your webspace.</li>
-	<li>Inspect the Settings.sample.php files (in this repository _settings folder, they are examples) and provide valid MySQL user information, the current nameserver's hostname, and other necessary details (refer to comments within the file).</li>
-	<li>Review the Settings.sample.php file and carefully read the notes and comments to comprehend the functions of different settings. This understanding is vital, as these settings will dictate the behavior of the DNS service and the files utilized.</li>
+	<li>Inspect the Settings.sample.php files (in this repository _settings folder, they are examples) and provide valid MySQL user information(refer to comments within the file).</li>
 	<li>Rename the Settings.sample.php file to settings.php in your websites document root folder.</li>
 	<li>Login using the default credentials (refer to the section below in this readme [admin/changeme]).</li>
-	<li>Set up the cronjobs as outlined in the instructions below.</li>
+	<li>Set up the cronjobs as outlined in the instructions below in the "<b>Setting up Cronjob" Section</b>.</li>
 	
 	
-	
-	
-	<li> Keep a backup of the original file; if you want to deactivate all functionalities of this panel for Bind, you can revert to the old file. If you've made any changes to this relevant file during the setup, adjust this setting accordingly. However, this setting is suited for a default configuration and installation. It is not advisable to alter this unless necessary. Modify your /etc/bind/named.conf file to match the following content (nothing more) <font color="red">(remove any existing content!)</font>:<br /><br /> include "/etc/bind/dnshttp/dnshttp.named.conf";<br /><br /> </li>
+	<li> Keep a backup of the original file; if you want to deactivate all functionalities of this panel for Bind, you can revert to the old file (<b>Exception for this rollback method is if you using this script in a virtualmin environment as master/hybrid server - than a simple revert to the old file wont work</b>). If you've made any changes to this relevant file during the setup, adjust this setting accordingly. However, this setting is suited for a default configuration and installation. It is not advisable to alter this unless necessary. </li>
+	<li> Delete the file /etc/bind/named.conf - This software will generate its own on the next sync.php cronjob run! (see previous list item for more informatiosn)</li>
 	<li>With these steps completed, you are now prepared to utilize all the functionalities of this software! There's no need to manually set up MySQL tables; the software will handle this during installation. You can now log in at the domain where your website is deployed...</li>
 </ul>
+<h3 id="installcron">Rollback</h3>
+As described in the installation steps, you changed file named.conf. You shall have made a backup like described in the Installation steps. If you replace your named.conf with your old initial backuped-file - All Changes made by DNSHTTP to your Bind9 Instance will be gone. This is a simple but trustfull way to "hard" deactivate and activate this software connection with bind. This may not work if you are using this software on a virtualmin environment as hybrid/master server. In this case you have to fix issues manually in case there are some. This script has been tested a long time in virtualmin. A rollback/fix on Virtualmin Servers will be less easy than a fix on other systems, but if you have some experience with DNS you should always been able to fix it yourself. You are free to ask on my forum or contact me if you have issues. If i have the possibility i will try to help you.<br /><br />
 
-
-
-
-<h2 id="installcron">Rollback</h2>
-As described in the installation steps, you changed file named.conf. You shall have made a backup like described in the Installation steps. If you replace your named.conf with your old initial backuped-file - All Changes made by DNSHTTP to your Bind9 Instance will be gone. This is a simple but trustfull way to "hard" deactivate and activate this software connection with bind. 
-<h2 id="installcron">Setting Up Cronjobs</h2>
+<h3 id="installcron">Setting Up Cronjobs</h3>
 <p><span style="color: red;">Please ensure that both cronjobs are configured as the root user.</span></p>
-<table>
+<table class="table table-bordered table-dark">
 	<thead>
 		<tr>
 			<th>Command</th>
@@ -257,113 +244,100 @@ As described in the installation steps, you changed file named.conf. You shall h
 			<td>Resets Blacklisted IPs for Web Interface and API Requests (Optional but Recommended)</td>
 		</tr>
 		<tr>
-			<td>PATH_TO_WEBROOT/_cronjon/notify.php &gt;/dev/null 2&gt;&1;</td>
-			<td>daily</td>
-			<td>Cronjob that returns in text format actual replication news which may are important (you could send this to yourself per mail for example) (Optional)</td>
-		</tr>
-		<tr>
 			<td>PATH_TO_WEBROOT/_cronjon/sync.php &gt;/dev/null 2&gt;&1;</td>
 			<td>hourly</td>
 			<td>Essential for DNS Server Configuration Operations, Database Synchronization, Replication, and Autosetup<br />This cronjob will restart Bind and set permissions for folders and zone files when completed. You can adjust the interval as needed; a one-hour interval is recommended for faster replication.</td>
 		</tr>
+		<tr>
+			<td>PATH_TO_WEBROOT/_cronjon/notify.php &gt;/dev/null 2&gt;&1;</td>
+			<td>favor</td>
+			<td>Optional Cronjob / Script to display last changes and delete them in the interfaces activity section! (optional)</td>
+		</tr>
 	</tbody>
-</table>
-
-
-<h2 id="default-login-for-webinterface">Default Login for Webinterface</h2>
-<p>Username: admin<br>Passwort: changeme</p>
-<h2 id="passlost">Caution to Prevent Password Loss</h2>
-<p>It's important to exercise caution in safeguarding your password as there's no straightforward means of restoring it in the event of loss.<br />
-If you lose your administrator password without access to a user with user management permissions, you'll need to reset the users table. This can be accomplished by entering your MySQL server and deleting the dnshttp_user table. Upon visiting the page thereafter, the table will be restored with the original login information as indicated below.<br /><br /><b class="orangetext">If you wish to avoid deleting the users table</b>:</p>
-<p>If your admin password is lost and you lack another administrative account for user management, the only available recourse is manual password alteration within the database. Refer to the users table and replace the string in the password field with a new bcrypt PHP string containing your new password. Online tools are available for generating these strings.<br /><br />Deleting the table will result in the removal of all users. However, the password and administrative user will be reset to the default login credentials provided at the end of the readme. This offers a simpler solution if retaining the users table isn't essential.<br /><br />The web interface does not include a password restoration function and such functionality is not planned. However, you can modify account passwords if you are able to log in.</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="internal_show" id="show_f">
-<h2 id="repinfods">Informations About Domains and Replications</h2>
-Here you can see more detailed informations about the Replications and Domains...
-
-
+</table>	   
+</section>
+</section> <section class="docs-section" id="item-1-3">
 <h2 id="repinfo">Domains, Replications and Conflicts</h2>
-You can see replicated Domains in the Domains->Slave Domains Section. There are all domains which have been copied from other dns servers, which are registered in the Replication->Manage DNS Servers Area! The data in the interface you see may outdated. It updates every time the cronjob dies execute, you will see the last time of execution on top of the domain pages. There are a lot of icons which describe the status of servers or domains, you can see what the icons mean below in the icon description area!<br /><br />
-If you visit the Replication Area you will be able to get access to the API Logfile, the Replication Logfile and the DNS Server Manager. You can get informations how to set up a DNS Server Connection below. The API Logfile Serves as Log for Requests to and from this server to other dns servers. This log may not be fully reliable, cos not all areas are covered, to prevent useless database storage beeing used by this logs. In some cases, if there are errors, you may get more insights in that area about this area. Entries are marked with [in] or [out]. [in] describes an incoming request, to this server. [out] defines an outgoing request to another server.<br /><br />
+You can see replicated Domains in the Domains Section. There are all domains which have been copied from other dns servers, which are registered in the Replication Servers Area! The data in the interface you see may outdated. It updates every time the cronjob dies execute, you will see the last time of execution on top of the domain pages. There are a lot of icons which describe the status of servers or domains, you can see what the icons mean below in the icon description area!<br /><br />
+If you visit the Replication Area you will be able to get access to the Replication Logfile and the DNS Server Manager. You can get informations how to set up a DNS Server Connection below. In some cases, if there are errors, you may get more insights in that area about this area.<br /><br />
+Within the Domain section, you gain visibility into domains that have undergone replication or have been fetched locally. The Master Domains section specifically presents domains that have been locally fetched. Domains in this section are inherently treated as master domains. It's important to adhere to the guideline of refraining from registering other slave domains locally. The software's framework anticipates that exclusively master domains are configured within the local servers' named.conf.local and named.conf.default-zones (or the designated file writte in the settings page). This configuration is suitable for the majority of setups, especially when employing this software for replication purposes. The fetched local Master Domains, which potentially can be replicated to other servers, can be comprehensively reviewed in the Domain->Master Domains Section, complete with their respective statuses. Further elucidation of the icons can be found in the documentation.<br /><br />
+Within the Domains section, you'll find Domains labeled "Slave Domains." For more comprehensive insights into the various status icons, detailed information can be found in the documentation.<br /><br />
+Conflicts may arise in scenarios where a domain exists both as a master domain on the local server and as a slave domain on a remote server, or if two slave servers provide the same master domain. In such cases, these conflicts are highlighted within the dedicated "Conflicts" Section. To address conflicts, you have the option to give preference to a particular domain in the Domains section. This chosen domain then takes precedence in conflict situations. Failing to resolve a conflict will result in the domain not being registered in the local bind instance. Therefore, resolving conflicts becomes essential for maintaining domain activity. The conflicts section primarily serves as an overview of conflicts, their resolutions, and the affected servers—the origins of the conflicts. Conflicts can be resolved by designating a preferred domain. Unsolved conflicts are marked in yellow, whereas resolved conflicts are indicated in green.<br /><br />
+It's important to highlight that local Master domains are inherently preferred by default. This preference mechanism serves to safeguard against conflicts that could lead to slave servers inadvertently deregistering domains.<br /><br />
 
-Within the Domain section, you gain visibility into domains that have undergone replication or have been fetched locally. The Master Domains section specifically presents domains that have been locally fetched. Domains in this section are inherently treated as master domains. It's important to adhere to the guideline of refraining from registering other slave domains locally. The software's framework anticipates that exclusively master domains are configured within the local servers' named.conf.local and named.conf.default-zones (or the designated file stipulated in settings.php). This configuration is suitable for the majority of setups, especially when employing this software for replication purposes. The fetched local Master Domains, which potentially can be replicated to other servers, can be comprehensively reviewed in the Domain->Master Domains Section, complete with their respective statuses. Further elucidation of the icons can be found in the documentation.<br /><br />
+<h3 id="repcon">Replication Logfile</h3>
+Contained within the Replication Logfile is a comprehensive record of the entire replication process, meticulously orchestrated by the cronjob sync.php. This logfile serves as a repository of the intricacies involved in the executed operations. While much of this information is accessible through the user interface (UI) and does not necessarily require direct inspection of the log files, delving into the Replication Logfile can prove immensely valuable when troubleshooting errors or conducting in-depth analysis.<br /><br />
 
-Within the Domains section, you'll find a button labeled "Slave Domains." Clicking on this button will reveal a list of domains that have been sourced from other DNS Servers. For more comprehensive insights into the various status icons, detailed information can be found in the documentation.<br /><br />
+<h3 id="repcon">Domain Detail View</h3>
+While navigating the Domains Section's Domains Overview, you have the ability to inspect the zonedata for domains that have been fetched either externally through replication or locally. Should any errors manifest within the zonedata, these are visually indicated by an icon. To gain further insights into these errors, the "Details" button window provides access to the output of the named-zonecheck command. Within this window, you'll find supplementary information regarding the domain and any errors that might have arisen during the execution of sync.php. This background process orchestrates various tasks and operations.<br /><br />
 
-Conflicts may arise in scenarios where a domain exists both as a master domain on the local server and as a slave domain on a remote server, or if two slave servers provide the same master domain. In such cases, these conflicts are highlighted within the dedicated "Conflicts" Section. To address conflicts, you have the option to give preference to a particular domain in either the Domain->Master Domains or Domain->Slave Domains section. This chosen domain then takes precedence in conflict situations. Failing to resolve a conflict will result in the domain not being registered in the local bind instance. Therefore, resolving conflicts becomes essential for maintaining domain activity. The conflicts section primarily serves as an overview of conflicts, their resolutions, and the affected servers—the origins of the conflicts. Conflicts can be resolved by designating a preferred domain. Unsolved conflicts are marked in yellow, whereas resolved conflicts are indicated in green.<br /><br />
+<h3 id="repcon">Authenticity of the Webinterface</h3>
+It's important to note that updates to the Domain Section exclusively occur during the operation of the cronjob sync.php. At the uppermost part of the page, the date and time of the most recent data update are displayed in green. To initiate a data update, you have the option to manually execute sync.php or alternatively, you can await the completion of the next scheduled cronjob cycle for automatic updates. (For further guidance, refer to the "Installation" section.)<br /><br />
 
-It's important to highlight that local Master domains are inherently preferred by default. This preference mechanism serves to safeguard against conflicts that could lead to slave servers inadvertently deregistering domains.
-<h2 id="repcon">Replication Logfile</h2>
-Contained within the Replication Logfile is a comprehensive record of the entire replication process, meticulously orchestrated by the cronjob sync.php. This logfile serves as a repository of the intricacies involved in the executed operations. While much of this information is accessible through the user interface (UI) and does not necessarily require direct inspection of the log files, delving into the Replication Logfile can prove immensely valuable when troubleshooting errors or conducting in-depth analysis.
-
-<h2 id="repcon">Domain Detail View</h2>
-While navigating the Domains Section's Domains Overview, you have the ability to inspect the zonedata for domains that have been fetched either externally through replication or locally. Should any errors manifest within the zonedata, these are visually indicated by an icon. To gain further insights into these errors, the "Details" button window provides access to the output of the named-zonecheck command. Within this window, you'll find supplementary information regarding the domain and any errors that might have arisen during the execution of sync.php. This background process orchestrates various tasks and operations.
-
-<h2 id="repcon">Authenticity of the Webinterface</h2>
-It's important to note that updates to the Domain Section exclusively occur during the operation of the cronjob sync.php. At the uppermost part of the page, the date and time of the most recent data update are displayed in green. To initiate a data update, you have the option to manually execute sync.php or alternatively, you can await the completion of the next scheduled cronjob cycle for automatic updates. (For further guidance, refer to the "Installation" section.)
-
-<h2 id="repcon">Types of Server Connections</h2>
+<h3 id="repcon">Types of Server Connections</h3>
 In scenarios where a system comprises dedicated Master Domains and Slave Servers, deploying this software on both servers is recommended. On the Master server, the Slave Server should be configured, designating it as such within the software. This entails specifying the relevant website URL where the panel is hosted, ensuring an identical token to the counterpart server, and providing the external server's IP address. It is crucial that this external IP address is valid, as the replication process hinges on this. At least one functional IPv4 or IPv6 address is necessary for the other nameserver's accessibility.<br /><br />
-
-Concurrently, on the Slave Server, the installation of the panel is also required. Here, the Master server should be set up within the Replication->Manage DNS Server Area. The status icons indicating the feasibility of the connection can be observed, with detailed explanations available in the documentation.<br /><br />
-
+Concurrently, on the Slave Server, the installation of the panel is also required. Here, the Master server should be set up within the Replication Server Area. The status icons indicating the feasibility of the connection can be observed, with detailed explanations available in the documentation.<br /><br />
 Furthermore, the software accommodates "hybrid" connections, wherein each server equipped with this panel can function as both a slave and a master server simultaneously. This configuration proves advantageous, and the conflict section proves particularly useful in these setups.<br /><br />
 
-<h2 id="repcon">Domain Settings will not Sync</h2>
-When establishing a Slave/Master Server connection, it's important to note that certain settings pertaining to domain preferences or replication blocking will not be synchronized between the servers. If you wish to prioritize a domain on two Master servers, you must individually configure the preference on each respective Master server. It's crucial to understand that the replication process exclusively involves the synchronization of domains and the content within these domains. Specifically, the replication covers the domain name itself, without encompassing any additional settings or attributes associated with it.
-<h2 id="reptok">Server Tokens</h2>
-For seamless server communication and successful replication processes, it's imperative to ensure uniformity in the tokens used for server connections. To illustrate, if Server 1 utilizes a token "123," it is essential that the exact same token "123" is configured on Server 2 as well. This consistency in tokens serves as a fundamental requirement for the effective operation of replication processes and other API requests. It's advisable to verify that the chosen token intended for replication exists identically on both servers, thus facilitating smooth and uninterrupted communication between them.
-<h2 id="disable-repdomain">Disable Replication for Master/User Domains</h2>
+<h3 id="repcon">Domain Settings will not Sync</h3>
+When establishing a Slave/Master Server connection, it's important to note that certain settings pertaining to domain preferences or replication blocking will not be synchronized between the servers. If you wish to prioritize a domain on two Master servers, you must individually configure the preference on each respective Master server. It's crucial to understand that the replication process exclusively involves the synchronization of domains and the content within these domains. Specifically, the replication covers the domain name itself, without encompassing any additional settings or attributes associated with it.<br /><br />
+<h3 id="reptok">Server Tokens</h3>
+For seamless server communication and successful replication processes, it's imperative to ensure uniformity in the tokens used for server connections. To illustrate, if Server 1 utilizes a token "123," it is essential that the exact same token "123" is configured on Server 2 as well. This consistency in tokens serves as a fundamental requirement for the effective operation of replication processes and other API requests. It's advisable to verify that the chosen token intended for replication exists identically on both servers, thus facilitating smooth and uninterrupted communication between them.<br /><br />
+<h3 id="disable-repdomain">Disable Replication for Master Domains</h3>
 <p>Within the web interface, there is a functionality that allows you to selectively disable the replication of specific master domains to slave servers. This means you can control and prevent the propagation of certain master domains to slave servers, offering a higher degree of flexibility and customization in your DNS management setup.</p>
-<h2 id="repzc">Zone Checks</h2>
-Every zone file which will be used, will checked with the command named-checkzone before it gets written for the configuration. If that command fails, the last working file gets in affect. If there is no working file the domain will not be active. You will get notification icons on that domain for every case. Look at the status icon information below in the documentation to get informations about this status icons. If a Zone is Using its fallback zonefile, or failing verifying the new file, you can get the error string of "named-checkzone" in the domains details section.
-<h2 id="debuginfo">MySQL Debugging for Developers</h2>
-<p>For those engaged in development or seeking to modify the software, the activation of the mysql_debugging mode within the settings.php file provides a valuable tool. This mode enables the appearance of the "debug" section, allowing for the observation of MySQL errors, should they arise. It's crucial to note that this section is primarily intended for developers, as the software has undergone comprehensive testing, rendering this feature largely superfluous for regular users. It's important to emphasize that this section exclusively displays MySQL errors and doesn't provide insights into replication or other functionalities. In instances where MySQL errors do occur, particularly during table structure regeneration, there's no need for undue concern, as these errors are likely to self-correct over time.</p>
-</div>
+<h3 id="repzc">Zone Checks</h3>
+Every zone file which will be used, will checked with the command named-checkzone before it gets written for the configuration. If that command fails, the last working file gets in affect. If there is no working file the domain will not be active. You will get notification icons on that domain for every case. Look at the status icon information below in the documentation to get informations about this status icons. If a Zone is Using its fallback zonefile, or failing verifying the new file, you can get the error string of "named-checkzone" in the domains details section.<br /><br />
+<h3 id="debuginfo">MySQL Debugging for Developers</h3>
+<p>It's crucial to note that this section is primarily intended for developers, as the software has undergone comprehensive testing, rendering this feature largely superfluous for regular users. It's important to emphasize that this section exclusively displays MySQL errors and doesn't provide insights into replication or other functionalities. In instances where MySQL errors do occur, particularly during table structure regeneration, there's no need for undue concern, as these errors are likely to self-correct over time.</p>					
+					
+				   	</section> <section class="docs-section" id="item-1-4">
+<h2 id="default-login-for-webinterface" class="orangetext">Default Login for Webinterface</h2>
+<div class="alert alert-danger"><b>Change the initial password after you have succesfully authenticated the first time!</b></div>
+<p>Username: admin<br>Passwort: changeme</p>					
+					
+					</section>
+			    </article>
+			    <article class="docs-article" id="section-9" style="padding-top: 0px;">
+					<header class="docs-header">
+					    <h2 class="docs-heading">Various</h2>
+					    <section class="docs-intro">
+						    <p>Here you can see various pages with licensing and support informations!</p>
+						</section><!--//docs-intro-->
+				    </header>
+					<section class="docs-section" id="item-9-1" style="padding-top: 0px;">
+						<h2 class="section-heading">How to get support?</h2>
+						<p>There are different ways to get support for our products. You can write comments in our specific websites section for the related product, but the best way it to write in our forum, as we are getting notifications about that! So if you need any help, sign in at our forum and we will do what we can to serve you. If you do not want to register at our forum, you are invited to write us for support at requests@bugfish.eu.</p>
+						<a href="https://www.bugfish.eu" class="btn btn-primary" target="_blank"><i class="fas fa-link me-2"></i> My Website</a>
+						<a href="https://forum.bugfish.eu/" class="btn btn-warning" target="_blank"><i class="fas fa-bug me-2"></i> My Forum</a>
+					</section><!--//section-->	
+					<section class="docs-section" id="item-9-2">
+						<h2 class="section-heading">License Informations</h2>
+						<h4>License Informations of this Software Code</h4>
+		Copyright 2022 www.bugfish.eu Jan-Maurice Dahlmanns (Bugfish)<br />
+		This Product is running with MIT LICENSE<br /><br />
 
+		Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:<br /><br />
 
+		The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.<br /><br />
 
-<div class="internal_show" id="show_license"><h2>License</h2>
-Please mind Licenses of Frameworks in \_framework.  
-Licenses which are not MIT, are not used in this project, but may  
-be existant in functions library!<br /><br />
-
-Copyright (c) 2021 Jan-Maurice Dahlmanns<br /><br />
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:<br /><br />
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.<br /><br />
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. <br /><br />
-<b>Please mind license of other libraries may included!</b>
-
-</div>
-
-</div>
-
-    </div>
-  </body>
-</html>
+		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br /><br />
+						<h4>License Informations of this Github Page</h4>
+				       <p> <!--/* This template is free as long as you keep the footer attribution link. If you'd like to use the template without the attribution link, you can buy the commercial license via our website: themes.3rdwavemedia.com Thank you for your support. :) */-->
+			            <small class="copyright">Designed with <span class="sr-only">love</span><i class="fas fa-heart" style="color: #fb866a;"></i> by <a class="theme-link" href="http://themes.3rdwavemedia.com" target="_blank" rel="noopener">Xiaoying Riley</a> for developers <br/>(And modified by <a href="https://www.bugfish.eu" target="_blank" rel="noopener">bugfish</a>)<br />You are only allowed to use this template if you include this attribution!</small></p>					
+					</section><!--//section-->		
+			    </article><!--//docs-article-->
+			</div> <!--//docs-container--> 
+		</div><!--//docs-content-->   
+    </div><!--//docs-wrapper-->       
+    <!-- Javascript -->          
+    <script src="assets/plugins/popper.min.js"></script>
+    <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>  
+    <!-- Page Specific JS -->
+    <script src="assets/plugins/smoothscroll.min.js"></script>
+    <script src="assets/js/highlight.min.js"></script>
+    <script src="assets/js/highlight-custom.js"></script> 
+    <script src="assets/plugins/simplelightbox/simple-lightbox.min.js"></script>      
+    <script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script> 
+    <script src="assets/js/docs.js"></script> 
+</body>
+</html> 

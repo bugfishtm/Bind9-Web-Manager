@@ -1,11 +1,24 @@
-<?php
-	/*
-		__________              _____.__       .__     
-		\______   \__ __  _____/ ____\__| _____|  |__  
-		 |    |  _/  |  \/ ___\   __\|  |/  ___/  |  \ 
-		 |    |   \  |  / /_/  >  |  |  |\___ \|   Y  \
-		 |______  /____/\___  /|__|  |__/____  >___|  /
-				\/     /_____/               \/     \/  Index File for DNS Replication over HTTP*/
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish - DNSHTTP Software / MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 	# Include Settings
 	if(file_exists("./settings.php")) {  require_once("./settings.php"); } else {echo "No settings.php found!<br />Please change settings.sample.php and rename this file to settings.php after that!"; exit(); }
 	
@@ -45,7 +58,7 @@
 		<?php if($permsobj->hasPerm($user->user_id, "usermgr") OR $user->user_rank == 0) { ?><a href="./?site=users" <?php if(@$_GET["site"] == "users") { echo 'id="nav_active"'; } ?>>Users</a> - <?php } ?>
 		<?php if($permsobj->hasPerm($user->user_id, "blocklist") OR $user->user_rank == 0) { ?><a href="./?site=blocks" <?php if(@$_GET["site"] == "blocks") { echo 'id="nav_active"'; } ?>>Blocklist</a> - <?php } ?>
 		<a href="./?site=domains" <?php if(@$_GET["site"] == "domains" || @$_GET["site"] == "apidomains" || @$_GET["site"] == "binddomains" || @$_GET["site"] == "conflict") { echo 'id="nav_active"'; } ?>>Domains</a> - 
-  		<?php if($user->user_rank == 0 OR $permsobj->hasPerm($user->user_id, "serversmgr")) { ?><a href="./?site=replication" <?php if(@$_GET["site"] == "replication" || @$_GET["site"] == "logs" || @$_GET["site"] == "logsapi" || @$_GET["site"] == "server") { echo 'id="nav_active"'; } ?>>Replication</a> - <?php } ?>
+  		<?php if($user->user_rank == 0 OR $permsobj->hasPerm($user->user_id, "serversmgr")) { ?><a href="./?site=replication" <?php if(@$_GET["site"] == "replication" || @$_GET["site"] == "logs"  || @$_GET["site"] == "act" || @$_GET["site"] == "logsapi" || @$_GET["site"] == "server") { echo 'id="nav_active"'; } ?>>Replication</a> - <?php } ?>
  		<?php if(($permsobj->hasPerm($user->user_id, "debug") OR $user->user_rank == 0) AND _MYSQL_LOGGING_) { ?><a href="./?site=debug" <?php if(@$_GET["site"] == "debug") { echo 'id="nav_active"'; } ?>>Debug</a> -  <?php } ?> 
 		<a href="./?site=profile" <?php if(@$_GET["site"] == "profile") { echo 'id="nav_active"'; } ?>>Profile</a> - 
 		<a href="./?site=logout">Logout</a>
@@ -58,6 +71,7 @@
 			case "apidomains": require_once("./_instance/site_apidomains.php"); break;
 			case "binddomains": require_once("./_instance/site_binddomains.php"); break;
 			case "logs": require_once("./_instance/site_logs.php"); break;
+			case "act": require_once("./_instance/site_act.php"); break;
 			case "logsapi": require_once("./_instance/site_logsapi.php"); break;
 			case "debug": require_once("./_instance/site_debug.php"); break;
 			case "blocks": require_once("./_instance/site_blocks.php"); break;

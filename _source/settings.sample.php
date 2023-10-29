@@ -1,11 +1,24 @@
-<?php
-	/*
-		__________              _____.__       .__     
-		\______   \__ __  _____/ ____\__| _____|  |__  
-		 |    |  _/  |  \/ ___\   __\|  |/  ___/  |  \ 
-		 |    |   \  |  / /_/  >  |  |  |\___ \|   Y  \
-		 |______  /____/\___  /|__|  |__/____  >___|  /
-				\/     /_____/               \/     \/  Bind9 Web Manager Configuration File */
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish - DNSHTTP Software / MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 	##########################################################################################################################################
 	# Website Title and Impressum URL
 	##########################################################################################################################################			
@@ -67,9 +80,9 @@
 	## Local Nameserver Service Settings
 	define("_BIND_SERVICE_NAME_",  			"bind9"); # Can be left unchanged / Name of the nameserver server (bind, named)
 	# Command Name to Check Zones - Can be left unchagend!
-	define("_BIND_CHECKZONE_COMMAND_",  	"/usr/sbin/named-checkzone");
+	define("_BIND_CHECKZONE_COMMAND_",  	"/usr/bin/named-checkzone");
 	# Command to Compile Zones # Can be left unchanged
-	define("_BIND_COMPILEZONE_COMMAND_",  	"/usr/sbin/named-compilezone");
+	define("_BIND_COMPILEZONE_COMMAND_",  	"/usr/bin/named-compilezone");
 	## Enable MySQL Logging page and MySQL Error Logging in Database at All?
 	define("_MYSQL_LOGGING_", 				true); # Can be left unchanged!
 	# Where should Files for DNS be stored ? (From master Servers fetched host files)

@@ -1,16 +1,29 @@
-<?php
-	/*
-		__________              _____.__       .__     
-		\______   \__ __  _____/ ____\__| _____|  |__  
-		 |    |  _/  |  \/ ___\   __\|  |/  ___/  |  \ 
-		 |    |   \  |  / /_/  >  |  |  |\___ \|   Y  \
-		 |______  /____/\___  /|__|  |__/____  >___|  /
-				\/     /_____/               \/     \/  Bind9 Web Manager Init File */
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish - DNSHTTP Software / MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 
 	/* Variables */	
 	define('_HELP_',    "https://bugfishtm.github.io/Bind9-Web-Manager/"); 
 	define("_SLAVE_AS_MASTER_DOMAIN_",  false); // Not Configured DO NEVER CHANGE!	
-	define("_FOOTER_", '<div id="footer">DnsHTTPv3.7 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
+	define("_FOOTER_", '<div id="footer">DnsHTTPv3.7.2 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
 	define("_CRON_DEBUG_", 2);
 	define("_CRON_BIND_FILE_CONFIG_DNSHTTP_",  	_CRON_BIND_LIB_);	# Can be left unchanged	/ Path to save Configuration Files to
 	# The Initial Bind9 Configuration
@@ -623,6 +636,7 @@
 		logging_add("START: Get Domains From Master Servers (Slave Domains)\r\n");
 		# --------------------------------------------------------------------------------------	
 		$servers = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE server_type = 1 OR server_type = 3", true);
+		$error_servers = array();
 		if(is_array($servers)) {	
 			foreach($servers as $key => $value) {	
 				$output = "";
@@ -673,7 +687,7 @@
 				} elseif($returncurl == "token-error") { 
 					$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 0 WHERE id = ".$value["id"].";");	
 					 logging_add("ERROR: Server with ID-'".$value["id"]."' has Wrong Security Token !\r\n");
-				} else { logging_add("ERROR: Bad Slave Server Response!\r\n"); }
+				} else { logging_add("ERROR: Bad Slave Server Response!\r\n"); array_push($error_servers, $value["id"]); }
 			} 
 		} else { $mysql->query("DELETE FROM "._TABLE_DOMAIN_API_."");logging_add("OK: There are no Slave Servers, all Remote Domains Cleared!\r\n"); }
 		logging_add("FINISHED: LAST OPERATION\r\n");	
@@ -703,7 +717,10 @@
 				$apipath	=	dnshttp_server_get($mysql, $value["fk_server"])["api_path"]."/_api/content.php";
 				$returncurl =   dnshttp_api_getcontent($mysql, $apipath, dnshttp_server_get($mysql, $value["fk_server"])["api_token"], $value["domain"]);
 				$domain = $value["domain"];
-
+				if(in_array($value["fk_server"], $error_servers)) {
+					logging_add("SKIPPED: Server Timeout : $domain\r\n");
+					continue;
+				}
 				if($returncurl AND $returncurl != "error-domain-no-exist") { 
 					//echo $returncurl;
 					$bind[0]["type"] = "s";
@@ -921,6 +938,7 @@
 				$bind[0]["type"] = "s";
 				$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck_message = ? WHERE id = '".$value["id"]."'", $bind);
 				$isnowregister = false;
+				$nowwritte = false;
 				if(strpos(strtolower($cout), ": loaded serial") > -1) {
 					$isnowregister = true;				
 					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 1, okonce = 1, registered = 1 WHERE id = '".$value["id"]."'");
@@ -929,6 +947,7 @@
 					//} else {
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
+					$nowwritte = true;
 					$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";
 				} else {
 					$isnowregister = false;		
@@ -941,11 +960,18 @@
 				} else {
 					logging_add("ERROR: No valid zone data in file: ".$filenamecleared.""."\r\n");
 				}
+				
+				if(!$nowwritte AND @file_exists(@$filenamecleared) AND _CRON_BIND_FILE_REWRITE_) {
+					$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";				
+				}
 			}
 		}
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		if(file_exists(_CRON_BIND_FILE_TABLE_)) { @unlink(_CRON_BIND_FILE_TABLE_); }
-		@file_put_contents(_CRON_BIND_FILE_TABLE_, $conf_buildstring);	
+		if(file_exists(_CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master")) { 
+			$rnew = $conf_buildstring."\r\n\r\nzone \".\" {\r\n\ttype hint;\r\n\tfile \""._CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master\";\r\n};"; 
+		} else { $rnew = $conf_buildstring ;}
+		@file_put_contents(_CRON_BIND_FILE_TABLE_, $rnew);	
 		logging_add("OK: Trying to write Zone Table File: "._CRON_BIND_FILE_TABLE_."\r\n");
 		if(_CRON_BIND_FILE_REWRITE_ AND _CRON_BIND_FILE_) { 
 			logging_add("INFO: _CRON_BIND_FILE_ is set and _CRON_BIND_FILE_REWRITE_ is set!\r\n");
@@ -956,7 +982,9 @@
 				//check if file same
 				if(md5_file(_CRON_BIND_FILE_TEMP_."file1_tmp") === md5_file(_CRON_BIND_FILE_)) {
 					@unlink(_CRON_BIND_FILE_);
-					@file_put_contents(_CRON_BIND_FILE_, $conf_buildstring);	
+					if(file_exists(_CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master")) { $rnew = $conf_buildstring."\r\n\r\nzone \".\" {\r\n\ttype hint;\r\n\tfile \""._CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master\";\r\n};"; }
+					else { $rnew = $conf_buildstring ;}
+					@file_put_contents(_CRON_BIND_FILE_, $rnew);	
 					logging_add("OK: Trying to write Zone Table File: "._CRON_BIND_FILE_."\r\n");
 				} else {
 					logging_add("ERROR: File has been changed, waiting for next cron to reload zone table: "._CRON_BIND_FILE_."\r\n");

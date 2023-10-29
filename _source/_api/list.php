@@ -1,15 +1,25 @@
-<?php
-	/*
-		__________              _____.__       .__     
-		\______   \__ __  _____/ ____\__| _____|  |__  
-		 |    |  _/  |  \/ ___\   __\|  |/  ___/  |  \ 
-		 |    |   \  |  / /_/  >  |  |  |\___ \|   Y  \
-		 |______  /____/\___  /|__|  |__/____  >___|  /
-				\/     /_____/               \/     \/  API File to Fetch Domain Content */
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish - DNSHTTP Software / MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 	require_once("../settings.php");				
-	
-	// Class for Logging
-	$log_api	=	new x_class_log($mysql, _TABLE_LOG_, "api");
 	
 	// Check if Request is IP-Blocked
 	if($ipbl->isblocked()) {
@@ -26,7 +36,7 @@
 
 	// Display Content List of Local Domains
 	$domar	=	array();
-	$ar = $mysql->select("SELECT domain FROM "._TABLE_DOMAIN_BIND_." WHERE set_no_replicate = 0", true);	
+	$ar = $mysql->select("SELECT domain FROM "._TABLE_DOMAIN_BIND_."", true);	
 	if(is_array($ar)) {	
 		foreach($ar AS $key => $value) { array_push($domar, trim($value["domain"])); }
 		echo serialize($domar);

@@ -1,10 +1,24 @@
-<?php
-	/*	__________ ____ ___  ___________________.___  _________ ___ ___  
-		\______   \    |   \/  _____/\_   _____/|   |/   _____//   |   \ 
-		 |    |  _/    |   /   \  ___ |    __)  |   |\_____  \/    ~    \
-		 |    |   \    |  /\    \_\  \|     \   |   |/        \    Y    /
-		 |______  /______/  \______  /\___  /   |___/_______  /\___|_  / 
-				\/                 \/     \/                \/       \/  Referers Control Class */
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish Framework Codebase // MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 	class x_class_referer {
 		######################################################
 		// Class Variables
@@ -43,12 +57,12 @@
 		// Prepare URL for Database
 		######################################################
 		private function prepareUrl($tmpcode){
-			if(strpos($tmpcode, "?") > -1) 			{$tmpcode = @substr($tmpcode, 0, 	strpos($tmpcode, "?"));}
-			if(strpos($tmpcode, "&") > -1)			{$tmpcode = @substr($tmpcode, 0, 	strpos($tmpcode, "&"));} 
-			if(strpos($tmpcode, "https://") > -1)	{$tmpcode = @substr($tmpcode, 		strpos($tmpcode, "https://"));} 
-			if(strpos($tmpcode, "http://") > -1)	{$tmpcode = @substr($tmpcode, 		strpos($tmpcode, "http://"));} 
-			if(strpos($tmpcode, "www.") > -1)		{$tmpcode = @substr($tmpcode, 		strpos($tmpcode, "www."));} 
-			$return = urldecode(trim($tmpcode));
+			if(@strpos($tmpcode, "?") > -1) 			{$tmpcode = @substr($tmpcode, 0, 	@strpos($tmpcode, "?"));}
+			if(@strpos($tmpcode, "&") > -1)			{$tmpcode = @substr($tmpcode, 0, 	@strpos($tmpcode, "&"));} 
+			if(@strpos($tmpcode, "https://") > -1)	{$tmpcode = @substr($tmpcode, 		@strpos($tmpcode, "https://"));} 
+			if(@strpos($tmpcode, "http://") > -1)	{$tmpcode = @substr($tmpcode, 		@strpos($tmpcode, "http://"));} 
+			if(@strpos($tmpcode, "www.") > -1)		{$tmpcode = @substr($tmpcode, 		@strpos($tmpcode, "www."));} 
+			$return = @urldecode(trim($tmpcode));
 		}	
 
 		######################################################
@@ -62,7 +76,7 @@
 		// Execute Function
 		######################################################
 		public function execute(){
-			if ( $parts = parse_url( @$_SERVER["HTTP_REFERER"] ) AND $this->enabled) {
+			if ( $parts = @parse_url( @$_SERVER["HTTP_REFERER"] ) AND $this->enabled) {
 				$thecurrentreferer = $this->prepareUrl(@$parts[ "host" ]);
 				$b[0]["type"]	=	"s";
 				$b[0]["value"]	=	@substr(trim($thecurrentreferer), 0, 510);

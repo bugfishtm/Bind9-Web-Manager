@@ -1,10 +1,24 @@
-<?php
-	/*	__________ ____ ___  ___________________.___  _________ ___ ___  
-		\______   \    |   \/  _____/\_   _____/|   |/   _____//   |   \ 
-		 |    |  _/    |   /   \  ___ |    __)  |   |\_____  \/    ~    \
-		 |    |   \    |  /\    \_\  \|     \   |   |/        \    Y    /
-		 |______  /______/  \______  /\___  /   |___/_______  /\___|_  / 
-				\/                 \/     \/                \/       \/  Mail Templates Class */		
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish Framework Codebase // MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 	// Class for Handling Mail Templates and Substitutions to them, eventually directly send with x_class_mail
 	class x_class_mail_template {
 		// Class Variables
@@ -39,8 +53,11 @@
 								  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Identificator',
 								  `name` varchar(256) NOT NULL COMMENT 'Template Identifier',
 								  `subject` text NULL COMMENT 'Template Subject',
+								  `description` text NULL COMMENT 'Template Description',
 								  `content` text DEFAULT NULL COMMENT 'Template Content',
 								  `section` VARCHAR(128) DEFAULT NULL COMMENT 'Related Section',
+								  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation',
+								  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Modification | Auto - Set',
 								  PRIMARY KEY (`id`),
 								  UNIQUE KEY `Unique` (`name`, `section`));");}
 
@@ -58,12 +75,12 @@
 		// Add Substitutions
 		public function add_substitution($name, $replace) { 
 			$substitute = $this->substitute; 
-			array_push($substitute, array(array($name, $replace)));
+			array_push($substitute, array($name, $replace));
 			$this->substitute = $substitute;}
 		// Do Substitutions on Text
 		public function do_substitute($text) {
 			if(is_array($this->substitute)) {
-				foreach($this->substitute as $key => $value) { $text = str_replace($value[0], $value[1], $text); }
+				foreach($this->substitute as $key => $value) { $text = @str_replace($value[0], $value[1], $text); }
 				return $text;
 			}			
 		}			
@@ -87,7 +104,7 @@
 		}			
 		
 		// Setup new Mail template 
-		public function setup($name, $subject, $content, $overwrite = false) {
+		public function setup($name, $subject, $content, $description = "", $overwrite = false) {
 			$ar = $this->mysql->select("SELECT * FROM `".$this->table."` WHERE name = '".$this->mysql->escape($name)."' AND section = '".$this->section."'", false);
 			if(is_array($ar)) {
 				if($overwrite) { 
@@ -95,14 +112,80 @@
 					$bind[0]["type"] = "s";
 					$bind[1]["value"] = $content;
 					$bind[1]["type"] = "s";
-					$this->mysql->query("UPDATE `".$this->table."` SET name = '".$name."', subject = ?, content = ? WHERE name = '".$this->mysql->escape($name)."' AND section = '".$this->section."'", $bind);
+					$bind[2]["value"] = $description;
+					$bind[2]["type"] = "s";
+					$this->mysql->query("UPDATE `".$this->table."` SET name = '".$name."', subject = ?, content = ?, description = ? WHERE name = '".$this->mysql->escape($name)."' AND section = '".$this->section."'", $bind);
 				}
 			} else { 
 				$bind[0]["value"] = $subject;
 				$bind[0]["type"] = "s";
 				$bind[1]["value"] = $content;
 				$bind[1]["type"] = "s";
-				$this->mysql->query("INSERT INTO `".$this->table."` (name, subject, content, section) VALUES('".$name."', ?, ?, '".$this->section."');", $bind);
+				$bind[2]["value"] = $description;
+				$bind[2]["type"] = "s";
+				$this->mysql->query("INSERT IGNORE INTO `".$this->table."` (name, subject, content, description, section) VALUES('".$name."', ?, ?, ?,'".$this->section."');", $bind);
+				return $this->mysql->insert_id;
+			}			
+		}
+		
+		// Setup new Mail template 
+		public function change($id, $name, $subject, $content, $description = "") {
+			if(!is_numeric($id)) { return false; }
+			$ar = $this->mysql->select("SELECT * FROM `".$this->table."` WHERE id = '".$id."' AND section = '".$this->section."'", false);
+			if(is_array($ar)) {
+				$bind[0]["value"] = $subject;
+				$bind[0]["type"] = "s";
+				$bind[1]["value"] = $content;
+				$bind[1]["type"] = "s";
+				$bind[2]["value"] = $description;
+				$bind[2]["type"] = "s";
+				$this->mysql->query("UPDATE `".$this->table."` SET name = '".$name."', subject = ?, content = ?, description = ? WHERE id = '".$id."' AND section = '".$this->section."'", $bind);
+			}		
+		}
+		
+		public function name_exists($name) {
+			$bind[0]["value"] = $name;
+			$bind[0]["type"] = "s";
+			$ar = $this->mysql->select("SELECT * FROM `".$this->table."` WHERE name = ? AND section = '".$this->section."'", false, $bind);
+			if(is_array($ar)) {
+				return true;
+			} else { 
+				return false;
+			}			
+		}
+
+		public function get_name_by_id($id) {
+			if(!is_numeric($id)) { return false; }
+			$ar = $this->mysql->select("SELECT * FROM `".$this->table."` WHERE id = '".$id."' AND section = '".$this->section."'", false);
+			if(is_array($ar)) {
+				return $ar["name"];
+			} else { 
+				return false;
+			}			
+		}
+		
+		public function id_exists($id) {
+			if(!is_numeric($id)) { return false; }
+			$ar = $this->mysql->select("SELECT * FROM `".$this->table."` WHERE id = '".$id."' AND section = '".$this->section."'", false);
+			if(is_array($ar)) {
+				return true;
+			} else { 
+				return false;
+			}			
+		}
+		
+		public function id_delete($id) {
+			if(!is_numeric($id)) { return false; }
+			return $this->mysql->query("DELETE FROM `".$this->table."` WHERE id = '".$id."' AND section = '".$this->section."'");
+		}
+		
+		public function get_full($id) {
+			if(!is_numeric($id)) { return false; }
+			$ar = $this->mysql->select("SELECT * FROM `".$this->table."` WHERE id = '".$id."' AND section = '".$this->section."'", false);
+			if(is_array($ar)) {
+				return $ar;
+			} else { 
+				return false;
 			}			
 		}
 	} 

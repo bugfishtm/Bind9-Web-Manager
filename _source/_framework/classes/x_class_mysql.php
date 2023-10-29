@@ -1,10 +1,24 @@
-<?php
-	/*	__________ ____ ___  ___________________.___  _________ ___ ___  
-		\______   \    |   \/  _____/\_   _____/|   |/   _____//   |   \ 
-		 |    |  _/    |   /   \  ___ |    __)  |   |\_____  \/    ~    \
-		 |    |   \    |  /\    \_\  \|     \   |   |/        \    Y    /
-		 |______  /______/  \______  /\___  /   |___/_______  /\___|_  / 
-				\/                 \/     \/                \/       \/  MySQL Control Class */
+<?php 
+	/* 	
+		@@@@@@@   @@@  @@@   @@@@@@@@  @@@@@@@@  @@@   @@@@@@   @@@  @@@  
+		@@@@@@@@  @@@  @@@  @@@@@@@@@  @@@@@@@@  @@@  @@@@@@@   @@@  @@@  
+		@@!  @@@  @@!  @@@  !@@        @@!       @@!  !@@       @@!  @@@  
+		!@   @!@  !@!  @!@  !@!        !@!       !@!  !@!       !@!  @!@  
+		@!@!@!@   @!@  !@!  !@! @!@!@  @!!!:!    !!@  !!@@!!    @!@!@!@!  
+		!!!@!!!!  !@!  !!!  !!! !!@!!  !!!!!:    !!!   !!@!!!   !!!@!!!!  
+		!!:  !!!  !!:  !!!  :!!   !!:  !!:       !!:       !:!  !!:  !!!  
+		:!:  !:!  :!:  !:!  :!:   !::  :!:       :!:      !:!   :!:  !:!  
+		 :: ::::  ::::: ::   ::: ::::   ::        ::  :::: ::   ::   :::  
+		:: : ::    : :  :    :: :: :    :        :    :: : :     :   : :  
+		   ____         _     __                      __  __         __           __  __
+		  /  _/ _    __(_)__ / /    __ _____  __ __  / /_/ /  ___   / /  ___ ___ / /_/ /
+		 _/ /  | |/|/ / (_-</ _ \  / // / _ \/ // / / __/ _ \/ -_) / _ \/ -_|_-</ __/_/ 
+		/___/  |__,__/_/___/_//_/  \_, /\___/\_,_/  \__/_//_/\__/ /_.__/\__/___/\__(_)  
+								  /___/                           
+		Bugfish Framework Codebase // MIT License
+		// Autor: Jan-Maurice Dahlmanns (Bugfish)
+		// Website: www.bugfish.eu 
+	*/
 	class x_class_mysql {
 		/*	___________     ___.   .__                 
 			\__    ___/____ \_ |__ |  |   ____   ______
@@ -24,32 +38,105 @@
 								  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date',
 								  `section` varchar(64) DEFAULT NULL COMMENT 'Related Section',
 								  PRIMARY KEY (`id`));");}
-
+		/*	  ____  ____   ____   _______/  |________ __ __   _____/  |_ 
+			_/ ___\/  _ \ /    \ /  ___/\   __\_  __ \  |  \_/ ___\   __\
+			\  \__(  <_> )   |  \\___ \  |  |  |  | \/  |  /\  \___|  |  
+			 \___  >____/|___|  /____  > |__|  |__|  |____/  \___  >__|  
+				 \/           \/     \/                          \/       Constructor and Status Functions */
+		/********************** Public but Readonly Parameters ****/	 
+			public $mysqlcon    = false; // MySQLI Object
+			public $lasterror	= false; // Error out of Last Request		
+			public $fullerror   = false; // Error Full out of Last Request
+			public $insert_id	= false; // Last Insert ID			
+			public $transaction = false; // Is a Transaction Running?
+			public $auth_user	= false; 
+			public $auth_pass	= false; 
+			public $auth_host	= false; 
+			public $auth_db = false;
+			public $auth_port = 3306;
+		/********************** Construct Connection ****/	
+		function __construct($hostname, $username, $password, $database, $port = 3306) {
+			$this->auth_user = $username;
+			$this->auth_pass = $password;
+			$this->auth_host = $hostname;
+			$this->auth_db = $database;
+			$this->auth_port = $port;
+			try { $this->mysqlcon = @mysqli_connect($hostname, $username, $password, $database, $port); 
+				   if(@mysqli_connect_errno()) { $this->lasterror  =  @mysqli_connect_error(); } else { $this->lasterror = false; }
+			} catch (Exception $e){ $this->lasterror = $e; } }			
+		/**************** Internal Function to get Class Copy */
+		public function construct() { return new x_class_mysql($this->auth_host, $this->auth_user, $this->auth_pass, $this->auth_db, $this->auth_port); }			
+		/**************** Internal Function to get Class Copy */
+		public function construct_copy() { return $this; }			
+		/********************** Get Connection Status (ping alias) ****/	
+		public function status() { return $this->ping(); }
+		/********************** Get Connection ****/	
+		public function con() { return $this->mysqlcon; }			
+		/********************** Last Error ****/	
+		public function lastError() { return $this->lasterror; }			
+		public function last_error() { return $this->lasterror; }			
+		/********************** Get Ping MySQL Status ****/	
+		public function ping() { try { return $this->handler(mysqli_ping($this->mysqlcon), false, "ping", false); 
+			} catch (Exception $e){ return $this->handler(false, $e, "ping", false); }  }	
+		/********************** Full Error ****/	
+		public function fullError() { return $this->fullerror; }			
+		public function full_error() { return $this->fullerror; }
+		/********************** Full Error ****/	
+		public function last_insert() { return $this->insert_id; }			
+		public function lastinsert() { return $this->insert_id; }
+		public function insert_id() { return $this->insert_id; }			
+		public function insertid() { return $this->insert_id; }
+		/********************** Inject ****/
+		public function inject($mysqli) { if(is_object($mysqli)) { $this->mysqlcon = $mysqli; return true; } return false; }
+		/*	___.                        .__                          __    
+			\_ |__   ____   ____   ____ |  |__   _____ _____ _______|  | __
+			 | __ \_/ __ \ /    \_/ ___\|  |  \ /     \\__  \\_  __ \  |/ /
+			 | \_\ \  ___/|   |  \  \___|   Y  \  Y Y  \/ __ \|  | \/    < 
+			 |___  /\___  >___|  /\___  >___|  /__|_|  (____  /__|  |__|_ \
+				 \/     \/     \/     \/     \/      \/     \/           \/ */		
+		private $bm	  	  = false;	private $bmcookie  = false; 
+		public function benchmark_get() { 
+			if( $this->bm) { return $_SESSION[$this->bmcookie."x_class_mysql"]; } 
+			return false;}		
+		private function benchmark_raise($raise = 1) {if( $this->bm) {  
+			$_SESSION[$this->bmcookie."x_class_mysql"] = @$_SESSION[$this->bmcookie."x_class_mysql"] + 1; 
+		} } 
+		public function benchmark_config($bool = false, $preecookie = "") {
+			if (session_status() !== PHP_SESSION_ACTIVE) {@session_start();}
+			$this->bmcookie = $preecookie;
+			$this->bm  	= $bool;
+			$_SESSION[$this->bmcookie."x_class_mysql"] = 0; }
 		/*	.____                        .__                
 			|    |    ____   ____   ____ |__| ____    ____  
 			|    |   /  _ \ / ___\ / ___\|  |/    \  / ___\ 
 			|    |__(  <_> ) /_/  > /_/  >  |   |  \/ /_/  >
 			|_______ \____/\___  /\___  /|__|___|  /\___  / 
-					\/    /_____//_____/         \//_____/ 		*/
-			private $logfile_messages = false; public function logfile_messages($bool = false) { $this->logfile_messages = $bool; }
-			private $logging_active = false; private $logging_table = ""; private $logging_section = ""; private $logging_all = false;
+					\/    /_____//_____/         \//_____/ 	Setup	*/						  
+			private $logfile_messages = false; 
+			public function logfile_messages($bool = false) { $this->logfile_messages = $bool; }				
 			public function log_disable() { $this->logging_active = false; }
-			public function log_enable() { $this->logging_active = true; }
+			public function log_status() { return $this->logging_active; } 
+			public function log_enable() { if($this->logging_table) { $this->logging_active = true; } }
+			private function log_con() { return new x_class_mysql($this->auth_host, $this->auth_user, $this->auth_pass, $this->auth_db, $this->auth_port); }	
+				private $logging_active = false;
+				private $logging_table = false;
+				private $logging_section = "";
+				private $logging_all = false;
+			private $stop_on_error	  = false; public function stop_on_error($bool = false) { $this->stop_on_error  = $bool; } // Stop if Error?
+			private $display_on_error = false; public function display_on_error($bool = false) { $this->display_on_error  = $bool; } // Display 
 			public function log_config($table = "mysqllogging", $section = "", $logall = false) {
-				$this->logging_active = true; 
 				$this->logging_all = $logall; 
-				$this->logging_table = $table; 
+				$this->logging_table = $table;
 				$this->logging_section = $section;
+				if($this->logging_table) { $this->logging_active = true; }				
 				if(!$this->table_exists($this->logging_table)) { $this->create_table(); $this->free_all(); } }
-			private function log($output, $sqlerror, $exception, $init, $boolsuccess, $nolog = false) { if($this->logging_active AND !$nolog) {
-				if(!$this->logging_all AND (!@$exception OR (trim($sqlerror) == "" OR !$sqlerror))) { return false; }
-				if(!$this->logging_all AND $boolsuccess != 0) { return false; }
-				
-				if( $this->logfile_messages) {
-					error_log("X_CLASS_MYSQL_ERROR: [INIT] ".@serialize(@$init)." [EXCEPTION] ".@serialize(@$exception)." [SQLERROR] ".@serialize(@$sqlerror)." [OUTPUT] ".@serialize(@$output)." ");
-				}
-				
-				$mysql = $this->log_con();
+			private function log($output, $sqlerror, $exception, $init, $boolsuccess, $nolog = false) { 
+				if($this->logging_active AND !$nolog) {
+					if(!$this->logging_all AND $boolsuccess != 0) { return false; }
+					if(!$this->logging_all AND (!@$exception OR (trim($sqlerror) == "" OR !$sqlerror))) { return false; }
+					if( $this->logfile_messages) {
+						error_log("X_CLASS_MYSQL[ERR]: [Initial Query] ".@serialize(@$init)." [Exception Result] ".@serialize(@$exception)." [SQL Error Result] ".@serialize(@$sqlerror)." [Additional Output] ".@serialize(@$output)." [URL] ".@trim(@$_SERVER["REQUEST_URI"])." ");}
+				$mysql = $this->log_con();	 
 				$inarray["section"] = $this->logging_section;
 				$inarray["url"] = @trim(@$_SERVER["REQUEST_URI"]);
 				$inarray["sqlerror"] = @$sqlerror;
@@ -66,98 +153,44 @@
 						$b[3]["type"] = "s";
 						$b[3]["value"] = $inarray["init"];
 						$b[4]["type"] = "s";
-						$b[4]["value"] = $inarray["output"];
-						$x = $mysql->query("INSERT INTO `".$this->logging_table."`(url, sqlerror, exception, init, output, section, success) VALUES(?, ?,?,?,?, \"".$inarray["section"]."\", ".$boolsuccess.");", $b);
-						return $x;}
-				 catch (Exception $e){ return false; }
-				} return false; }
-			private function log_con() { return new x_class_mysql($this->auth_host, $this->auth_user, $this->auth_pass, $this->auth_db); }	
-				
-		/*	__   ____ _ _ __ ___ 
-			\ \ / / _` | '__/ __|
-			 \ V / (_| | |  \__ \
-			  \_/ \__,_|_|  |___/	*/			 
-			public  $mysqlcon		  = false; // MySQLI Object
-			private $transaction      = false; // Is a Transaction Running?
-			public  $lasterror		  = false; // Error out of Last Request
-			public  $fullerror	  	  = false; // Error Full out of Last Request
-			public  $insert_id	  	  = false; // Last Insert ID
-			private $stop_on_error	  = false; public function stop_on_error($bool = false) { $this->stop_on_error  = $bool; } // Stop if Error?
-			private $display_on_error = false; public function display_on_error($bool = false) { $this->display_on_error  = $bool; } // Display Errors?				
-												  
-		/*	___.                        .__                          __    
-			\_ |__   ____   ____   ____ |  |__   _____ _____ _______|  | __
-			 | __ \_/ __ \ /    \_/ ___\|  |  \ /     \\__  \\_  __ \  |/ /
-			 | \_\ \  ___/|   |  \  \___|   Y  \  Y Y  \/ __ \|  | \/    < 
-			 |___  /\___  >___|  /\___  >___|  /__|_|  (____  /__|  |__|_ \
-				 \/     \/     \/     \/     \/      \/     \/           \/ */								  
-			private $bm	  	  = false;	private $bmcookie  = false; 				  
-			private function benchmark_raise($raise = 1) {if( $this->bm) {  $_SESSION[$this->bmcookie."x_class_mysql"] = $_SESSION[$this->bmcookie."x_class_mysql"] + 1; } } 
-			public function benchmark_get() { if( $this->bm) { return $_SESSION[$this->bmcookie."x_class_mysql"]; } return false;}						
-			public function benchmark_config($bool = false, $preecookie = "") {$this->bmcookie = $preecookie;$this->bm  	= $bool;$_SESSION[$this->bmcookie."x_class_mysql"] = 0;}		
-				
+						$b[4]["value"] = $inarray["output"];	
+						return $mysql->query("INSERT INTO `".$this->logging_table."`(url, sqlerror, exception, init, output, section, success) VALUES(?, ?,?,?,?, \"".$inarray["section"]."\", ".$boolsuccess.");", $b);
+				} catch (Exception $e){ return false; } } return false; }
 		/*	  ___ ___                    .___.__                
 			 /   |   \_____    ____    __| _/|  |   ___________ 
 			/    ~    \__  \  /    \  / __ | |  | _/ __ \_  __ \
 			\    Y    // __ \|   |  \/ /_/ | |  |_\  ___/|  | \/
 			 \___|_  /(____  /___|  /\____ | |____/\___  >__|   
-				   \/      \/     \/      \/           \/        */					
-		private function handler($excecution, $exception, $init, $nolog = false) {	
-			// Benchmark Raise
+				   \/      \/     \/      \/           \/        */	
+		private function handler($excecution, $exception, $init, $nolog = false) {			
 			$this->benchmark_raise();
-			$this->fullerror = array();
-			// Handle Exception
-			if(is_object($exception)) {
-				// Set Last Error and Full Error
-				$this->fullerror["mysql"] = @mysqli_error($this->mysqlcon);
-				$this->fullerror["exception"] = @serialize(@$e);
-				$this->fullerror["init"] = $init;
-				$this->fullerror["output"] = @serialize(@$excecution);
-				$this->lasterror = true;
-				
-				// Log Error
-				$this->log($excecution, $this->fullerror["mysql"], $exception, $init, 0, $nolog);
-				
-				// Display and Stop
-				if($this->display_on_error AND $this->lasterror) { echo print_r($this->fullerror); }
-				if($this->stop_on_error AND $this->lasterror) { exit(); }
-				
-				// Return false on Exception
-				return false;
-			}
-
-			// Set Last Error and Full Error
+			$this->fullerror = array();				
+			$this->lasterror = false;		
 			$this->fullerror["mysql"] = @mysqli_error($this->mysqlcon);
-			$this->fullerror["exception"] = false;
-			$this->fullerror["init"] = $init;
 			$this->fullerror["output"] = @serialize(@$excecution);
-			
-			// Set Last Error
-			if(!$excecution) {$curer = 1;} else {$curer = 0;} 
-			$this->lasterror = $curer;
-
-			// Insert Last Insert ID
-			@$this->insert_id = $this->mysqlcon->insert_id; 
-
-			// Log if Needed
-			if($this->lasterror) {$curer = 0;} else {$curer = 1;} 
-			$this->log($excecution, $this->fullerror["mysql"], false, $init, $curer, $nolog);
-			
-			// Display and Stop
+			$this->fullerror["init"] = $init;
+			if(is_object($exception)) { $this->fullerror["exception"] = @serialize(@$e); }
+				else { $this->fullerror["exception"] = false; }
+			if(is_object($exception)) { $this->lasterror = 1;	} 
+				else {  if(!$excecution) {$curer = 1;} else {$curer = 0;} $this->lasterror = $curer;  }
+			if(!is_object($exception)) { @$this->insert_id = $this->mysqlcon->insert_id; }
+			if(is_object($exception)) {	
+				$this->log($excecution, $this->fullerror["mysql"], $exception, $init, 0, $nolog);
+			} else { if($this->lasterror) {$curer = 0;} else {$curer = 1;}   
+				$this->log($excecution, $this->fullerror["mysql"], false, $init, $curer, $nolog); }
 			if($this->display_on_error AND $this->lasterror) { echo print_r($this->fullerror); }
 			if($this->stop_on_error AND $this->lasterror) { exit(); }
-					
-			// Return Execution if False / True
-			return $excecution;}				
-				
+			if(is_object($exception)) {	
+				return false;
+			} return $excecution; }
 		/*	___________                           
 			\_   _____/_____________  ___________ 
 			 |    __)_\_  __ \_  __ \/  _ \_  __ \
 			 |        \|  | \/|  | \(  <_> )  | \/
 			/_______  /|__|   |__|   \____/|__|   
-					\/                                */
-		public function displayError($exit = false) {
-			http_response_code(503);
+					\/                                */			
+		public function displayError($exit = true, $response_code = 503) {			
+			@http_response_code($response_code);
 			echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
 			"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 			<html version="-//W3C//DTD XHTML 1.1//EN"
@@ -170,7 +203,6 @@
 					<meta http-equiv="content-Type" content="text/html; utf-8" />
 					<meta name="robots" content="noindex, nofollow" />
 					<meta http-equiv="Pragma" content="no-cache" />
-					<meta http-equiv="content-Language" content="en" />
 					<meta name="viewport" content="width=device-width, initial-scale=1">
 					<style>
 					html, body { background: blue; color: white; font-family: Arial; text-align: center; margin: 0 0 0 0; padding: 0 0 0 0; position: absolute; width: 100%; top: 0px; left: 0px; height: 100vh; }
@@ -182,20 +214,26 @@
 				</head>
 				<body>
 					<div id="dberrorwrapper"><font size="+5">Error 503</font><br/><font size="+3">Site under Maintenance...</font><br />Please check in later! x)<br />The MySQL Server Connection has failed!</div>
-				</body></html>';if($exit){exit();}}				
-				
+				</body></html>'	;  if($exit){exit();}}		
 		/*	___________     ___.   .__                 
 			\__    ___/____ \_ |__ |  |   ____   ______
 			  |    |  \__  \ | __ \|  | _/ __ \ /  ___/
 			  |    |   / __ \| \_\ \  |_\  ___/ \___ \ 
 			  |____|  (____  /___  /____/\___  >____  >
 						   \/    \/          \/     \/  */
-		public function table_exists($tablename){return $this->query("SELECT 1 FROM `".$tablename."` LIMIT 1;"); } 
-		public function table_delete($tablename){return $this->update('DROP TABLE `'.$tablename.'`');}
-		public function table_create($tablename){return $this->update('CREATE TABLE `'.$tablename.'`');}	
-		public function auto_increment($table, $value){ return $this->query('ALTER TABLE `'.$tablename.'`'. " AUTO_INCREMENT = ".$value);}	
-		public function table_backup($table, $filepath = false, $withdata = true, $dropstate = false){  $data = ""; $this->lasterror = false;
-			// Create and Write Backup to File 
+		public function table_exists($tablename){$x = $this->log_status(); $this->log_disable();  $bind[0]["value"] = $tablename; $bind[0]["type"] = "s";
+										$y =  $this->query("SELECT 1 FROM `".$tablename."` LIMIT 1;"); if($x) {$this->log_enable();} return $y;} 
+		public function table_delete($tablename){ $bind[0]["value"] = $tablename; $bind[0]["type"] = "s"; 
+										return $this->query('DROP TABLE `'.$tablename.'`'); }										
+		public function table_create($tablename){ $bind[0]["value"] = $tablename; $bind[0]["type"] = "s";
+										return $this->update('CREATE TABLE `".$tablename."`'); }										
+		public function auto_increment($table, $value){ $bind[0]["value"] = $table; $bind[0]["type"] = "s"; 
+														$bind[1]["value"] = $value; $bind[1]["type"] = "i";
+										return $this->query('ALTER TABLE ?'. " AUTO_INCREMENT = ?"); }
+		public function table_backup($table, $filepath = false, $withdata = true, $dropstate = false){
+			$this->lasterror = false;
+			$this->fullerror = array();
+			$data = "";
 			if($dropstate) { $data.= "DROP TABLE IF EXISTS `{$table}`;\n"; }
 			$res = $this->query("SHOW CREATE TABLE `{$table}`");
 			$row = mysqli_fetch_row($res);
@@ -211,42 +249,24 @@
 					for($j=0; $j<count($items); $j++){
 					  if (isset($items[$j])) { $vals[$z].= "'".$this->escape( $items[$j] )."'"; } else { $vals[$z].= "NULL"; }
 					  if ($j<(count($items)-1)){ $vals[$z].= ","; }
-					}
-					$vals[$z].= ")"; $z++;
-				  }
+					}$vals[$z].= ")"; $z++; }
 				  $data.= "INSERT INTO `{$table}` VALUES ";      
 				  $data .= "  ".implode(";\nINSERT INTO `{$table}` VALUES ", $vals).";\n";
-				}
-			  }
-		    // Finalize
-			if($filepath) { $handle = fopen($filepath,'w+');fwrite($handle,$data);fclose($handle); } return $data;}
-		
+				}}
+			if($filepath) { $handle = fopen($filepath,'w+');fwrite($handle,$data);fclose($handle); } return $data;}				
 		/*	________          __        ___.                                
 			\______ \ _____ _/  |______ \_ |__ _____    ______ ____   ______
 			 |    |  \\__  \\   __\__  \ | __ \\__  \  /  ___// __ \ /  ___/
 			 |    `   \/ __ \|  |  / __ \| \_\ \/ __ \_\___ \\  ___/ \___ \ 
 			/_______  (____  /__| (____  /___  (____  /____  >\___  >____  >
-					\/     \/          \/    \/     \/     \/     \/     \/   */
-		public function database_delete($database){return $this->update('DROP DATABASE `'.$database.'`');}
-		public function database_create($database){return $this->update('CREATE DATABASE `'.$database.'`');}
-		public function database_select($database) { try { return $this->handler(mysqli_select_db($this->mysqlcon, $database), false, "database_select: ".$database, false); } catch (Exception $e){ return $this->handler(false, $e, "database_select: ".$database, false); }}
-			
-		/*				  .__   __  .__                                     
-			  _____  __ __|  |_/  |_|__|   ________ __   ___________ ___.__.
-			 /     \|  |  \  |\   __\  |  / ____/  |  \_/ __ \_  __ <   |  |
-			|  Y Y  \  |  /  |_|  | |  | < <_|  |  |  /\  ___/|  | \/\___  |
-			|__|_|  /____/|____/__| |__|  \__   |____/  \___  >__|   / ____|
-				  \/                         |__|           \/       \/        */
-		public function multi_query($query) { 
-			try { return $this->handler($this->mysqlcon->multi_query($query), false, "multi_query: ".$query, false);
-			} catch (Exception $e){ return $this->handler(false, $e, "multi_query: ".$query, false); }}
-		public function multi_query_file($file) { 
-			if(file_exists($file)) {
-				try { $sql = file_get_contents($file);
-					return $this->handler($this->mysqlcon->multi_query($sql), false, "multi_query_file: ".$file, false);
-				} catch (Exception $e){ return $this->handler(false, $e, "multi_query_file: ".$file, false); }
-			} return false;}
-
+					\/     \/          \/    \/     \/     \/     \/     \/   */	
+		public function database_delete($database){ $bind[0]["value"] = $database; $bind[0]["type"] = "s";
+												return $this->query('DROP DATABASE ?');}
+		public function database_create($database){ $bind[0]["value"] = $database; $bind[0]["type"] = "s";
+												return $this->query('CREATE DATABASE ?');}
+		public function database_select($database){ try {
+				return $this->handler(mysqli_select_db($this->mysqlcon, $database), false, "database_select: ".$database, false); 
+				} catch (Exception $e){ return $this->handler(false, $e, "database_select: ".$database, false); }}		
 		/*	 _                                  _   _                 
 			| |                                | | (_)                
 			| |_ _ __ __ _ _ __  ___  __ _  ___| |_ _  ___  _ __  ___ 
@@ -260,23 +280,71 @@
 		/********************** Get Transaction Status ****/
 		public function transactionStatus() { return $this->transaction; }
 		/********************** Commit a Transaction ****/
-		public function commit() {try { if($this->transaction) {  $this->transaction = false; return $this->handler(mysqli_commit($this->mysqlcon), false, "commit", false); } return false; } catch (Exception $e){ return $this->handler(false, $e, "commit", false); }}
-
+		public function commit() {try { if($this->transaction) {  $this->transaction = false; return $this->handler(mysqli_commit($this->mysqlcon), false, "commit", false); } return false; } catch (Exception $e){ return $this->handler(false, $e, "commit", false); }}		
+		/*		________                              __  .__                      
+				\_____  \ ______   ________________ _/  |_|__| ____   ____   ______
+				 /   |   \\____ \_/ __ \_  __ \__  \\   __\  |/  _ \ /    \ /  ___/
+				/    |    \  |_> >  ___/|  | \// __ \|  | |  (  <_> )   |  \\___ \ 
+				\_______  /   __/ \___  >__|  (____  /__| |__|\____/|___|  /____  >
+						\/|__|        \/           \/                    \/     \/    */
+		/********************** Destroy Connection ****/	
+		function __destruct() { /* Nothing */ }
+		/********************** Mysql Filter a Variable ****/	
+		public function escape($val) 	{ if(!is_object($val) AND !is_array($val)) { return @mysqli_real_escape_string($this->mysqlcon, $val); } else { $val = serialize($val); return @mysqli_real_escape_string($this->mysqlcon, $val);} }			
+		/**************** Next Result */
+		public function next_result() { try {  return mysqli_next_result($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "next_result", false); } }
+		/**************** Store Result */
+		public function store_result() { try {  return mysqli_store_result($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "store_result", false); }  }
+		/**************** More Results? */
+		public function more_results() { try {  return mysqli_more_results($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "more_results", false); } }
+		/**************** Store Result Array */
+		public function fetch_array($result) { try { return mysqli_fetch_array($result); } catch(Exception $e) { return $this->handler(false, $e, "fetch_array", false); } }
+		/**************** Store Result Object */
+		public function fetch_object($result) { try { return mysqli_fetch_object($result); } catch(Exception $e) { return $this->handler(false, $e, "fetch_object", false); } }
+		/**************** Free Result */
+		public function free_result($result) { try { return mysqli_free_result($result); } catch(Exception $e) { return $this->handler(false, $e, "free_result", false); } }			
+		/**************** Free Result */
+		public function use_result() { try { return mysqli_use_result($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "use_result", false); } }			
+		/**************** Free All */
+		public function free_all() { 
+			$results = array();	
+			try {$x = false;
+				try { $x = mysqli_use_result($this->mysqlcon); } catch (Exception $e){  }
+				if(is_object($x)) { $y = mysqli_fetch_object($x); array_push($results, $y); mysqli_free_result($x); }
+				while ($this->more_results()) {
+					if ($this->next_result()) {
+						$x = $this->store_result($this->mysqlcon);
+						if(is_object($x)) { $y = mysqli_fetch_object($x); array_push($results, $y); mysqli_free_result($x); }
+					}}	
+			} catch (Exception $e){ return $this->handler(false, $e, "free_all", false); }
+			return $results;}				
+		/*				  .__   __  .__                                     
+			  _____  __ __|  |_/  |_|__|   ________ __   ___________ ___.__.
+			 /     \|  |  \  |\   __\  |  / ____/  |  \_/ __ \_  __ <   |  |
+			|  Y Y  \  |  /  |_|  | |  | < <_|  |  |  /\  ___/|  | \/\___  |
+			|__|_|  /____/|____/__| |__|  \__   |____/  \___  >__|   / ____|
+				  \/                         |__|           \/       \/        */			
+		public function multi_query($query) { 
+			try { return $this->handler($this->mysqlcon->multi_query($query), false, "multi_query: ".$query, false);
+			} catch (Exception $e){ return $this->handler(false, $e, "multi_query: ".$query, false); }}
+		public function multi_query_file($file) { 
+			if(file_exists($file)) {
+				try { $sql = file_get_contents($file);
+					return $this->handler($this->mysqlcon->multi_query($sql), false, "multi_query_file: ".$file, false);
+				} catch (Exception $e){ return $this->handler(false, $e, "multi_query_file: ".$file, false); }
+			} return false;}				
 		/*	____   ____      .__                        
 			\   \ /   /____  |  |  __ __   ____   ______
 			 \   Y   /\__  \ |  | |  |  \_/ __ \ /  ___/
 			  \     /  / __ \|  |_|  |  /\  ___/ \___ \ 
 			   \___/  (____  /____/____/  \___  >____  >
-						   \/                 \/     \/ 	Decrease / Increase Values Dynamically and SQL Injection Safe! (shall be)*/
+						   \/                 \/     \/ 	Decrease / Increase Values Dynamically and SQL Injection Safe! (shall be)*/				
 		public function row_element_increase($table, $nameidfield, $id, $increasefield, $increasevalue = 1){
-			try {  return $this->update("UPDATE ".$table." SET ".$increasefield." = ".$increasefield." + ".$increasevalue." WHERE ".$nameidfield." = '".$id."'");
-			} catch (Exception $e){ return $this->handler(false, $e, "row_element_increase: ".$table."; ".$nameidfield."; ".$id."; ".$increasefield.";", false); }}
-				
+			if(!is_numeric($id) OR !is_numeric($increasevalue)) { return false; }
+			return $this->update("UPDATE ".$table." SET ".$increasefield." = ".$increasefield." + ".$increasevalue." WHERE ".$nameidfield." = '".$id."'");}
 		public function row_element_decrease($table, $nameidfield, $id, $decreasefield, $decreasevalue = 1){
-			try{ return $this->update("UPDATE ".$table." SET ".$increasefield." = ".$decreasefield." + ".$decreasevalue." WHERE ".$nameidfield." = '".$id."'");
-			} catch (Exception $e){ return $this->handler(false, $e, "row_element_decrease: ".$table."; ".$nameidfield."; ".$id."; ".$decreasefield.";", false); }}	
-			
-		/**********************  Get Values Dynamically and SQL Injection Safe! (shall be) ****/
+			if(!is_numeric($id) OR !is_numeric($decreasevalue)) { return false; }
+			return $this->update("UPDATE ".$table." SET ".$increasefield." = ".$decreasefield." + ".$decreasevalue." WHERE ".$nameidfield." = '".$id."'"); }
 		public function row_get($table, $id, $row = "id") { 
 			$bindar[0]["value"] = $id;
 			$bindar[0]["type"]  = "s";
@@ -307,75 +375,7 @@
 		public function row_del($table, $id, $row = "id") { 
 			$bindar[0]["value"] = $id;
 			$bindar[0]["type"]  = "s";		
-			return $this->query("DELETE FROM `".$table."` WHERE ".$row." = ?", $bindar); }				
-			
-		/*			   _          
-					  (_)         
-			 _ __ ___  _ ___  ___ 
-			| '_ ` _ \| / __|/ __|
-			| | | | | | \__ \ (__ 
-			|_| |_| |_|_|___/\___|  Usefull Smart Functions */
-		/********************** Destroy Connection ****/	
-		function __destruct() { /* Nothing */ }
-		/********************** Mysql Filter a Variable ****/	
-		public function escape($val) 	{ if(!is_object($val) AND !is_array($val)) { return @mysqli_real_escape_string($this->mysqlcon, $val); } else { $val = serialize($val); return @mysqli_real_escape_string($this->mysqlcon, $val);} }		
-		/********************** Return Last Insert ID (may not trustable) ****/	
-		public function insert_id() 	{ return $this->mysqlcon->insert_id; }				
-		/**************** Next Result */
-		public function next_result() { try {  return mysqli_next_result($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "next_result", false); } }
-		/**************** Store Result */
-		public function store_result() { try {  return mysqli_store_result($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "store_result", false); }  }
-		/**************** More Results? */
-		public function more_results() { try {  return mysqli_more_results($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "more_results", false); } }
-		/**************** Store Result Array */
-		public function fetch_array($result) { try { return mysqli_fetch_array($result); } catch(Exception $e) { return $this->handler(false, $e, "fetch_array", false); } }
-		/**************** Store Result Object */
-		public function fetch_object($result) { try { return mysqli_fetch_object($result); } catch(Exception $e) { return $this->handler(false, $e, "fetch_object", false); } }
-		/**************** Free Result */
-		public function free_result($result) { try { return mysqli_free_result($result); } catch(Exception $e) { return $this->handler(false, $e, "free_result", false); } }			
-		/**************** Free Result */
-		public function use_result() { try { return mysqli_use_result($this->mysqlcon); } catch(Exception $e) { return $this->handler(false, $e, "use_result", false); } }			
-		/**************** Free All */
-		public function free_all() { 
-			$results = array();	
-			try {
-				$x = false;
-				try { $x = mysqli_use_result($this->mysqlcon); } catch (Exception $e){  }
-				if(is_object($x)) { $y = mysqli_fetch_object($x); array_push($results, $y); mysqli_free_result($x); }
-				while ($this->more_results()) {
-					if ($this->next_result()) {
-						$x = $this->store_result($this->mysqlcon);
-						if(is_object($x)) { $y = mysqli_fetch_object($x); array_push($results, $y); mysqli_free_result($x); }
-					}
-				}	
-			} catch (Exception $e){ return $this->handler(false, $e, "free_all", false); }
-			return $results;}				
-			
-		/*	  ____  ____   ____   _______/  |________ __ __   _____/  |_ 
-			_/ ___\/  _ \ /    \ /  ___/\   __\_  __ \  |  \_/ ___\   __\
-			\  \__(  <_> )   |  \\___ \  |  |  |  | \/  |  /\  \___|  |  
-			 \___  >____/|___|  /____  > |__|  |__|  |____/  \___  >__|  
-				 \/           \/     \/                          \/       Constructor and Status Functions */
-		/********************** Construct Connection ****/	 
-		private $auth_user	= false;private $auth_pass	= false;private $auth_host	= false;private $auth_db = false;
-		function __construct($hostname, $username, $password, $database) {
-			$this->auth_user = $username;
-			$this->auth_pass = $password;
-			$this->auth_host = $hostname;
-			$this->auth_db = $database;
-			if (session_status() !== PHP_SESSION_ACTIVE) {@session_start();}
-			try { $this->mysqlcon = @mysqli_connect($hostname, $username, $password, $database); 
-				   if(@mysqli_connect_errno()) { $this->lasterror  =  @mysqli_connect_error(); } else { $this->lasterror = false; }
-			} catch (Exception $e){ $this->lasterror = true; } }
-		/**************** Internal Function to get Class Copy */
-		private function construct() { return new x_class_mysql($this->auth_host, $this->auth_user, $this->auth_pass, $this->auth_db); }
-		/**************** Internal Function to get Class Copy */
-		private function construct_copy() { return $this; }
-		/********************** Get Connection Status (ping alias) ****/	
-		public function status() 		{ return $this->ping(); }
-		/********************** Get Ping MySQL Status ****/	
-		public function ping() { try { return $this->handler(mysqli_ping($this->mysqlcon), false, "ping", false); } catch (Exception $e){ return $this->handler(false, $e, "ping", false); }  }	
-		
+			return $this->query("DELETE FROM `".$table."` WHERE ".$row." = ?", $bindar); }		
 		/*			  _           _   
 					 | |         | |  
 			 ___  ___| | ___  ___| |_ 
