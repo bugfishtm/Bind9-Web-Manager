@@ -239,17 +239,17 @@ As described in the installation steps, you changed file named.conf. You shall h
 	</thead>
 	<tbody>
 		<tr>
-			<td>PATH_TO_WEBROOT/_cronjon/daily.php &gt;/dev/null 2&gt;&1;</td>
+			<td>DOCROOT/_cronjon/daily.php &gt;/dev/null 2&gt;&1;</td>
 			<td>daily</td>
 			<td>Resets Blacklisted IPs for Web Interface and API Requests (Optional but Recommended)</td>
 		</tr>
 		<tr>
-			<td>PATH_TO_WEBROOT/_cronjon/sync.php &gt;/dev/null 2&gt;&1;</td>
+			<td>DOCROOT/_cronjon/sync.php &gt;/dev/null 2&gt;&1;</td>
 			<td>hourly</td>
 			<td>Essential for DNS Server Configuration Operations, Database Synchronization, Replication, and Autosetup<br />This cronjob will restart Bind and set permissions for folders and zone files when completed. You can adjust the interval as needed; a one-hour interval is recommended for faster replication.</td>
 		</tr>
 		<tr>
-			<td>PATH_TO_WEBROOT/_cronjon/notify.php &gt;/dev/null 2&gt;&1;</td>
+			<td>DOCROOT/_cronjon/notify.php &gt;/dev/null 2&gt;&1;</td>
 			<td>favor</td>
 			<td>Optional Cronjob / Script to display last changes and delete them in the interfaces activity section! (optional)</td>
 		</tr>
@@ -297,7 +297,7 @@ Every zone file which will be used, will checked with the command named-checkzon
 					
 					</section>
 			    </article>
-			    <article class="docs-article" id="section-9" style="padding-top: 0px;">
+			    <article class="docs-article" id="section-9" style="padding-top: 0px; ">
 					<header class="docs-header">
 					    <h2 class="docs-heading">Various</h2>
 					    <section class="docs-intro">
@@ -310,11 +310,10 @@ Every zone file which will be used, will checked with the command named-checkzon
 						<a href="https://www.bugfish.eu" class="btn btn-primary" target="_blank"><i class="fas fa-link me-2"></i> My Website</a>
 						<a href="https://forum.bugfish.eu/" class="btn btn-warning" target="_blank"><i class="fas fa-bug me-2"></i> My Forum</a>
 					</section><!--//section-->	
-					<section class="docs-section" id="item-9-2">
+					<section class="docs-section" id="item-9-2" style="border-bottom: none;">
 						<h2 class="section-heading">License Informations</h2>
 						<h4>License Informations of this Software Code</h4>
-		Copyright 2022 www.bugfish.eu Jan-Maurice Dahlmanns (Bugfish)<br />
-		This Product is running with MIT LICENSE<br /><br />
+		Copyright 2022 www.bugfish.eu Jan-Maurice Dahlmanns (Bugfish)<br /><br />
 
 		Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:<br /><br />
 

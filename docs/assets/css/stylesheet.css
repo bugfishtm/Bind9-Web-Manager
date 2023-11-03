@@ -156,7 +156,8 @@ h1, h2, h3 {
 	
 	.alert-danger, .callout-block-danger {
 	
-		background: #d26d69 !important;
+		background: red !important;
+		color: white !important;
 	}
 	
 	.alert-warning, .callout-block-warning {
