@@ -5,6 +5,8 @@
 
 # Bind9 Web Manager [DNSHTTP]
 
+![framework](./docs/bframe.jpg)
+
 ## Documentation
 
 For complete documentation, see the file index.html in the docs folder. You can open it with any web browser.
