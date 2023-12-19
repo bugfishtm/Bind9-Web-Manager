@@ -1,11 +1,11 @@
 ![Bugfish](https://img.shields.io/badge/Bugfish-Software-orange)
 ![Status](https://img.shields.io/badge/Status-Finished-green)
-![License](https://img.shields.io/badge/License-MIT-black)
-![Version](https://img.shields.io/badge/Version-3.7.2-white)
+![License](https://img.shields.io/badge/License-GPLv3-black)
+![Version](https://img.shields.io/badge/Version-3.7.3-white)
 
 # Bind9 Web Manager [DNSHTTP]
 
-![framework](./docs/bframe.jpg)
+![framework](./_images/bugfish-framework-banner.jpg)
 
 ## Documentation
 
@@ -18,6 +18,8 @@ For complete documentation, see the file index.html in the docs folder. You can 
 ## Overview
 
 The Bind9 Web Manager [DNSHTTP] offers a comprehensive set of features for managing your BIND9 DNS servers. Here's an overview of the key functionalities:
+
+![framework](./_images/domains.png)
 
 ### Slave Server Replication
 

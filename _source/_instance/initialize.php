@@ -23,7 +23,7 @@
 	/* Variables */	
 	define('_HELP_',    "https://bugfishtm.github.io/Bind9-Web-Manager/"); 
 	define("_SLAVE_AS_MASTER_DOMAIN_",  false); // Not Configured DO NEVER CHANGE!	
-	define("_FOOTER_", '<div id="footer">DnsHTTPv3.7.2 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
+	define("_FOOTER_", '<div id="footer">DnsHTTPv3.7.3 by <a href="https://bugfish.eu/aboutme" target="_blank" rel="noopeener">Bugfish</a> | <a href="'._IMPRESSUM_.'" target="_blank" rel="noopeener">Impressum</a> | <a href="'._HELP_.'" target="_blank" rel="noopeener">Help</a>  </div>');
 	define("_CRON_DEBUG_", 2);
 	define("_CRON_BIND_FILE_CONFIG_DNSHTTP_",  	_CRON_BIND_LIB_);	# Can be left unchanged	/ Path to save Configuration Files to
 	# The Initial Bind9 Configuration
@@ -948,7 +948,7 @@
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
 					$nowwritte = true;
-					$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
 				} else {
 					$isnowregister = false;		
 					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 0, okonce = 0, registered = 0 WHERE id = '".$value["id"]."'");
@@ -962,7 +962,7 @@
 				}
 				
 				if(!$nowwritte AND @file_exists(@$filenamecleared) AND _CRON_BIND_FILE_REWRITE_) {
-					$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";				
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}				
 				}
 			}
 		}
