@@ -52,7 +52,7 @@ Gain detailed insights into replication and domain information, enabling well-in
 Ensure you meet the following requirements:
 
 - Elevated permissions (root) for cronjob execution
-- Apache2 web server with robust PHP 7/8 support
+- Apache2 web server with robust PHP 8 support
 - Apache2 Modules: rewrite, headers
 - PHP Modules: mysql, curl, intl, mbstring, zip, gd
 - Unrestricted access to a MySQL database with full permissions
