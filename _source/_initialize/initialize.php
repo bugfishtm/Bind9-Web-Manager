@@ -33,7 +33,12 @@
 		General Site Variables
 	*************************************************************************/
 	define('_GITHUB_',   			"https://github.com/bugfishtm/"); 										# URL to Documentation
-	define("_VERSION_", 			'4.1.0');																# Current Actual Code Version
+	define("_VERSION_", 			'4.1.1');																# Current Actual Code Version
+	
+	/*************************************************************************
+		Docker Define Var for installations
+	*************************************************************************/	
+	if(!defined("_DNSHTTP_DOCKERIZED_")) { define("_DNSHTTP_DOCKERIZED_", true); }
 	
 	/*************************************************************************
 		Extended Sync Cron Configuration Variables

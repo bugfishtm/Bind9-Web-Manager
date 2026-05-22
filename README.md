@@ -24,7 +24,7 @@ DNSHTTP can operate as a dedicated DNS control panel alongside existing hosting 
 
 Delivers the essential tools to effectively manage your site’s content, structure, and user roles—streamlined for simplicity, without unnecessary complexity. For a broad overview of its capabilities, refer to the feature list below.
 
-## 📋 Domain and Record Management
+### 📋 Domain and Record Management
  
 The core of DNSHTTP is its domain and DNS record management. You can add, edit, and remove domains along with all of their associated DNS records directly through the web interface, without manually editing zone files or reloading services by hand.
 
@@ -36,7 +36,7 @@ The software features a robust user and group management system, enabling admini
 
 ![Screenshot](./_screenshots/site_user_list.png)
 
-## 🔄 Slave Server Replication
+### 🔄 Slave Server Replication
  
 DNSHTTP gives you direct control over the replication process between your Master and Slave DNS servers, with real-time status updates so you can monitor the state of your replication at a glance.
  
@@ -45,19 +45,19 @@ DNSHTTP gives you direct control over the replication process between your Maste
 
 ![Screenshot](./_screenshots/site_server_list.png)
 
-## 🚫 IP Blacklisting
+### 🚫 IP Blacklisting
  
-DNSHTTP includes built-in IP blacklisting to help protect your DNS infrastructure from suspicious or unauthorized activity. When a threat is identified, the offending IP can be banned directly through the interface. Bans can be lifted manually at any time, or you can set up the `daily.php` cronjob to automate blacklisting resets on a scheduled basis.
+DNSHTTP includes built-in IP blacklisting to help protect your DNS infrastructure from suspicious or unauthorized activity. When a threat is identified, the offending IP can be banned directly through the interface. Bans can be lifted manually at any time, or you can set up the `blacklist.php` cronjob to automate blacklisting resets on a scheduled basis.
 
 ![Screenshot](./_screenshots/site_blacklist.png)
 
-## 📊 Replication Insights
+### 📊 Replication Insights
  
 Beyond basic replication controls, DNSHTTP provides detailed insights into the state of your replication and domain configuration. This gives you the visibility needed to make informed decisions, catch issues early, and proactively manage your DNS replication strategy across all connected servers.
 
 ![Screenshot](./_screenshots/site_domain_conflicts.png)
 
-## 🔌 External API
+### 🔌 External API
  
 DNSHTTP exposes an API interface secured with tokens, allowing external systems and scripts to perform DNS operations programmatically. This makes it straightforward to integrate DNS management into your existing workflows, automation pipelines, or third-party tooling.
 

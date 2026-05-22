@@ -56,11 +56,10 @@
 					$string = "";
 					if($curissuer["solved"] == 0 AND is_numeric($curissuer["solved"])) { 	
 						echo '<div class="callout callout-danger mb-3" role="alert">';
-						echo 'Conflicted Domain</b>: <b>'.htmlspecialchars(@$curissuer["domain"] ?? '').'<br /><br /><b>Conflicts</b>:<br /> '.@dnshttp_conflicts_helper($curissuer["servers"]).' ';	
+						echo 'Conflicted Domain: <b>'.htmlspecialchars(@$curissuer["domain"] ?? '').'</b><br /><br /><b>Conflicts</b>: <div style="font-weight: normal !important;">'.@dnshttp_conflicts_helper($curissuer["servers"]).'</div> ';	
 					} else { 
-						echo '<div class="callout callout-warning mb-3" role="alert">';
-						echo "<div class='callout callout-success mb-3'>Solved</div> "; 
-						echo 'Conflicted Domain: <b>'.htmlspecialchars(@$curissuer["domain"] ?? '').'</b><br /><br /><b>Conflicts</b>:<br /> '.@dnshttp_conflicts_helper($curissuer["servers"]).'<br /><br /><b>Solved with</b>:<br /> ';	
+						echo '<div class="callout callout-success mb-3" role="alert">';
+						echo 'Conflicted Domain: <b>'.htmlspecialchars(@$curissuer["domain"] ?? '').'</b><br /><br /><b>Conflicts</b>:<br /> '.@dnshttp_conflicts_helper($curissuer["servers"]).'<br /><b>Solved with</b>: ';	
 						echo $curissuer["solved"]; 
 					}
 					echo '</div>';	

@@ -65,15 +65,15 @@
 	
 	function dnshttp_api_blacklist_check($ipbl) 	{ if($ipbl->isblocked()) { echo "ip-blacklisted"; exit(); } }
 	
-	function dnshttp_api_token_check($mysql, $token) 		{ 
-		if(!dnshttp_api_token_valid($mysql, $token)) {
+	function dnshttp_api_token_check($mysql, $ipbl, $token) 		{ 
+		if(!dnshttp_api_token_valid($mysql, $token, $ipbl)) {
 			$ipbl->raise(); 
 			echo "token-error";
 			exit();
 		}
 	}
 	
-	function dnshttp_api_token_valid($mysql, $token) {
+	function dnshttp_api_token_valid($mysql, $token, $ipbl) {
 		$bind[0]["type"]	=	"s";
 		$bind[0]["value"]	=	trim($token ?? '');
 		$res = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE TRIM(api_token) = ?", false, $bind);
@@ -286,9 +286,9 @@
 		####################################################################################################################################### 
 		// Recreate DNS Config File Structure if not Exists
 		#--------------------------------------------------------------------------------------------------------------------------------------
-		try {
+		try { 
 		if(!@file_exists(_CRON_BIND_FILE_CONFIG_DNSHTTP_)) {
-			if(@mkdir(_CRON_BIND_FILE_CONFIG_DNSHTTP_, _CRON_BIND_LIB_CODE_, true)) {
+			if(@mkdir(_CRON_BIND_FILE_CONFIG_DNSHTTP_, "0"._CRON_BIND_LIB_CODE_, true)) {
 				 logging_add("OK: Configuration Folder created: "._CRON_BIND_FILE_CONFIG_DNSHTTP_."\r\n"); 
 			} else {  logging_add("ERROR: Configuration Folder creation failed [may a permission problem]: "._CRON_BIND_FILE_CONFIG_DNSHTTP_."\r\n");  }
 		} else {  logging_add("OK: Configuration Folder exists: "._CRON_BIND_FILE_CONFIG_DNSHTTP_."\r\n");  }		
@@ -342,7 +342,7 @@
 		} else {  logging_add("OK: Bind Main Config Include File does exist: "._CRON_BIND_CONFNAME_."\r\n");  }	 
 		#--------------------------------------------------------------------------------------------------------------------------------------
 		if(!@file_exists(_CRON_BIND_LIB_)) {
-			if(@mkdir(_CRON_BIND_LIB_, _CRON_BIND_LIB_CODE_, true)) {
+			if(@mkdir(_CRON_BIND_LIB_, "0"._CRON_BIND_LIB_CODE_, true)) {
 				 logging_add("OK: Zone File Folder created: "._CRON_BIND_LIB_."\r\n"); 
 			} else {  logging_add("ERROR: Zone File Folder creation failed: "._CRON_BIND_LIB_."\r\n");  }
 		} else {  logging_add("OK: Zone File Folder does exist: "._CRON_BIND_LIB_."\r\n");  }		
@@ -845,7 +845,7 @@
 					@file_put_contents(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), $value["content"]);
 					@chown(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_USER_);
 					@chgrp(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_GROUP_);
-					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_CODE_);		
+					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), "0"._CRON_BIND_LIB_CODE_);	 	
 					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));
 					if(strpos(strtolower($cout), ": loaded serial") > -1) { 
 						$newzoneok = true;
@@ -864,13 +864,13 @@
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, _CRON_BIND_LIB_CODE_);			
+					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
 				} 
 				if($newzoneok != true AND !file_exists($filenamecleared)) { 
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, _CRON_BIND_LIB_CODE_);			
+					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
 				} 
 				
 				$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." ".$filenamecleared);
@@ -932,7 +932,7 @@
 					@file_put_contents(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), $value["content"]);
 					@chown(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_USER_);
 					@chgrp(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_GROUP_);
-					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_CODE_);				
+					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), "0"._CRON_BIND_LIB_CODE_);				
 					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));		
 					if(strpos(strtolower($cout), ": loaded serial") > -1) { 
 						$newzoneok = true;
@@ -951,13 +951,13 @@
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, _CRON_BIND_LIB_CODE_);			
+					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
 				} 
 				if($newzoneok != true AND !file_exists($filenamecleared)) { 
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, _CRON_BIND_LIB_CODE_);			
+					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
 				} 
 				$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." ".$filenamecleared);
 				$bind[0]["value"] = $cout;
@@ -1050,8 +1050,9 @@
 		logging_add("START: Linux Command Executions \r\n");
 		// Chown
 		if(file_exists(_CRON_BIND_LIB_)) { 
-			logging_add("OK: chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_LIB_.";\r\n"); 
-			@shell_exec("chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_LIB_.";");
+			logging_add("OK: chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_LIB_." -R;\r\n"); 
+			@shell_exec("chown "._CRON_BIND_LIB_USER_.":"._CRON_BIND_LIB_GROUP_." "._CRON_BIND_LIB_." -R;");
+			@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_." -R;");
 		} else { logging_add("ERROR: Execution of a command skipped, "._CRON_BIND_LIB_.": Folder does not exists!\r\n"); }	
 
 		if(file_exists(_CRON_BIND_FILE_CONFIG_DNSHTTP_)) { 
@@ -1076,36 +1077,45 @@
 		
 		// Chmod 
 		if(file_exists(_CRON_BIND_LIB_)) {  
-			logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_.";\r\n"); 
-			@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_.";");
+			logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_.";\r\n"); 
+			@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_LIB_.";");
 		} else { logging_add("ERROR: Execution of a command skipped, "._CRON_BIND_LIB_.": Folder does not exists!\r\n"); }	
 		
 		if(file_exists(_CRON_BIND_FILE_CONFIG_DNSHTTP_)) {  
-			logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_DNSHTTP_.";\r\n"); 
-			@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_DNSHTTP_.";");
+			logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_DNSHTTP_.";\r\n"); 
+			@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_DNSHTTP_.";");
 		} else { logging_add("ERROR: Execution of a command skipped, "._CRON_BIND_FILE_CONFIG_DNSHTTP_.": Folder does not exists!\r\n"); }	
 
-		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TABLE_.";\r\n"); 
-		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TABLE_.";");
+		logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TABLE_.";\r\n"); 
+		@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TABLE_.";");
 
-		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_.";\r\n"); 
-		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_.";");
+		logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_.";\r\n"); 
+		@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_CONFIG_.";");
 		
-		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TEMP_.";\r\n"); 
-		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TEMP_.";");
+		logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TEMP_.";\r\n"); 
+		@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_TEMP_.";");
 
-		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_LOAD_.";\r\n"); 
-		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_LOAD_.";");
+		logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_LOAD_.";\r\n"); 
+		@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_FILE_LOAD_.";");
 
-		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_CONFNAME_.";\r\n"); 
-		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." "._CRON_BIND_CONFNAME_.";");
+		logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_CONFNAME_.";\r\n"); 
+		@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." "._CRON_BIND_CONFNAME_.";");
 		
-		logging_add("OK: chmod "._CRON_BIND_LIB_CODE_." /etc/bind;\r\n"); 
-		@shell_exec("chmod "._CRON_BIND_LIB_CODE_." /etc/bind;");
+		logging_add("OK: chmod "."0"._CRON_BIND_LIB_CODE_." /etc/bind;\r\n"); 
+		@shell_exec("chmod "."0"._CRON_BIND_LIB_CODE_." /etc/bind;");
+		
+		if(_DNSHTTP_DOCKERIZED_) {
+			@shell_exec("chmod "."0777 /etc/bind/named.conf;");
+		}
 		
 		// Restart Named Service
 		logging_add("OK: systemctl restart "._BIND_SERVICE_NAME_.";\r\n"); 
+		@shell_exec("supervisorctl restart bind9");
 		@shell_exec("systemctl restart "._BIND_SERVICE_NAME_."; ");
+		if(_DNSHTTP_DOCKERIZED_) {
+			@shell_exec("service  "._BIND_SERVICE_NAME_." start");
+			@shell_exec("service  "._BIND_SERVICE_NAME_." restart");
+		}
 		logging_add("FINISHED: LAST OPERATION\r\n"); 
 		logging_add("........................................................................................................................................\r\n");
 		// Logfile Message

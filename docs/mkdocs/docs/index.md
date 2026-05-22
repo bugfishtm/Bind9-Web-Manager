@@ -1,89 +1,71 @@
-# Proxmox-VMA2RAW
+# Bind9 Web Manager [DNSHTTP]
 
-Convert Proxmox VMA backups to raw disk images with ease using Docker.
+Bind9 Web Manager (DNSHTTP) is a web-based management interface for BIND9 DNS servers.
 
 -----------
 
-## Introduction
+## 🚀 Introduction
 
-This repository provides the necessary files and a ready-to-use Docker image to convert Proxmox VMA backup files to raw disk images. These raw images can then be accessed or mounted with Windows software. This Docker image converts Proxmox VMA backup files to raw disk images. These raw images can then be accessed or mounted with Windows software.
+Bind9 Web Manager (DNSHTTP) is a web-based management interface for BIND9 DNS servers. It centralizes domain and record management, server replication, security controls, and operational insights into a single platform — making DNS administration more straightforward for both single-server setups and multi-server architectures.
 
-### Prerequisites
+![Screenshot](./screenshots/site_domain_records_1.png)
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed on your machine.
-- [DiskInternals Linux Reader](https://www.diskinternals.com/linux-reader/) for mounting raw disk images on Windows.
+DNSHTTP supports hybrid server configurations, where a single server acts as both a Master and a Slave simultaneously. This is useful for reducing infrastructure complexity while still maintaining proper replication across your DNS architecture.
 
-### Pull the Docker Image  
+To set up a hybrid environment, deploy the software on both servers. On the Master server, configure the Slave Server entry, and on the Slave server, configure the Master Server entry. Once both sides are configured, the servers can replicate with each other bidirectionally as needed.
 
-1. Pull the Docker image from Docker Hub:  
-    ```sh
-    docker pull bugfishtm/proxmox-vma2raw:latest
-    ```  
-2. Run the Docker container and specify a folder to put your vma files in:  
-    ```sh
-    docker run -it -v C:\path\to\your\files:/opt/files bugfishtm/proxmox-vma2raw:latest
-    ```  
+![Screenshot](./screenshots/site_server_details_1.png)
 
-### Usage
+DNSHTTP can operate as a dedicated DNS control panel alongside existing hosting panels such as Virtualmin, Plesk, ISPConfig, and others — managing your Bind9 DNS layer independently without interfering with your existing stack🔌. In Docker environments, only the standalone deployment is supported, which is also the case when installing via the setup script .
 
-1. Place your `.vma` files in the `files` folder specified at the docker image deployment.
+-----------
 
-2. Access the interactive shell of the running Docker container in bash mode:
-    ```sh
-    docker exec -it proxmox-vma2raw /bin/bash
-    ```
+## 🔥 Features
 
-3. Navigate to the `/opt/files` directory:
-    ```sh
-    cd /opt/files
-    ```
+Delivers the essential tools to effectively manage your site’s content, structure, and user roles—streamlined for simplicity, without unnecessary complexity. For a broad overview of its capabilities, refer to the feature list below.
 
-4. Extract the `.vma` file to a raw disk image:
-    ```sh
-    vma extract ./sourcefile.vma ./extractdir
-    ```
-    - Ensure `./extractdir` does not exist before running the command.
+### 📋 Domain and Record Management
+ 
+The core of DNSHTTP is its domain and DNS record management. You can add, edit, and remove domains along with all of their associated DNS records directly through the web interface, without manually editing zone files or reloading services by hand.
 
-5. The raw disk image will be available in the `./extractdir` directory inside the directory you placed your .vma file in.
+### 🛡️ Access Control
 
-6. Use [DiskInternals Linux Reader](https://www.diskinternals.com/linux-reader/) to mount and access the raw disk image.  
+The software features a robust user and group management system, enabling administrators to efficiently create, organize, and manage both users and user groups. With flexible permission controls, administrators can assign specific access rights to groups and individual users, ensuring secure and streamlined management of user privileges across the platform.
 
-### For Developers
+### 🔄 Slave Server Replication
+ 
+DNSHTTP gives you direct control over the replication process between your Master and Slave DNS servers, with real-time status updates so you can monitor the state of your replication at a glance.
+ 
+- The **Domains Section** displays both replicated slave domains and locally mastered domains side by side.
+- **Conflicts** occur when the same domain exists as both a master and a slave entry. These are automatically detected, clearly highlighted, and can be resolved through the dedicated **Conflicts** section.
 
-If you want to rebuild or change the image, in case dockerhub is not available or you want to modify the files.
+### 🚫 IP Blacklisting
+ 
+DNSHTTP includes built-in IP blacklisting to help protect your DNS infrastructure from suspicious or unauthorized activity. When a threat is identified, the offending IP can be banned directly through the interface. Bans can be lifted manually at any time, or you can set up the `blacklist.php` cronjob to automate blacklisting resets on a scheduled basis.
 
-1. Clone the repository:
-    ```sh
-    git clone https://github.com/bugfishtm/proxmox-vma2raw.git
-    cd proxmox-vma2raw
-    ```
+### 📊 Replication Insights
+ 
+Beyond basic replication controls, DNSHTTP provides detailed insights into the state of your replication and domain configuration. This gives you the visibility needed to make informed decisions, catch issues early, and proactively manage your DNS replication strategy across all connected servers.
 
-2. Run the `create.bat` script to build and run the Docker container:
-    ```sh
-    ./_docker/build.bat
-    ```
+### 🔌 External API
+ 
+DNSHTTP exposes an API interface secured with tokens, allowing external systems and scripts to perform DNS operations programmatically. This makes it straightforward to integrate DNS management into your existing workflows, automation pipelines, or third-party tooling.
 
+### 🖥️ Integrated Installer 
 
-### Useful Links
+The installation process is simplified through a clear and intuitive graphical user interface (GUI), making setup quick and accessible for users with minimal technical experience. Additionally, advanced users can choose from alternative installation methods such as Docker containers or automated scripts, providing flexible deployment options to suit different environments and preferences.
 
-- [Github](https://github.com/bugfishtm/proxmox-vma2raw)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [DiskInternals Linux Reader](https://www.diskinternals.com/linux-reader/)
-- [DockerHUB](https://hub.docker.com/r/bugfishtm/proxmox-vma2raw)
+-----------
 
-
-### Video Tutorial
+### Tutorials
 
 The following documentation is intended for both end-users and developers.
 
 
 | **Description**                                                       | **Link**                                                                                         |
 |----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| A playlist or video related to this project. | [https://www.youtube.com/watch?v=AGllcgOKZDE](https://www.youtube.com/watch?v=AGllcgOKZDE)|
+| A playlist or video related to this project. | [https://www.youtube.com/playlist?list=PL6npOHuBGrpChSvani3MESZnzuKwwxz4o](hhttps://www.youtube.com/playlist?list=PL6npOHuBGrpChSvani3MESZnzuKwwxz4o)|
 | If this repository contains a _videos folder, you can check that as well. | |
-
-
-
 
 -----------
 

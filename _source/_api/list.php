@@ -55,8 +55,6 @@
 	if(is_array($ar)) {	
 		foreach($ar AS $key => $value) { array_push($domar, trim($value["domain"])); }
 		echo serialize($domar);
-		//if(@$_POST["compress"] == "stop")  { echo serialize($domar); }
-		//else { echo dnshttp_compress(serialize($domar)); }
 		exit();
 	} else { 
 		echo dnshttp_compress(serialize($domar));

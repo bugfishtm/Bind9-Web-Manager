@@ -305,12 +305,13 @@
 												  </td>
 												  <td><?php
 													if($value["registered"] == "1") { echo '<span class="badge text-bg-success" title="Registered and Active in Bind9">R</span> '; }
-													if($value["registered"] != "1") { echo '<span class="badge text-bg-warning" title="Not active for queries">NR</span> '; }
+													if($value["registered"] != "1") { echo '<span class="badge text-bg-danger" title="Not active for queries">NR</span> '; }
 													if($value["conflict"] == "1") { echo '<span class="badge text-bg-warning" title="Conflicts">C</span> '; }
 													if($value["preferred"] == "1") { echo '<span class="badge text-bg-primary" title="Prefered which may solvesn conflicts">P</span> '; }
 													if($value["set_no_replicate"] == "1") { echo '<span class="badge text-bg-danger" title="Replication to other servers Disabled">RD</span> '; }
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
+													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
 												  ?></td><td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 														<?php echo "<a class='btn btn-dark btn-sm' title='Inspect all similar Domains' href='./?site=domain_list&domain=".base64_encode(trim(strtolower($value["domain"] ?? '') ?? ''))."'><i class=\"bi bi-copy\"></i></a>"; ?> 
@@ -340,12 +341,13 @@
 												  </td>
 												  <td><?php
 													if($value["registered"] == "1") { echo '<span class="badge text-bg-success" title="Registered and Active in Bind9">R</span> '; }
-													if($value["registered"] != "1") { echo '<span class="badge text-bg-warning" title="Not active for queries">NR</span> '; }
+													if($value["registered"] != "1") { echo '<span class="badge text-bg-danger" title="Not active for queries">NR</span> '; }
 													if($value["conflict"] == "1") { echo '<span class="badge text-bg-warning" title="Conflicts">C</span> '; }
 													if($value["preferred"] == "1") { echo '<span class="badge text-bg-primary" title="Prefered which may solvesn conflicts">P</span> '; }
 													if($value["set_no_replicate"] == "1") { echo '<span class="badge text-bg-danger" title="Replication to other servers Disabled">RD</span> '; }
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
+													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
 												  ?></td><td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 														<?php echo "<a class='btn btn-dark btn-sm' title='Inspect all similar Domains' href='./?site=domain_list&domain=".base64_encode(trim(strtolower($value["domain"] ?? '') ?? ''))."'><i class=\"bi bi-copy\"></i></a>"; ?> 
@@ -376,11 +378,12 @@
 												  <td class="pre_before_ip_getter">#<?php echo htmlspecialchars($value["fk_server"] ?? ''); ?></td>
 												  <td><?php
 													if($value["registered"] == "1") { echo '<span class="badge text-bg-success" title="Registered and Active in Bind9">R</span> '; }
-													if($value["registered"] != "1") { echo '<span class="badge text-bg-warning" title="Not active for queries">NR</span> '; }
+													if($value["registered"] != "1") { echo '<span class="badge text-bg-danger" title="Not active for queries">NR</span> '; }
 													if($value["conflict"] == "1") { echo '<span class="badge text-bg-warning" title="Conflicts">C</span> '; }
 													if($value["preferred"] == "1") { echo '<span class="badge text-bg-primary" title="Prefered which may solvesn conflicts">P</span> '; }
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
+													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
 												  ?></td>
 												  <td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
@@ -415,12 +418,13 @@
 												  <td class="pre_before_ip_getter">#<?php echo htmlspecialchars($value["fk_user"] ?? ''); ?></td>
 												  <td><?php
 													if($value["registered"] == "1") { echo '<span class="badge text-bg-success" title="Registered and Active in Bind9">R</span> '; }
-													if($value["registered"] != "1") { echo '<span class="badge text-bg-warning" title="Not active for queries">NR</span> '; }
+													if($value["registered"] != "1") { echo '<span class="badge text-bg-danger" title="Not active for queries">NR</span> '; }
 													if($value["conflict"] == "1") { echo '<span class="badge text-bg-warning" title="Conflicts">C</span> '; }
 													if($value["preferred"] == "1") { echo '<span class="badge text-bg-primary" title="Prefered which may solvesn conflicts">P</span> '; }
 													if($value["set_no_replicate"] == "1") { echo '<span class="badge text-bg-danger" title="Replication to other servers Disabled">RD</span> '; }
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
+													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
 												  ?></td><td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 														<?php echo "<a class='btn btn-dark btn-sm' title='Inspect all similar Domains' href='./?site=domain_list&domain=".base64_encode(trim(strtolower($value["domain"] ?? '') ?? ''))."'><i class=\"bi bi-copy\"></i></a>"; ?> 
@@ -1062,6 +1066,7 @@
 		<?php if(@$current_user["conflict"] == 1 AND @$current_user["preferred"] != 1) { ?> <div class="callout callout-warning mb-3" role="alert">This domain is in conflict with other duplicated domain names. </div> <?php } ?>
 		<?php if(@$current_user["set_no_replicate"] == 1) { ?> <div class="callout callout-danger mb-3" role="alert">This domain has external replication disabled and will not be duplicated to other requesting master servers. </div> <?php } ?>
 		<?php if(@$current_user["oldzonefallback"] == 1) { ?> <div class="callout callout-danger mb-3" role="alert">This domains zone data has errors, please fix the domains zone data. Currently the server is using the last working zone data configuration for this server. </div> <?php } ?>
+		<?php if(@$current_user["zonecheck"] == 0) { ?> <div class="callout callout-warning mb-3" role="alert">The DNS zone may has errors, or not yet been reinitialized by the background worker (can take up to 2 hours). </div> <?php } ?>
 			  		
 		<!----------------- Status Boxes -------------------->
 		<div class="row">
@@ -1194,11 +1199,18 @@
 								$merged = array_merge($res, $res2);
 								if(is_array($merged)) { 
 									foreach ($merged AS $key => $value) { 
+										$is_bind_dom = true;
+										$is_bind_c = false;
+										if(isset($value["fk_server"])) { 
+											$is_bind_dom = false;
+										}
+										if(is_numeric(@$_GET["bind_id"])) { $is_bind_c = true; }
+									
 										$has_one_entry = true;
 										?>
-											<tr class="align-middle" <?php if(@$value["id"] == $current_user["id"]) { ?> style="background: #CFF4FC !important;" <?php } ?>>
-											  <td class="pre_before_ip_getter" <?php if(@$value["id"] == $current_user["id"]) { ?> style="background: #CFF4FC !important;" <?php } ?>><?php echo htmlspecialchars($value["domain"] ?? ''); ?></td>
-											  <td <?php if(@$value["id"] == $current_user["id"]) { ?> style="background: #CFF4FC !important;" <?php } ?>>
+											<tr class="align-middle" <?php if(@$value["id"] == $current_user["id"] AND ((!$is_bind_dom AND !$is_bind_c) OR ($is_bind_dom AND $is_bind_c))) { ?> style="background: #424649 !important; color: white;" <?php } ?>>
+											  <td class="pre_before_ip_getter" <?php if(@$value["id"] == $current_user["id"] AND ((!$is_bind_dom AND !$is_bind_c) OR ($is_bind_dom AND $is_bind_c))) { ?> style="background: #424649 !important;color: white;" <?php } ?>><?php echo htmlspecialchars($value["domain"] ?? ''); ?></td>
+											  <td <?php if(@$value["id"] == $current_user["id"] AND ((!$is_bind_dom AND !$is_bind_c) OR ($is_bind_dom AND $is_bind_c))) { ?> style="background: #424649 !important; color: white; " <?php } ?>>
 												<?php 
 													
 													if(@$value["fk_server"] > 0) {
@@ -1210,16 +1222,17 @@
 													}
 												?>
 											  </td>
-											  <td <?php if(@$value["id"] == $current_user["id"]) { ?> style="background: #CFF4FC !important;" <?php } ?>><?php
+											  <td <?php if(@$value["id"] == $current_user["id"] AND ((!$is_bind_dom AND !$is_bind_c) OR ($is_bind_dom AND $is_bind_c))) { ?> style="background: #424649 !important; color: white;" <?php } ?>><?php
 												if($value["registered"] == "1") { echo '<span class="badge text-bg-success" title="Registered and Active in Bind9">R</span> '; }
-												if($value["registered"] != "1") { echo '<span class="badge text-bg-warning" title="Not active for queries">NR</span> '; }
+												if($value["registered"] != "1") { echo '<span class="badge text-bg-danger" title="Not active for queries">NR</span> '; }
 												if($value["conflict"] == "1") { echo '<span class="badge text-bg-warning" title="Conflicts">C</span> '; }
 												if($value["preferred"] == "1") { echo '<span class="badge text-bg-primary" title="Prefered which may solvesn conflicts">P</span> '; }
 												if(@$value["set_no_replicate"] == "1") { echo '<span class="badge text-bg-danger" title="Replication to other servers Disabled">RD</span> '; }
 												if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 												if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
+												if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
 											  ?></td>
-											  <td <?php if(@$value["id"] == $current_user["id"]) { ?> style="background: #CFF4FC !important;" <?php } ?>>
+											  <td <?php if(@$value["id"] == $current_user["id"] AND ((!$is_bind_dom AND !$is_bind_c) OR ($is_bind_dom AND $is_bind_c))) { ?> style="background: #424649 !important; color: white;" <?php } ?>>
 												<?php if(@$value["fk_server"] > 0) { if(@$value["id"] != $current_user["id"]) { echo "<a class='btn btn-dark btn-sm' title='Inspect this specific Domain' href='./?site=domain_list&api_id=".trim(strtolower($value["id"] ?? '') ?? '')."'><i class=\"bi bi-search\"></i></a>"; } }
 														else { if(@$value["id"] != $current_user["id"]) { echo "<a class='btn btn-dark btn-sm' title='Inspect this specific Domain' href='./?site=domain_list&bind_id=".trim(strtolower($value["id"] ?? '') ?? '')."'><i class=\"bi bi-search\"></i></a>"; } } ?>
 												<?php if(@$value["fk_server"] > 0) { echo "<a class='btn btn-dark btn-sm' title='Inspect this domains server' href='./?site=server_list&id=".trim(strtolower($value["fk_server"] ?? '') ?? '')."'><i class=\"bi bi-server\"></i></a>"; } ?>
@@ -1358,12 +1371,13 @@
 												  </td>
 												  <td><?php
 													if($value["registered"] == "1") { echo '<span class="badge text-bg-success" title="Registered and Active in Bind9">R</span> '; }
-													if($value["registered"] != "1") { echo '<span class="badge text-bg-warning" title="Not active for queries">NR</span> '; }
+													if($value["registered"] != "1") { echo '<span class="badge text-bg-danger" title="Not active for queries">NR</span> '; }
 													if($value["conflict"] == "1") { echo '<span class="badge text-bg-warning" title="Conflicts">C</span> '; }
 													if($value["preferred"] == "1") { echo '<span class="badge text-bg-primary" title="Prefered which may solvesn conflicts">P</span> '; }
 													if(@$value["set_no_replicate"] == "1") { echo '<span class="badge text-bg-danger" title="Replication to other servers Disabled">RD</span> '; }
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
+													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
 												  ?></td><td>
 													<?php if(@$value["fk_server"] > 0) { echo "<a class='btn btn-dark btn-sm' title='Inspect this specific Domain' href='./?site=domain_list&api_id=".trim(strtolower($value["id"] ?? '') ?? '')."'><i class=\"bi bi-search\"></i></a>"; }
 															else { echo "<a class='btn btn-dark btn-sm' title='Inspect this specific Domain' href='./?site=domain_list&bind_id=".trim(strtolower($value["id"] ?? '') ?? '')."'><i class=\"bi bi-search\"></i></a>"; } ?>

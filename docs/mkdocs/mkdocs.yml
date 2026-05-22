@@ -1,10 +1,13 @@
-site_name: Proxmox vma2raw
-repo_url: https://github.com/bugfishtm/proxmox-vma2raw
-repo_name: proxmox-vma2raw
+site_name: Bind9 Web Manager (DNSHTTP)
+repo_url: https://github.com/bugfishtm/Bind9-Web-Manager
+repo_name: Bind9-Web-Manager
 
 nav:
     - Overview: index.md
     - Download: download.md
+    - Tutorials: tutorials.md
+    - Installation: installation.md
+    - Screenshots: screenshots.md
     - Contributing: contributing.md
     - Warranty: warranty.md
     - Support: support.md

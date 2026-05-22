@@ -6,7 +6,7 @@ If you experience any issues or have questions while using this software, don't 
 
 For general inquiries, bug reports, questions, or feature requests, please use GitHub Issues as the primary platform:
 
-[GitHub Issues](https://github.com/bugfishtm/proxmox-vma2raw/issues){.md-button}
+[GitHub Issues](https://github.com/bugfishtm/Bind9-Web-Manager/issues){.md-button}
 
 ---
 

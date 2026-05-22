@@ -117,6 +117,17 @@
 	
 	// ─── Config Builder ───────────────────────────────────────────────────────────
 	function buildConfig(array $old, string $sql_pass, string $method): array {
+		
+		 if(!_DNSHTTP_DOCKERIZED_) {
+			$pre_sbch = '/usr/bin/named-checkzone';
+			$pre_sbchc = '/usr/bin/named-compilezone';
+			$pre_sbchc2 = 'bind';
+		} else {
+			$pre_sbch = '/usr/sbin/named-checkzone';
+			$pre_sbchc = '/usr/sbin/named-compilezone';
+			$pre_sbchc2 = 'named';
+		} 
+		
 		$base = [
 			'_TITLE_'                              => $old['title'],
 			'_HELP_'                               => "https://bugfishtm.github.io/Bind9-Web-Manager/",
@@ -140,9 +151,9 @@
 			'_CRON_BIND_LIB_GROUP_'                => 'bind',
 			'_CRON_BIND_LIB_CODE_'                 => '770',
 			'_CRON_BIND_LIB_ENDING_'               => '.dnshttp',
-			'_BIND_SERVICE_NAME_'                  => 'bind9',
-			'_BIND_CHECKZONE_COMMAND_'             => '/usr/bin/named-checkzone',
-			'_BIND_COMPILEZONE_COMMAND_'           => '/usr/bin/named-compilezone',
+			'_BIND_SERVICE_NAME_'                  => $pre_sbchc2,
+			'_BIND_CHECKZONE_COMMAND_'             => $pre_sbch,
+			'_BIND_COMPILEZONE_COMMAND_'           => $pre_sbchc,
 			'_CRON_BIND_LIB_'                      => '/etc/bind/dnshttp/',
 			'_CRON_BIND_CONFNAME_'                 => '/etc/bind/named.conf',
 			'_COOKIES_'                            => 'dnshttp_',
@@ -684,7 +695,7 @@
 			<span style="color:var(--white)">Virtualmin</span>,
 			<span style="color:var(--white)">ISPConfig</span>,
 			and as a <span style="color:var(--white)">standalone</span> solution.
-			Tested on Debian 8&ndash;11 and Ubuntu 16&ndash;22 with multiple BIND versions.
+			Tested on Debian 8&ndash;11/12 and Ubuntu 16&ndash;22/24 with multiple BIND versions.
 			Built with the <span style="color:var(--accent)">Bugfish Framework</span> &middot; License: GPLv3
 		  </div>
 
@@ -878,7 +889,18 @@
 			</div>
 		  </div>
 		  <?php endif; ?>
-
+		  
+		<?php if(!_DNSHTTP_DOCKERIZED_) {
+			$pre_host_rgm = old('sql_host');
+			$pre_user_rgm = old('sql_user');
+			$pre_pass_rgm = "";
+			$pre_db_rgm = old('sql_db');
+		} else {
+			$pre_host_rgm = getenv('sf_db_host');
+			$pre_user_rgm = getenv('sf_db_user');
+			$pre_pass_rgm = getenv('sf_db_pass');
+			$pre_db_rgm = getenv('sf_db_db');
+		} ?>
 		  <form method="POST" id="install-form">
 			<input type="hidden" name="step" value="3">
 
@@ -907,31 +929,33 @@
 			<div class="form-row">
 			  <div class="form-group">
 				<label>Host <span class="req">*</span></label>
-				<input type="text" name="sql_host" value="<?php echo  old('sql_host', '127.0.0.1') ?>" placeholder="127.0.0.1" required>
+				<input type="text" name="sql_host" value="<?php echo $pre_host_rgm; ?>" placeholder="127.0.0.1" required>
 			  </div>
 			  <div class="form-group">
 				<label>Database Name <span class="req">*</span></label>
-				<input type="text" name="sql_db" value="<?php echo  old('sql_db') ?>" placeholder="dnshttp" required>
+				<input type="text" name="sql_db" value="<?php echo $pre_db_rgm; ?>" placeholder="dnshttp" required>
 			  </div>
 			</div>
 			<div class="form-row">
 			  <div class="form-group">
 				<label>Username <span class="req">*</span></label>
-				<input type="text" name="sql_user" value="<?php echo  old('sql_user') ?>" placeholder="dbuser" required>
+				<input type="text" name="sql_user" value="<?php echo $pre_user_rgm; ?>" placeholder="dbuser" required>
 			  </div>
 			  <div class="form-group">
 				<label>Password</label>
-				<input type="password" name="sql_pass" placeholder="<?php echo  !empty($errors) ? '(re-enter password)' : 'password' ?>">
+				<input type="password" name="sql_pass"  value="<?php echo $pre_pass_rgm; ?>"  placeholder="<?php echo !empty($errors) ? '(re-enter password)' : 'password' ?>">
 			  </div>
 			</div>
 
 			<div class="sect">Server Setup</div>
 			
 			<p class="sect"><b>Standalone</b>Use DNSHTTP as standalone version, without other hosting systems as Master, Slave or Hybrid.</p>
-			<p class="sect"><b>Virtualmin</b>Use DNSHTTP on top of Virtualmin to fetch domains and records from Virtualmin as Master, Slave or Hybrid.</p>
-			<p class="sect"><b>ISPConfig</b>Use DNSHTTP on top of ISPConfig to fetch domains and records from ISPConfig as Master, Slave or Hybrid.</p>
-			<p class="sect"><b>Plesk</b>Use DNSHTTP on top of Plesk to fetch domains and records from Plesk as Master, Slave or Hybrid.</p>
-			<p class="sect"><b>Custom</b>Use a custom configuration, some settings may only be changed by manually editing the settings.php file.</p>
+			<?php if(!_DNSHTTP_DOCKERIZED_) { ?>
+				<p class="sect"><b>Virtualmin</b>Use DNSHTTP on top of Virtualmin to fetch domains and records from Virtualmin as Master, Slave or Hybrid.</p>
+				<p class="sect"><b>ISPConfig</b>Use DNSHTTP on top of ISPConfig to fetch domains and records from ISPConfig as Master, Slave or Hybrid.</p>
+				<p class="sect"><b>Plesk</b>Use DNSHTTP on top of Plesk to fetch domains and records from Plesk as Master, Slave or Hybrid.</p>
+				<p class="sect"><b>Custom</b>Use a custom configuration, some settings may only be changed by manually editing the settings.php file.</p>
+			<?php } ?>
 
 			<div class="methods" id="method-group">
 			  <?php

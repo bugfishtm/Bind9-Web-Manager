@@ -25,6 +25,11 @@
 	#	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 	
 	/*************************************************************************
+		Docker Define Var for installations
+	*************************************************************************/	
+	define("_DNSHTTP_DOCKERIZED_", true);
+	
+	/*************************************************************************
 		Installation if no Settings.php has been found.
 	*************************************************************************/	
 	if(!file_exists("./_data/settings.php")) {

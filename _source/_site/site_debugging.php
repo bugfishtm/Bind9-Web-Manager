@@ -178,7 +178,7 @@
 	<br clear="left"><br clear="left">
 		 
 	<!----------------- Table Element  -------------------->
-	<h4>Cronjob: Sync.php <br /><small style="font-size: 12px;"> Latest 50 Activities</small></h4>
+	<h4>Cronjob: Sync.php <br /><small style="font-size: 12px;"> Latest 10 Activities</small></h4>
 	<div class="card mb-4 tablecard">
 	  <!-- /.card-header -->
 	  <div class="card-body p-0 ">
@@ -193,7 +193,7 @@
 			  </thead>
 			  <tbody>
 				<?php		  
-					$res = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE ref = 'cron_sync' ORDER BY id DESC LIMIT 50", true); 
+					$res = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE ref = 'cron_sync' ORDER BY id DESC LIMIT 10", true); 
 					if(is_array($res)) { 
 						foreach ($res AS $key => $value) { 	
 							?>
@@ -204,7 +204,7 @@
 								  <?php } else { ?>
 									<td><span class="badge text-bg-dark">INFO</span></td>
 								  <?php } ?>
-								  <td class="bg-black" style="background: #121212;"><button type="button" class="btn btn-dark" onClick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? '' : 'none';">Show/Hide</button><section style="display: none;"><?php echo $value["message"]; ?></section></td>
+								  <td class="bg-black" style="background: #242424 !important; color: white;"><button type="button" class="btn btn-dark" onClick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? '' : 'none';">Show/Hide</button><section style="display: none;"><?php echo $value["message"]; ?></section></td>
 								  
 								  
 								</tr>						
@@ -225,7 +225,7 @@
 	</div>	
 		 
 	<!----------------- Table Element  -------------------->
-	<h4>Cronjob: Blacklist.php <br /><small style="font-size: 12px;"> Latest 50 Activities</small></h4>
+	<h4>Cronjob: Blacklist.php <br /><small style="font-size: 12px;"> Latest 10 Activities</small></h4>
 	<div class="card mb-4 tablecard">
 	  <!-- /.card-header -->
 	  <div class="card-body p-0 ">
@@ -240,7 +240,7 @@
 			  </thead>
 			  <tbody>
 				<?php		  
-					$res = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE ref = 'cron_blacklist' ORDER BY id DESC LIMIT 50", true); 
+					$res = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE ref = 'cron_blacklist' ORDER BY id DESC LIMIT 10", true); 
 					if(is_array($res)) { 
 						foreach ($res AS $key => $value) { 	
 							?>

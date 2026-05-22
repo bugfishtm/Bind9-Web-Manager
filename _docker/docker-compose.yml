@@ -3,7 +3,7 @@ services:
     build: 
       context: .
       no_cache: true
-    image: bugfishtm/dnshttp:4.1.0
+    image: bugfishtm/dnshttp:latest
     pull_policy: never
     restart: always
     ports:

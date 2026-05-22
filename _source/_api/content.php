@@ -61,8 +61,6 @@
 	$ar = $mysql->select("SELECT id, content FROM "._TABLE_DOMAIN_REG_." WHERE LOWER(TRIM(domain)) = ?", false, $bind);
 	if(is_array($ar)) {
 		echo $ar["content"];
-		//if(@$_POST["compress"] == "stop")  { echo $ar["content"]; }
-		//else { echo dnshttp_compress($ar["content"]); }
 		exit();
 	} else { 
 		echo "error-domain-no-exist";

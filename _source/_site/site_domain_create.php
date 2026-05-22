@@ -79,7 +79,7 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$new_domain."\"";
 														, '".$newsoa."'
 													);", $bind);
 													
-			x_eventBoxPrep("Domain has been created or is already existant on your account!", "ok", _COOKIES_);
+			x_eventBoxPrep("Domain has been created, please start adding records to the domain!", "ok", _COOKIES_);
 			$checkserverid = $mysql->insert_id; 
 			Header("Location: ./?site=domain_list&bind_id=".$checkserverid."");
 			exit();

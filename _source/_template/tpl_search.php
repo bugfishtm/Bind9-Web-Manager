@@ -89,12 +89,13 @@
 							$output = $output."</td>";
 							$output = $output."<td>";
 								if($value["registered"] == "1") { $output = $output. '<span class="badge text-bg-success" title="Registered and Active in Bind9">R</span> '; }
-								if($value["registered"] != "1") { $output = $output. '<span class="badge text-bg-warning" title="Not active for queries">NR</span> '; }
+								if($value["registered"] != "1") { $output = $output. '<span class="badge text-bg-danger" title="Not active for queries">NR</span> '; }
 								if($value["conflict"] == "1") { $output = $output. '<span class="badge text-bg-warning" title="Conflicts">C</span> '; }
 								if($value["preferred"] == "1") { $output = $output. '<span class="badge text-bg-primary" title="Prefered which may solvesn conflicts">P</span> '; }
 								if(@$value["set_no_replicate"] == "1") { $output = $output. '<span class="badge text-bg-danger" title="Replication to other servers Disabled">RD</span> '; }
 								if($value["oldzonefallback"] == "1") { $output = $output. '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 								if($value["okonce"] == "0") { $output = $output. '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
+								if($value["zonecheck"] == "0") { $output = $output. '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
 							$output = $output."</td>";
 							$output = $output."<td>";
 
