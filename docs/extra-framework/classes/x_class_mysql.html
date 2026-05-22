@@ -1,0 +1,2657 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="x_class_mail_template.html">
+      
+      
+        <link rel="next" href="x_class_mysql_item.html">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
+    
+    
+      
+        <title>x_class_mysql - Bugfish Framework</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+      
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "WebSite",
+      "name": "Bugfish Framework",
+    }
+    </script>
+	<script type="application/ld+json">
+	{
+	  "@context": "http://schema.org",
+	  "@type": "TechArticle",
+	  "headline": "PHP Class MySQL",
+	  "description": "Manage MySQL databases with the x_class_mysql class. Includes advanced database handling and logging features, crucial for many other classes.",
+	  "articleSection": "Introduction",
+	  "datePublished": "2025-03-04",
+	  "dateModified": "2025-03-04",
+	  "author": {
+		"@type": "Person",
+		"name": "Jan-Maurice Dahlmanns"
+	  },
+	  "publisher": {
+		"@type": "Organization",
+		"name": "Bugfish",
+		"logo": {
+		  "@type": "ImageObject",
+		  "url": "../logo.png"
+		}
+	  }
+	}
+	</script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="subject" content="documentation">
+	<meta name="copyright" content="bugfish">
+	<meta name='language' content='en'>
+	<meta name='robots' content='index,follow'>
+	<meta name='author' content='bugfish, ynvnzmlzaa@gmail.com'>
+	
+	
+	<meta property="og:title" content="PHP Class MySQL - Bugfish Framework"/>
+	<meta name="description" content="Manage MySQL databases with the x_class_mysql class. Includes advanced database handling and logging features, crucial for many other classes.">  
+	<meta name="og:description" content="Manage MySQL databases with the x_class_mysql class. Includes advanced database handling and logging features, crucial for many other classes.">  
+	<meta property="og:image" content="../meta.png" />
+
+
+    
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../insert_css/extra.css">
+    
+      <link rel="stylesheet" href="../insert_css/neoteroi-mkdocs.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#php-class-x_class_mysql" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Bugfish Framework" class="md-header__button md-logo" aria-label="Bugfish Framework" data-md-component="logo">
+      
+  <img src="../logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Bugfish Framework
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              x_class_mysql
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bugfishtm/bugfish-framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bugfish-framework
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Bugfish Framework" class="md-nav__button md-logo" aria-label="Bugfish Framework" data-md-component="logo">
+      
+  <img src="../logo.png" alt="logo">
+
+    </a>
+    Bugfish Framework
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bugfishtm/bugfish-framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bugfish-framework
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../download.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Download
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CSS Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            CSS Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../css/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    xcss_xfpe.css
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    JavaScript Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            JavaScript Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../javascript/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    xjs_library.js
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PHP Functions
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            PHP Functions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_button.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_button.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_captcha.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_captcha.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_cookiebanner.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_cookiebanner.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_curl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_curl.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_eventbox.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_eventbox.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_folder.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_folder.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_library.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_library.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_rss.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_rss.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_table.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_table.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_thumbnail.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_thumbnail.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_search.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_search.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PHP Classes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            PHP Classes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_2fa.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_2fa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_api.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_benchmark.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_benchmark
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_comment.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_comment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_crypt.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_crypt
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_csrf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_csrf
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_curl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_curl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_debug.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_debug
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_eventbox.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_eventbox
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_hitcounter.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_hitcounter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_ipbl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_ipbl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_log.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_block.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_block
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_lang.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_lang
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mail.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mail_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mail_template.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail_template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    x_class_mysql
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="x_class_mysql.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mysql
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mysql-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      MySQL Table
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Class Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status and Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#table-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transactions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alias-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alias Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi Query
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#row-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Row Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#private-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Private Methods
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#primary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Primary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#select" class="md-nav__link">
+    <span class="md-ellipsis">
+      select(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query" class="md-nav__link">
+    <span class="md-ellipsis">
+      query(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      update(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insert" class="md-nav__link">
+    <span class="md-ellipsis">
+      insert(...)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#binding-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Binding Information
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mysql_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mysql_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_perm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_perm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_perm_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_perm_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_redis.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_redis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_referer.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_referer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_table.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_table
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_user.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_user
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_var.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_var
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_version.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_version
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_zip.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_zip
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../warranty.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Warranty
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../support.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Support
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://bugfishtm.blogspot.com/2023/05/impressum.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Impressum
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://bugfishtm.blogspot.com/2023/05/privacy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Privacy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mysql-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      MySQL Table
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Class Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status and Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#table-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transactions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alias-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alias Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi Query
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#row-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Row Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#private-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Private Methods
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#primary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Primary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#select" class="md-nav__link">
+    <span class="md-ellipsis">
+      select(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query" class="md-nav__link">
+    <span class="md-ellipsis">
+      query(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      update(...)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insert" class="md-nav__link">
+    <span class="md-ellipsis">
+      insert(...)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#binding-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Binding Information
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<div><h1 id="php-class-x_class_mysql">PHP Class: <code>x_class_mysql</code></h1>
+<h2 id="introduction">Introduction</h2>
+<p>The <code>x_class_mysql</code> class provides an interface for interacting with a MySQL database. It encapsulates common database operations and includes additional features for error handling and logging.</p>
+<ul>
+<li><strong>Error Handling</strong>: Errors are managed by the <code>handler</code> method which updates internal error states and logs errors if configured.  </li>
+<li><strong>Benchmarking</strong>: Provides a simple benchmarking system to count operations.  </li>
+<li><strong>Logging</strong>: Allows configuration of logging to both the database and log files, with options to control logging behavior.  </li>
+<li><strong>Parameter Binding</strong>: When using prepared statements, ensure that <code>bindarray</code> is correctly formatted. The <code>type</code> key in each array element specifies the type of data being bound.  </li>
+</ul>
+<p>Use the class by including <code>/_framework/classes/x_class_mysql.php</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Dependencies</p>
+<ul>
+<li>PHP 7.0-7.4</li>
+<li>PHP 8.0-8.4</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">PHP-Modules</p>
+<ul>
+<li><code>mysqli</code>: The PHP MySQLi extension must be installed and enabled.  </li>
+<li><code>session</code>: Required for Benchmarking.</li>
+</ul>
+</div>
+<h2 id="mysql-table">MySQL Table</h2>
+<p>This section describes the table structure used by the MySQL class to log failures if logging is activated. The table is automatically created by the class if necessary. Below is a summary of the columns and keys used in the table, along with their purposes.</p>
+<div class="admonition note">
+<p class="admonition-title">The table will be automatically installed upon constructor execution.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Data Type</th>
+<th>Attributes</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>int(10)</code></td>
+<td><code>NOT NULL</code>, <code>AUTO_INCREMENT</code>, <code>PRIMARY KEY</code></td>
+<td>A unique identifier for each log entry, ensuring that each record can be individually tracked.</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td><code>varchar(256)</code></td>
+<td><code>DEFAULT NULL</code></td>
+<td>Stores the URL related to the log entry, providing context for where the failure occurred.</td>
+</tr>
+<tr>
+<td><code>init</code></td>
+<td><code>text</code></td>
+<td><code>NULL</code></td>
+<td>Contains initialization data, if available, that might provide additional context about the failure.</td>
+</tr>
+<tr>
+<td><code>exception</code></td>
+<td><code>text</code></td>
+<td><code>NULL</code></td>
+<td>Logs the text of any exception that was thrown, useful for diagnosing issues.</td>
+</tr>
+<tr>
+<td><code>sqlerror</code></td>
+<td><code>text</code></td>
+<td><code>NULL</code></td>
+<td>Records the MySQL error message if there was an SQL error, aiding in troubleshooting.</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td><code>text</code></td>
+<td><code>NULL</code></td>
+<td>Stores the output related to the error, which can provide additional details about the failure.</td>
+</tr>
+<tr>
+<td><code>success</code></td>
+<td><code>int(1)</code></td>
+<td><code>NULL</code></td>
+<td>Indicates the result of the query: <code>1</code> for success, <code>2</code> for error, or <code>NULL</code> if not applicable.</td>
+</tr>
+<tr>
+<td><code>creation</code></td>
+<td><code>datetime</code></td>
+<td><code>DEFAULT CURRENT_TIMESTAMP</code></td>
+<td>Records the timestamp when the log entry was created, allowing for chronological tracking.</td>
+</tr>
+<tr>
+<td><code>section</code></td>
+<td><code>varchar(128)</code></td>
+<td><code>DEFAULT NULL</code></td>
+<td>For Multi Site Purposes to split database data in categories.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Key Name</th>
+<th>Key Type</th>
+<th>Columns</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PRIMARY KEY</code></td>
+<td>Primary</td>
+<td><code>id</code></td>
+<td>Ensures that each log entry is uniquely identifiable.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="class-usage">Class Usage</h2>
+<h3 id="constructors">Constructors</h3>
+<table>
+<thead>
+<tr>
+<th>Method/Function</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct</code></td>
+<td><code>($hostname, $username, $password, $database, $port)</code></td>
+<td>Initializes a new MySQL connection using the provided credentials and database information.</td>
+</tr>
+<tr>
+<td><code>construct</code></td>
+<td>-</td>
+<td>Returns a new instance of <code>x_class_mysql</code> with the same connection parameters.</td>
+</tr>
+<tr>
+<td><code>construct_copy</code></td>
+<td>-</td>
+<td>Returns the current instance of <code>x_class_mysql</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="status-and-errors">Status and Errors</h3>
+<table>
+<thead>
+<tr>
+<th>Method/Function</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td>-</td>
+<td>Alias for <code>ping()</code>. Checks if the database connection is alive.</td>
+</tr>
+<tr>
+<td><code>con</code></td>
+<td>-</td>
+<td>Returns the MySQLi connection object.</td>
+</tr>
+<tr>
+<td><code>lastError</code></td>
+<td>-</td>
+<td>Returns the last error that occurred during database operations.</td>
+</tr>
+<tr>
+<td><code>fullError</code></td>
+<td>-</td>
+<td>Returns detailed error information.</td>
+</tr>
+<tr>
+<td><code>ping</code></td>
+<td>-</td>
+<td>Checks if the MySQL server is reachable. Uses <code>mysqli_ping()</code>.</td>
+</tr>
+<tr>
+<td><code>inject</code></td>
+<td><code>$mysqli</code></td>
+<td>Injects an external MySQLi connection object.</td>
+</tr>
+<tr>
+<td><code>displayError</code></td>
+<td><code>$exit = true, $response_code = 503</code></td>
+<td>Displays an error message and optionally exits the script.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="benchmarking">Benchmarking</h3>
+<table>
+<thead>
+<tr>
+<th>Method/Function</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>benchmark_get</code></td>
+<td>-</td>
+<td>Retrieves the current benchmark count.</td>
+</tr>
+<tr>
+<td><code>benchmark_raise</code></td>
+<td><code>$raise = 1</code></td>
+<td>Increments the benchmark counter.</td>
+</tr>
+<tr>
+<td><code>benchmark_config</code></td>
+<td><code>$bool = false, $preecookie = ""</code></td>
+<td>Configures benchmarking and session cookie prefix.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging">Logging</h3>
+<table>
+<thead>
+<tr>
+<th>Method/Function</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>logfile_messages</code></td>
+<td><code>$bool = false</code></td>
+<td>Enables or disables logging of error messages to a file.</td>
+</tr>
+<tr>
+<td><code>log_disable</code></td>
+<td>-</td>
+<td>Disables logging.</td>
+</tr>
+<tr>
+<td><code>log_status</code></td>
+<td>-</td>
+<td>Returns whether logging is active.</td>
+</tr>
+<tr>
+<td><code>log_enable</code></td>
+<td>-</td>
+<td>Enables logging if the logging table is configured.</td>
+</tr>
+<tr>
+<td><code>log_config</code></td>
+<td><code>$table = "mysqllogging", $section = "", $logall = false</code></td>
+<td>Configures logging settings including table name, section, and whether to log all messages.</td>
+</tr>
+<tr>
+<td><code>stop_on_error</code></td>
+<td><code>$bool = false</code></td>
+<td>Configures whether to stop execution on error.</td>
+</tr>
+<tr>
+<td><code>display_on_error</code></td>
+<td><code>$bool = false</code></td>
+<td>Configures whether to display errors.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="table-functions">Table Functions</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Method Name</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Return Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>table_exists</code></td>
+<td>Checks if a table exists in the database by trying to select from it.</td>
+<td>- <code>$tablename</code>: Name of the table to check.</td>
+<td>Returns the result of the query. <code>true</code> if the table exists, <code>false</code> otherwise.</td>
+</tr>
+<tr>
+<td><code>table_delete</code></td>
+<td>Deletes (drops) a specified table from the database.</td>
+<td>- <code>$tablename</code>: Name of the table to delete.</td>
+<td>Executes the <code>DROP TABLE</code> query and returns the result of the operation.</td>
+</tr>
+<tr>
+<td><code>table_create</code></td>
+<td>Creates a table with the given name.</td>
+<td>- <code>$tablename</code>: Name of the table to create.</td>
+<td>Executes the <code>CREATE TABLE</code> query and returns the result of the operation.</td>
+</tr>
+<tr>
+<td><code>auto_increment</code></td>
+<td>Sets the auto-increment value for a specified table.</td>
+<td>- <code>$table</code>: Name of the table. <br> - <code>$value</code>: The new auto-increment value.</td>
+<td>Executes the <code>ALTER TABLE</code> query to set auto-increment and returns the result of the operation.</td>
+</tr>
+<tr>
+<td><code>table_backup</code></td>
+<td>Backs up the structure and optionally the data of a specified table, saving it to a file if provided.</td>
+<td>- <code>$table</code>: Name of the table to back up. <br> - <code>$filepath</code> (optional): Path to save the backup file. <br> - <code>$withdata</code> (optional): Boolean to include table data (default: <code>true</code>). <br> - <code>$dropstate</code> (optional): Boolean to include <code>DROP TABLE IF EXISTS</code> in backup (default: <code>false</code>).</td>
+<td>Returns the table structure and data as a string. Optionally writes the backup to a file if <code>$filepath</code> is provided.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="database-functions">Database Functions</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Method Name</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Return Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>database_delete</code></td>
+<td>Deletes (drops) a specified database.</td>
+<td>- <code>$database</code>: The name of the database to delete.</td>
+<td>Executes the <code>DROP DATABASE</code> query and returns the result of the operation.</td>
+</tr>
+<tr>
+<td><code>database_create</code></td>
+<td>Creates a new database with the given name.</td>
+<td>- <code>$database</code>: The name of the database to create.</td>
+<td>Executes the <code>CREATE DATABASE</code> query and returns the result of the operation.</td>
+</tr>
+<tr>
+<td><code>database_select</code></td>
+<td>Selects a specific database for subsequent queries.</td>
+<td>- <code>$database</code>: The name of the database to select.</td>
+<td>Returns <code>true</code> if the database is selected successfully, or handles errors and returns <code>false</code> on failure.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="transactions">Transactions</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Method Name</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Return Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transaction</code></td>
+<td>Starts a database transaction if none is already running. Optionally disables auto-commit.</td>
+<td>- <code>$autocommit</code>: Boolean flag to set whether auto-commit is enabled (default: <code>false</code>).</td>
+<td>Returns <code>true</code> if the transaction starts successfully, <code>false</code> if already running, or handles exceptions gracefully.</td>
+</tr>
+<tr>
+<td><code>rollback</code></td>
+<td>Rolls back the current transaction if one is running.</td>
+<td>N/A</td>
+<td>Returns <code>true</code> if rollback is successful, <code>false</code> if no transaction is running, or handles exceptions.</td>
+</tr>
+<tr>
+<td><code>transactionStatus</code></td>
+<td>Checks whether a transaction is currently active.</td>
+<td>N/A</td>
+<td>Returns <code>true</code> if a transaction is running, <code>false</code> otherwise.</td>
+</tr>
+<tr>
+<td><code>commit</code></td>
+<td>Commits the current transaction if one is running.</td>
+<td>N/A</td>
+<td>Returns <code>true</code> if commit is successful, <code>false</code> if no transaction is running, or handles exceptions.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="alias-functions">Alias Functions</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Method Name</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Return Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__destruct</code></td>
+<td>Destructor method that closes the connection or performs cleanup when the object is destroyed.</td>
+<td>N/A</td>
+<td>No return value. The function doesn't perform any operations but is defined to properly destroy the object.</td>
+</tr>
+<tr>
+<td><code>escape</code></td>
+<td>Escapes a variable to make it safe for use in an SQL query. Handles both simple values and arrays/objects.</td>
+<td>- <code>$val</code>: The value to escape. Can be a string, object, or array.</td>
+<td>Returns the escaped string using <code>mysqli_real_escape_string()</code> or serialized object/array (escaped).</td>
+</tr>
+<tr>
+<td><code>next_result</code></td>
+<td>Advances the result pointer to the next result in a multi-query execution.</td>
+<td>N/A</td>
+<td>Returns the result of <code>mysqli_next_result()</code>, or <code>false</code> if an error occurs.</td>
+</tr>
+<tr>
+<td><code>store_result</code></td>
+<td>Stores the result set from the last query in the multi-query execution.</td>
+<td>N/A</td>
+<td>Returns the result set from <code>mysqli_store_result()</code>, or <code>false</code> on failure.</td>
+</tr>
+<tr>
+<td><code>more_results</code></td>
+<td>Checks if there are more results available in the multi-query execution.</td>
+<td>N/A</td>
+<td>Returns the result of <code>mysqli_more_results()</code>, or <code>false</code> on failure.</td>
+</tr>
+<tr>
+<td><code>fetch_array</code></td>
+<td>Fetches a result row as an associative array, numeric array, or both.</td>
+<td>- <code>$result</code>: The result set resource returned from a query.</td>
+<td>Returns the result row as an array, or <code>false</code> if an error occurs.</td>
+</tr>
+<tr>
+<td><code>fetch_object</code></td>
+<td>Fetches a result row as an object.</td>
+<td>- <code>$result</code>: The result set resource returned from a query.</td>
+<td>Returns the result row as an object, or <code>false</code> on failure.</td>
+</tr>
+<tr>
+<td><code>free_result</code></td>
+<td>Frees the memory associated with a result set.</td>
+<td>- <code>$result</code>: The result set resource to free.</td>
+<td>Returns <code>true</code> on success, or <code>false</code> on failure.</td>
+</tr>
+<tr>
+<td><code>use_result</code></td>
+<td>Initiates retrieval of a result set from a query that is to be retrieved row by row.</td>
+<td>N/A</td>
+<td>Returns the result of <code>mysqli_use_result()</code>, or <code>false</code> on failure.</td>
+</tr>
+<tr>
+<td><code>free_all</code></td>
+<td>Frees all result sets and fetches the remaining results in a multi-query execution.</td>
+<td>N/A</td>
+<td>Returns an array of all results fetched from the multi-query execution.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="multi-query">Multi Query</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Method Name</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Return Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>multi_query</code></td>
+<td>Executes a multi-query SQL string. Allows executing multiple SQL statements in a single query.</td>
+<td>- <code>$query</code>: The SQL query string containing multiple statements.</td>
+<td>Returns the result of <code>multi_query()</code> or, if an exception occurs, handles it and returns <code>false</code>.</td>
+</tr>
+<tr>
+<td><code>multi_query_file</code></td>
+<td>Executes a multi-query SQL from a file. Reads an SQL file and runs the queries contained within it.</td>
+<td>- <code>$file</code>: The path to the file containing the SQL queries.</td>
+<td>Returns the result of the <code>multi_query()</code> operation on the SQL file's content or <code>false</code> if the file doesn't exist.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="row-functions">Row Functions</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Method Name</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Parameters</strong></th>
+<th><strong>Return Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>row_element_increase</code></td>
+<td>Increases a numeric field in a specified table by a given value (defaults to 1).</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$nameidfield</code>: The column name used for identifying the row. <br> - <code>$id</code>: The identifier value for the row. <br> - <code>$increasefield</code>: The field to increase. <br> - <code>$increasevalue</code>: Amount to add.</td>
+<td>Returns <code>false</code> if <code>$id</code> or <code>$increasevalue</code> is not numeric; otherwise, it returns the result of the SQL <code>UPDATE</code> query.</td>
+</tr>
+<tr>
+<td><code>row_element_decrease</code></td>
+<td>Decreases a numeric field in a specified table by a given value (defaults to 1).</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$nameidfield</code>: The column name used for identifying the row. <br> - <code>$id</code>: The identifier value for the row. <br> - <code>$decreasefield</code>: The field to decrease. <br> - <code>$decreasevalue</code>: Amount to subtract.</td>
+<td>Returns <code>false</code> if <code>$id</code> or <code>$decreasevalue</code> is not numeric; otherwise, it returns the result of the SQL <code>UPDATE</code> query.</td>
+</tr>
+<tr>
+<td><code>row_get</code></td>
+<td>Retrieves an entire row from a specified table based on the row ID.</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$id</code>: The identifier value for the row. <br> - <code>$row</code>: The column name used to locate the row (default is <code>"id"</code>).</td>
+<td>Returns the row data as an array.</td>
+</tr>
+<tr>
+<td><code>row_element_get</code></td>
+<td>Retrieves a specific element from a row in the table. If the element is not found, it returns a fallback value.</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$id</code>: The identifier value for the row. <br> - <code>$elementrow</code>: The column from which to fetch the value. <br> - <code>$fallback</code>: The value to return if the element isn't found. <br> - <code>$row</code>: Identifier column (default: <code>"id"</code>).</td>
+<td>Returns the value of the specified column or <code>$fallback</code> if not found.</td>
+</tr>
+<tr>
+<td><code>row_element_change</code></td>
+<td>Changes the value of a specific column in a row.</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$id</code>: The identifier value for the row. <br> - <code>$element</code>: The new value to set. <br> - <code>$elementrow</code>: The column to change. <br> - <code>$row</code>: Identifier column (default: <code>"id"</code>).</td>
+<td>Returns the result of the SQL <code>UPDATE</code> query.</td>
+</tr>
+<tr>
+<td><code>row_exist</code></td>
+<td>Checks if a row with a specific ID exists in the table.</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$id</code>: The identifier value for the row. <br> - <code>$row</code>: The column to match for existence (default: <code>"id"</code>).</td>
+<td>Returns <code>true</code> if the row exists, otherwise <code>false</code>.</td>
+</tr>
+<tr>
+<td><code>rows_get</code></td>
+<td>Retrieves multiple rows from the table where the column matches the specified value.</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$id</code>: The identifier value for the rows. <br> - <code>$row</code>: The column name used for filtering rows (default: <code>"id"</code>).</td>
+<td>Returns an array of rows that match the condition.</td>
+</tr>
+<tr>
+<td><code>row_del</code></td>
+<td>Deletes a row in the specified table based on the row's ID.</td>
+<td>- <code>$table</code>: The table name. <br> - <code>$id</code>: The identifier value for the row. <br> - <code>$row</code>: The column to identify the row (default: <code>"id"</code>).</td>
+<td>Returns the result of the SQL <code>DELETE</code> query.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="private-methods">Private Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method/Function</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>log</code></td>
+<td><code>$output, $sqlerror, $exception, $init, $boolsuccess, $nolog = false</code></td>
+<td>Logs the error details to the database or file if logging is enabled.</td>
+</tr>
+<tr>
+<td><code>handler</code></td>
+<td><code>$excecution, $exception, $init, $nolog = false</code></td>
+<td>Handles the execution and error logging.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="primary">Primary</h3>
+<h4 id="select"><code>select(...)</code></h4>
+<p>Retrieves data from the database based on the provided query. It supports fetching single or multiple rows.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th><code>select</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parameters</strong></td>
+<td><code>string $query</code> <br> SQL query to execute <br> <code>bool $multiple</code> <br> Whether to fetch multiple rows (default: <code>false</code>) <br> <code>mixed $bindarray</code> <br> Array of binding parameters or <code>false</code> for direct query <br> <code>int $fetch_type</code> <br> Type of result array (e.g., <code>MYSQLI_ASSOC</code>, <code>MYSQLI_NUM</code>)</td>
+</tr>
+<tr>
+<td><strong>Return Value</strong></td>
+<td>Returns an array of results if successful; <code>false</code> if failed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="query"><code>query(...)</code></h4>
+<p>Executes a general query (e.g., INSERT, DELETE, etc.) and returns the result set.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th><code>query</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parameters</strong></td>
+<td><code>string $query</code> <br> SQL query to execute <br> <code>mixed $bindarray</code> <br> Array of binding parameters or <code>false</code> for direct query</td>
+</tr>
+<tr>
+<td><strong>Return Value</strong></td>
+<td>Returns the result set object if successful; <code>false</code> if failed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="update"><code>update(...)</code></h4>
+<p>Executes an update statement and returns the number of affected rows.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th><code>update</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parameters</strong></td>
+<td><code>string $query</code> <br> SQL query to execute <br> <code>mixed $bindarray</code> <br> Array of binding parameters or <code>false</code> for direct query</td>
+</tr>
+<tr>
+<td><strong>Return Value</strong></td>
+<td>Number of affected rows if successful; <code>false</code> if failed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="insert"><code>insert(...)</code></h4>
+<p>Inserts a new record into a specified table and returns the ID of the inserted record.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th><code>insert</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parameters</strong></td>
+<td><code>string $table</code> <br> Name of the table <br> <code>array $array</code> <br> Associative array of field names and values <br> <code>mixed $bindarray</code> <br> Array of binding parameters or <code>false</code> for direct query</td>
+</tr>
+<tr>
+<td><strong>Return Value</strong></td>
+<td>Inserted ID if successful; <code>false</code> if failed</td>
+</tr>
+</tbody>
+</table>
+<h2 id="binding-information">Binding Information</h2>
+<p>If <code>$bindarray</code> is provided for secure data transmission via mysql buffer:</p>
+<table>
+<thead>
+<tr>
+<th><code>bindarray</code> Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Array[X]["value"]</code></td>
+<td>Value to be bound to the query</td>
+</tr>
+<tr>
+<td><code>Array[X]["type"]</code></td>
+<td>Data type of the value (<code>s</code> = string, <code>i</code> = integer, <code>d</code> = double, <code>b</code> = blob)</td>
+</tr>
+</tbody>
+</table></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+        <script src="../insert_js/extra.js"></script>
+      
+    
+  <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(() => { lightbox.reload() });
+</script></body>
+</html>

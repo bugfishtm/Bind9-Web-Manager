@@ -1,0 +1,24 @@
+<p><strong>Version 4.1.0 Release</strong></p>
+<p><strong>Description:</strong> Major UI Overhaul with expanded functionality, including a fully integrated DNS Server capable of standalone Domain and Record Management.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li><strong>UI Overhaul:</strong> Completely redesigned interface for an improved user experience and more intuitive navigation.</li>
+<li><strong>Domain &amp; Record Management:</strong> Full integrated management of DNS Domains and Records directly within the web interface.</li>
+<li><strong>Standalone DNS Server:</strong> Now capable of operating as a standalone DNS server without external dependencies.</li>
+<li>And much more...</li>
+</ul>
+<p><strong>How to update 3.7.1 to 4.1.0:</strong></p>
+<ul>
+<li>Login to your web server.</li>
+<li>Create a backup of <code>Settings.php</code>.</li>
+<li>Remove <code>settings.php</code> and all existing DNSHTTP-related web files from the server (e.g. <code>var/www/html/*</code>).</li>
+<li>Upload the new files from the <code>_source</code> folder.</li>
+<li>Complete the installer at the website&#39;s root URL, then compare your configuration against the backed-up <code>settings.php</code>.</li>
+<li>The installer will generate a new <code>settings.php</code> at <code>_data/settings.php</code>.</li>
+<li>No database migrations or other major changes are required.</li>
+</ul>
+<p><strong>Backwards Compatibility:</strong></p>
+<ul>
+<li>Version 4.1.0 supports cross-version replication to and from version 3.x.x.</li>
+</ul>
+<p>Please note that this release focuses on interface and architectural improvements. We remain committed to delivering a reliable Bind9 Web Manager experience and continue to be responsive to all support requests. There are no known bugs in this release.</p>

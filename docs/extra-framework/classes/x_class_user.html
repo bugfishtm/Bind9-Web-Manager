@@ -1,0 +1,4886 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="x_class_table.html">
+      
+      
+        <link rel="next" href="x_class_var.html">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
+    
+    
+      
+        <title>x_class_user - Bugfish Framework</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "WebSite",
+      "name": "Bugfish Framework",
+    }
+    </script>
+	<script type="application/ld+json">
+	{
+	  "@context": "http://schema.org",
+	  "@type": "TechArticle",
+	  "headline": "PHP Class User",
+	  "description": "Develop robust user logins with the x_class_user class. Features password recovery, mail editing, and token operations for comprehensive authentication.",
+	  "articleSection": "Introduction",
+	  "datePublished": "2025-03-04",
+	  "dateModified": "2025-03-04",
+	  "author": {
+		"@type": "Person",
+		"name": "Jan-Maurice Dahlmanns"
+	  },
+	  "publisher": {
+		"@type": "Organization",
+		"name": "Bugfish",
+		"logo": {
+		  "@type": "ImageObject",
+		  "url": "../logo.png"
+		}
+	  }
+	}
+	</script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="subject" content="documentation">
+	<meta name="copyright" content="bugfish">
+	<meta name='language' content='en'>
+	<meta name='robots' content='index,follow'>
+	<meta name='author' content='bugfish, ynvnzmlzaa@gmail.com'>
+	
+	
+	<meta property="og:title" content="PHP Class User - Bugfish Framework"/>
+	<meta name="description" content="Develop robust user logins with the x_class_user class. Features password recovery, mail editing, and token operations for comprehensive authentication.">  
+	<meta name="og:description" content="Develop robust user logins with the x_class_user class. Features password recovery, mail editing, and token operations for comprehensive authentication.">  
+	<meta property="og:image" content="../meta.png" />
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../insert_css/extra.css">
+    
+      <link rel="stylesheet" href="../insert_css/neoteroi-mkdocs.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#php-class-x_class_user" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Bugfish Framework" class="md-header__button md-logo" aria-label="Bugfish Framework" data-md-component="logo">
+      
+  <img src="../logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Bugfish Framework
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              x_class_user
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bugfishtm/bugfish-framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bugfish-framework
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Bugfish Framework" class="md-nav__button md-logo" aria-label="Bugfish Framework" data-md-component="logo">
+      
+  <img src="../logo.png" alt="logo">
+
+    </a>
+    Bugfish Framework
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bugfishtm/bugfish-framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bugfish-framework
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../download.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Download
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CSS Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            CSS Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../css/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    xcss_xfpe.css
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    JavaScript Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            JavaScript Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../javascript/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    xjs_library.js
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PHP Functions
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            PHP Functions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_button.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_button.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_captcha.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_captcha.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_cookiebanner.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_cookiebanner.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_curl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_curl.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_eventbox.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_eventbox.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_folder.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_folder.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_library.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_library.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_rss.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_rss.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_table.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_table.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_thumbnail.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_thumbnail.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions/x_search.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_search.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PHP Classes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            PHP Classes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_2fa.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_2fa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_api.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_benchmark.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_benchmark
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_comment.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_comment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_crypt.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_crypt
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_csrf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_csrf
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_curl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_curl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_debug.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_debug
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_eventbox.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_eventbox
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_hitcounter.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_hitcounter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_ipbl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_ipbl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_log.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_block.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_block
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_lang.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_lang
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mail.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mail_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mail_template.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail_template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mysql.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mysql
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_mysql_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mysql_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_perm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_perm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_perm_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_perm_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_redis.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_redis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_referer.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_referer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_table.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_table
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    x_class_user
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="x_class_user.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    x_class_user
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Class Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-related" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Related
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference Returns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operation-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Returns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Constructor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initial Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interval-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interval Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expiry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expiry Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoblock-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Autoblock Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Session Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cookie-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cookie Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operation-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operation Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-table-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Table Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usergroup-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usergroup Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#password-filtering-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Password Filtering Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#password-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Password Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extrafield-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extrafield Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-validation-time-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token Validation Time Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-validation-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token Validation Functions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confirmation-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Confirmation Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registration-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registration Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registration Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#block-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Block Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabledisable-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable/Disable Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-user-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Change User Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-user-mail-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Change User Mail Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Change User Mail Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-workflow_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-user-name-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Change User Name Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Change User Name Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-workflow_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-check-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Duplicate Check Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extra-data-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extra Data Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#login-as-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Login As Functions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#primary-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Primary Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#init-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Init Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#login-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Login Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Login Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#return-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Return Codes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#activation-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Activation Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#activation-request-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Request ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#activation-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Request
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#activation-confirm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Confirm
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recover-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recover Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recover-request-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Request ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recover-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Request
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recover-confirm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Confirm
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mail-change-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mail Change Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mail Change Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mail-edit-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mail Edit Returns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mail-edit-confirm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mail Edit Confirm
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-login-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Display Login Function
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Display Login Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functionality
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#return-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Return Values
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_var.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_var
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_version.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_version
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="x_class_zip.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_zip
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../warranty.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Warranty
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../support.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Support
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://bugfishtm.blogspot.com/2023/05/impressum.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Impressum
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://bugfishtm.blogspot.com/2023/05/privacy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Privacy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Class Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-related" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Related
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference Returns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operation-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Returns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Constructor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initial Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interval-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interval Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expiry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expiry Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoblock-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Autoblock Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Session Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cookie-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cookie Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operation-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operation Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-table-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Table Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usergroup-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usergroup Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#password-filtering-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Password Filtering Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#password-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Password Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extrafield-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extrafield Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-validation-time-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token Validation Time Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-validation-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Token Validation Functions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confirmation-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Confirmation Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registration-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registration Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registration Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#block-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Block Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabledisable-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable/Disable Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-user-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Change User Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-user-mail-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Change User Mail Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Change User Mail Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-workflow_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-user-name-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Change User Name Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Change User Name Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-workflow_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-check-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Duplicate Check Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extra-data-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extra Data Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#login-as-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Login As Functions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#primary-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Primary Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#init-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Init Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#login-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Login Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Login Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-purpose_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Purpose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#return-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Return Codes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#activation-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Activation Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#activation-request-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Request ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#activation-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Request
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#activation-confirm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Activation Confirm
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recover-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recover Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recover-request-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Request ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recover-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Request
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recover-confirm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recover Confirm
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mail-change-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mail Change Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mail Change Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mail-edit-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mail Edit Returns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mail-edit-confirm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mail Edit Confirm
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-login-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Display Login Function
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Display Login Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functionality
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#return-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Return Values
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<div><h1 id="php-class-x_class_user">PHP Class: <code>x_class_user</code></h1>
+<h2 id="introduction">Introduction</h2>
+<p>The <code>x_class_user</code> PHP class is a versatile and robust solution designed for seamless integration of user management into web projects. As a core component of the Bugfish Framework, it offers essential features for managing user sessions, authentication, and profile customization.</p>
+<p>Use the class by including <code>/_framework/classes/x_class_user.php</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Dependencies</p>
+<ul>
+<li>PHP 7.0-7.4</li>
+<li>PHP 8.0-8.4</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">PHP-Modules</p>
+<ul>
+<li><code>mysqli</code>: The PHP MySQLi extension must be installed and enabled.  </li>
+<li><code>session</code>: PHP sessions must be enabled and started before CSRF protection can function correctly.</li>
+<li><code>openssl</code>: Used for cryptographic functions, such as token generation.  </li>
+<li><code>mbstring</code>: Required for handling multibyte character encodings.  </li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">PHP-Classes</p>
+<ul>
+<li><code>x_class_mysql</code>: Required for database operations.</li>
+</ul>
+</div>
+<h2 id="key-features">Key Features</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User Registration and Authentication</strong></td>
+<td>- Secure password hashing and persistent authentication via cookies<br>- Efficient session management for consistent user experience</td>
+</tr>
+<tr>
+<td><strong>Profile Customization</strong></td>
+<td>- Supports user groups and additional profile fields<br>- Manages user-specific settings</td>
+</tr>
+<tr>
+<td><strong>Session Management</strong></td>
+<td>- Integrates PHP sessions with MySQL for reliable session handling</td>
+</tr>
+<tr>
+<td><strong>Security Measures</strong></td>
+<td>- Protects against SQL injection (not a full security guarantee)</td>
+</tr>
+<tr>
+<td><strong>User Activity Management</strong></td>
+<td>- Handles account activation via email codes<br>- Supports password recovery and secure login procedures</td>
+</tr>
+<tr>
+<td><strong>Multi-Login Control and Login Flexibility</strong></td>
+<td>- Option to enable or disable multi-login per user<br>- Configurable login using either username or email</td>
+</tr>
+<tr>
+<td><strong>Reference Management</strong></td>
+<td>- Manages and resets internal references for clean user operations</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-structure">Table Structure</h2>
+<p>Tables will be installed automatically upon initialization.</p>
+<p><strong>Users Table</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Data Type</th>
+<th>Nullable</th>
+<th>Default Value</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>No</td>
+<td>AUTO_INCREMENT</td>
+<td>Unique ID</td>
+</tr>
+<tr>
+<td>user_name</td>
+<td>varchar(512)</td>
+<td>Yes</td>
+<td>'undefined'</td>
+<td>User login name</td>
+</tr>
+<tr>
+<td>user_initial</td>
+<td>int(1)</td>
+<td>Yes</td>
+<td>0</td>
+<td>1 if this user is the initial created user</td>
+</tr>
+<tr>
+<td>user_pass</td>
+<td>varchar(512)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User password</td>
+</tr>
+<tr>
+<td>user_mail</td>
+<td>varchar(512)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User email</td>
+</tr>
+<tr>
+<td>user_2fa</td>
+<td>text</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User 2FA secret key</td>
+</tr>
+<tr>
+<td>user_shadow</td>
+<td>varchar(512)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Store for email renewals</td>
+</tr>
+<tr>
+<td>user_rank</td>
+<td>int(9)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User rank</td>
+</tr>
+<tr>
+<td>user_confirmed</td>
+<td>tinyint(1)</td>
+<td>Yes</td>
+<td>0</td>
+<td>User activation status</td>
+</tr>
+<tr>
+<td>req_activation</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of activation request</td>
+</tr>
+<tr>
+<td>last_activation</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of last activation</td>
+</tr>
+<tr>
+<td>user_disabled</td>
+<td>int(1)</td>
+<td>Yes</td>
+<td>0</td>
+<td>1 if user is disabled</td>
+</tr>
+<tr>
+<td>last_login</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of last login</td>
+</tr>
+<tr>
+<td>user_blocked</td>
+<td>tinyint(1)</td>
+<td>Yes</td>
+<td>0</td>
+<td>User blocked status</td>
+</tr>
+<tr>
+<td>block_reset</td>
+<td>int(1)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Number of block resets</td>
+</tr>
+<tr>
+<td>block_auto</td>
+<td>int(1)</td>
+<td>Yes</td>
+<td>0</td>
+<td>Automatic block status</td>
+</tr>
+<tr>
+<td>block_activation</td>
+<td>int(1)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Block activation status</td>
+</tr>
+<tr>
+<td>block_mail_edit</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of last mail edit block</td>
+</tr>
+<tr>
+<td>fails_in_a_row</td>
+<td>int(10)</td>
+<td>Yes</td>
+<td>1</td>
+<td>Failed login attempts</td>
+</tr>
+<tr>
+<td>last_block</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of last block</td>
+</tr>
+<tr>
+<td>user_lang</td>
+<td>varchar(24)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User default language</td>
+</tr>
+<tr>
+<td>user_color</td>
+<td>varchar(24)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User default color</td>
+</tr>
+<tr>
+<td>user_theme</td>
+<td>varchar(24)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User default theme</td>
+</tr>
+<tr>
+<td>user_theme_sub</td>
+<td>varchar(24)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>User default sub-theme</td>
+</tr>
+<tr>
+<td>extradata</td>
+<td>TEXT</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Additional data</td>
+</tr>
+<tr>
+<td>hive_extradata</td>
+<td>TEXT</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Additional data for HIVE system</td>
+</tr>
+<tr>
+<td>req_reset</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of reset request</td>
+</tr>
+<tr>
+<td>last_reset</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of last reset</td>
+</tr>
+<tr>
+<td>req_mail_edit</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of last mail edit request</td>
+</tr>
+<tr>
+<td>last_mail_edit</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Date of last mail edit</td>
+</tr>
+<tr>
+<td>last_activity</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Last site activity</td>
+</tr>
+<tr>
+<td>created_date</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP</td>
+<td>Creation date</td>
+</tr>
+<tr>
+<td>modify_date</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</td>
+<td>Modification date</td>
+</tr>
+<tr>
+<td>Primary Key</td>
+<td></td>
+<td></td>
+<td>(id)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sessions Table</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Data Type</th>
+<th>Nullable</th>
+<th>Default Value</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>int(10)</td>
+<td>No</td>
+<td>AUTO_INCREMENT</td>
+<td>Unique Session ID</td>
+</tr>
+<tr>
+<td>fk_user</td>
+<td>int(10)</td>
+<td>No</td>
+<td></td>
+<td>Related User ID</td>
+</tr>
+<tr>
+<td>key_type</td>
+<td>tinyint(1)</td>
+<td>Yes</td>
+<td>0</td>
+<td>Session type (1 - activate, 2 - session, etc.)</td>
+</tr>
+<tr>
+<td>creation</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP</td>
+<td>Session creation date</td>
+</tr>
+<tr>
+<td>modification</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</td>
+<td>Session modification date</td>
+</tr>
+<tr>
+<td>refresh_date</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Last session use date</td>
+</tr>
+<tr>
+<td>session_key</td>
+<td>varchar(128)</td>
+<td>Yes</td>
+<td></td>
+<td>Session authentication token</td>
+</tr>
+<tr>
+<td>is_active</td>
+<td>tinyint(1)</td>
+<td>Yes</td>
+<td>0</td>
+<td>1 - Active, 0 - Expired</td>
+</tr>
+<tr>
+<td>request_ip</td>
+<td>varchar(128)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>IP at session creation (if enabled)</td>
+</tr>
+<tr>
+<td>execute_ip</td>
+<td>varchar(128)</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>IP at session invalidation (if enabled)</td>
+</tr>
+<tr>
+<td>Primary Key</td>
+<td></td>
+<td></td>
+<td>(id)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Group Table</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Data Type</th>
+<th>Nullable</th>
+<th>Default Value</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>int(10)</td>
+<td>No</td>
+<td>AUTO_INCREMENT</td>
+<td>Unique Group ID</td>
+</tr>
+<tr>
+<td>group_name</td>
+<td>varchar(255)</td>
+<td>No</td>
+<td></td>
+<td>Group name</td>
+</tr>
+<tr>
+<td>group_description</td>
+<td>TEXT</td>
+<td>Yes</td>
+<td>NULL</td>
+<td>Group description</td>
+</tr>
+<tr>
+<td>creation</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP</td>
+<td>Creation date</td>
+</tr>
+<tr>
+<td>modification</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</td>
+<td>Modification date</td>
+</tr>
+<tr>
+<td>Primary Key</td>
+<td></td>
+<td></td>
+<td>(id)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Group Relation Table</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Data Type</th>
+<th>Nullable</th>
+<th>Default Value</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>int(10)</td>
+<td>No</td>
+<td>AUTO_INCREMENT</td>
+<td>Unique Link ID</td>
+</tr>
+<tr>
+<td>fk_user</td>
+<td>int(10)</td>
+<td>No</td>
+<td></td>
+<td>Related User ID</td>
+</tr>
+<tr>
+<td>fk_group</td>
+<td>int(10)</td>
+<td>No</td>
+<td></td>
+<td>Related Group ID</td>
+</tr>
+<tr>
+<td>creation</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP</td>
+<td>Creation date</td>
+</tr>
+<tr>
+<td>Primary Key</td>
+<td></td>
+<td></td>
+<td>(id)</td>
+<td></td>
+</tr>
+<tr>
+<td>Unique Constraint</td>
+<td></td>
+<td></td>
+<td>UNIQUE (fk_user, fk_group)</td>
+<td>Unique combination of user and group</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Extrafield Table</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Data Type</th>
+<th>Nullable</th>
+<th>Default Value</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>int(10)</td>
+<td>No</td>
+<td>AUTO_INCREMENT</td>
+<td>Unique Extrafield ID</td>
+</tr>
+<tr>
+<td>fk_user</td>
+<td>int(10)</td>
+<td>No</td>
+<td></td>
+<td>Related User ID</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>User-defined fields</td>
+</tr>
+<tr>
+<td>creation</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP</td>
+<td>Creation date</td>
+</tr>
+<tr>
+<td>modification</td>
+<td>datetime</td>
+<td>Yes</td>
+<td>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</td>
+<td>Modification date</td>
+</tr>
+<tr>
+<td>Primary Key</td>
+<td></td>
+<td></td>
+<td>(id)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="class-parameters">Class Parameters</h2>
+<h3 id="user-related">User Related</h3>
+<p>These parameters are only set if a user is logged in:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user_name</code>, <code>name</code></td>
+<td>Contains the user name as set in the database.</td>
+</tr>
+<tr>
+<td><code>user_mail</code>, <code>mail</code></td>
+<td>Contains the user email as set in the database.</td>
+</tr>
+<tr>
+<td><code>theme</code>, <code>user_theme</code></td>
+<td>Contains the user theme as set in the database.</td>
+</tr>
+<tr>
+<td><code>lang</code>, <code>user_lang</code></td>
+<td>Contains the user language as set in the database.</td>
+</tr>
+<tr>
+<td><code>loggedIn</code>, <code>loggedin</code>, <code>user_loggedin</code>, <code>user_loggedIn</code></td>
+<td>Indicates if the user is logged in (true) or not (false).</td>
+</tr>
+<tr>
+<td><code>user()</code></td>
+<td>Array with all fields from the database related to the user (excluding extra fields or group tables).</td>
+</tr>
+<tr>
+<td><code>user_id</code>, <code>id</code></td>
+<td>Contains the user ID as set in the database.</td>
+</tr>
+<tr>
+<td><code>user_rank</code>, <code>rank</code></td>
+<td>Contains the user rank as set in the database.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reference-returns">Reference Returns</h3>
+<p>These variables are set if main operation functions (e.g., login, recover) are triggered, providing quick access to relevant data:</p>
+<table>
+<thead>
+<tr>
+<th>Reference Return Variables</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$mail_ref_user</code></td>
+<td>References the involved user ID after a major operation.</td>
+</tr>
+<tr>
+<td><code>$mail_ref_token</code></td>
+<td>References the user token for activation after a major operation.</td>
+</tr>
+<tr>
+<td><code>$mail_ref_receiver</code></td>
+<td>References the involved user email after a major operation.</td>
+</tr>
+<tr>
+<td><code>$ref</code></td>
+<td>References the involved user after a major operation.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operation-returns">Operation Returns</h3>
+<p>These variables are set after major functions (e.g., mail change, recovery) are triggered and reflect the result of these operations:</p>
+<table>
+<thead>
+<tr>
+<th>Operation Functions Return Vars</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$login_request_code</code></td>
+<td>Return code from login functions.</td>
+</tr>
+<tr>
+<td><code>$rec_request_code</code></td>
+<td>Return code from recover functions.</td>
+</tr>
+<tr>
+<td><code>$act_request_code</code></td>
+<td>Return code from activation functions.</td>
+</tr>
+<tr>
+<td><code>$mc_request_code</code></td>
+<td>Return code from mail change functions.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="class-constructor">Class Constructor</h2>
+<table>
+<thead>
+<tr>
+<th>Constructor Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct($x_class_mysql, $table_users, $table_sessions, $preecokie = "xusers", $initial_ref = false, $initial_pass = false, $initial_rank = false)</code></td>
+<td>Initializes with <code>x_class_mysql</code> object and table names (auto-generated). Optional initial username, password, and rank can be set. Used for creating tables and initial user setup if required. <br>$mysqlcon -&gt; <code>x_class_mysql</code> object<br>$table_users -&gt; Table name for users<br>$table_sessions -&gt; Table name for sessions<br>$preecokie -&gt; Precookie for multi-login<br>$initial_ref -&gt; Initial admin username/user email<br>$initial_pass -&gt; Initial password<br>$initial_rank -&gt; Initial user rank</td>
+</tr>
+</tbody>
+</table>
+<h2 id="configuration-methods">Configuration Methods</h2>
+<p>Run these functions before <code>init()</code> to adjust login class settings for your site:</p>
+<h3 id="initial-configuration">Initial Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>General Login Class Config Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>multi_login($bool = false)</code></td>
+<td>Allows multi-login. If <code>false</code>, users will be logged out in the first session if they log in elsewhere. If <code>true</code>, users can log in multiple times in different browsers.</td>
+</tr>
+<tr>
+<td><code>login_recover_drop($bool = false)</code></td>
+<td>Deactivates password reset tokens on successful login. If <code>true</code>, reset tokens will be disabled if the user logs in successfully.</td>
+</tr>
+<tr>
+<td><code>login_field_manual($string)</code></td>
+<td>Specifies a custom login field that should be unique (e.g., "user_name", "user_mail").</td>
+</tr>
+<tr>
+<td><code>login_field_user()</code></td>
+<td>Sets the primary login field to <code>user_name</code> if <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>login_field_mail()</code></td>
+<td>Sets the primary login field to <code>user_mail</code> if <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>mail_unique($bool = false)</code></td>
+<td>Ensures emails are unique if <code>true</code>. If <code>false</code>, emails are not unique but may be overwritten if <code>user_mail</code> is the default login option.</td>
+</tr>
+<tr>
+<td><code>user_unique($bool = false)</code></td>
+<td>Ensures usernames are unique if <code>true</code>. If <code>false</code>, usernames are not unique but may be overwritten if <code>user_name</code> is the default login option.</td>
+</tr>
+<tr>
+<td><code>ip_spoof_check(bool = true)</code></td>
+<td>Enables or disables IP spoofing checks during login. <strong>Parameters</strong>: <code>bool</code> - If true, IP spoofing checks are performed during login.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging-configuration">Logging Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Config: Log Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>log_ip($bool = false)</code></td>
+<td>Logs IP addresses in the database for sessions. <code>true</code> to enable, <code>false</code> to disable.</td>
+</tr>
+<tr>
+<td><code>log_activation($bool = false)</code></td>
+<td>Logs activation sessions. If <code>false</code>, used keys will be deleted. If <code>true</code>, they will be preserved.</td>
+</tr>
+<tr>
+<td><code>log_session($bool = false)</code></td>
+<td>Logs session data. If <code>false</code>, used keys will be deleted. If <code>true</code>, they will be preserved.</td>
+</tr>
+<tr>
+<td><code>log_recover($bool = false)</code></td>
+<td>Logs recovery actions. If <code>false</code>, used keys will be deleted. If <code>true</code>, they will be preserved.</td>
+</tr>
+<tr>
+<td><code>log_mail_edit($bool = false)</code></td>
+<td>Logs email edits. If <code>false</code>, used keys will be deleted. If <code>true</code>, they will be preserved.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="interval-configuration">Interval Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Config: Operation Delay Interval Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wait_activation_min($int = 6)</code></td>
+<td>Time in minutes that users need to wait between activation operations to prevent flooding.</td>
+</tr>
+<tr>
+<td><code>wait_recover_min($int = 6)</code></td>
+<td>Time in minutes that users need to wait between recovery operations to prevent flooding.</td>
+</tr>
+<tr>
+<td><code>wait_mail_edit_min($int = 6)</code></td>
+<td>Time in minutes that users need to wait between mail changes with activation operations to prevent flooding.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="expiry-configuration">Expiry Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Config: Token Expire Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>min_activation($int = 6)</code></td>
+<td>Activation token expiry time in minutes.</td>
+</tr>
+<tr>
+<td><code>min_recover($int = 6)</code></td>
+<td>Recovery token expiry time in minutes.</td>
+</tr>
+<tr>
+<td><code>min_mail_edit($int = 6)</code></td>
+<td>Mail edit token expiry time in minutes.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoblock-configuration">Autoblock Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Config: Autoblock Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>autoblock($int = false)</code></td>
+<td>Activates auto-blocking of users after X failed logins. <code>false</code> to deactivate.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="session-configuration">Session Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Config: Session Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sessions_days($int = 7)</code></td>
+<td>Defines the maximum number of days a session is valid.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cookie-configuration">Cookie Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Config: Cookie Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cookies_use($bool = true)</code></td>
+<td>Allows the use of cookies for "remember me" functionality. <code>false</code> to disable.</td>
+</tr>
+<tr>
+<td><code>cookies_days($int = 7)</code></td>
+<td>Defines the number of days cookies are valid if not refreshed.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="token-configuration">Token Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Token Config Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>token_charset($charset = "0123456789")</code></td>
+<td>Sets the character set for generated tokens.</td>
+</tr>
+<tr>
+<td><code>token_length($length = 24)</code></td>
+<td>Sets the length of generated tokens.</td>
+</tr>
+<tr>
+<td><code>session_length($length = 24)</code></td>
+<td>Sets the length of generated session tokens.</td>
+</tr>
+<tr>
+<td><code>session_charset($charset = "0123456789")</code></td>
+<td>Sets the character set for session tokens.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="operation-methods">Operation Methods</h2>
+<p>Internal used Methods for this class or additional categories of function which does not fit in any other category.</p>
+<h3 id="user-table-functions">User Table Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Extrafield Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user_add_field($addstring)</code></td>
+<td>Adds a field to the users table. The field is added with the provided column string.</td>
+</tr>
+<tr>
+<td><code>user_del_field($fieldname)</code></td>
+<td>Deletes a field from the users table. <strong>Note</strong>: This action deletes data.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usergroup-functions">Usergroup Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Group Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>groups($table_group, $table_group_link)</code></td>
+<td>Enables user groups functionality and sets the table names for groups and relations.</td>
+</tr>
+<tr>
+<td><code>group_add($name, $description = "")</code></td>
+<td>Creates a group with the specified name and optional description.</td>
+</tr>
+<tr>
+<td><code>group_del($id)</code></td>
+<td>Deletes a group with the specified ID.</td>
+</tr>
+<tr>
+<td><code>group_users($groupid)</code></td>
+<td>Retrieves all users in a group as an array representing the relations table fields.</td>
+</tr>
+<tr>
+<td><code>user_groups($userid)</code></td>
+<td>Retrieves all groups for a user as an array representing the user group fields.</td>
+</tr>
+<tr>
+<td><code>group_adduser($groupid, $userid)</code></td>
+<td>Adds a user to a group with the specified group and user IDs.</td>
+</tr>
+<tr>
+<td><code>group_deluser($groupid, $userid)</code></td>
+<td>Removes a user from a group with the specified group and user IDs.</td>
+</tr>
+<tr>
+<td><code>groups_del_field($fieldname)</code></td>
+<td>Deletes a field from the group table by specifying the column name.</td>
+</tr>
+<tr>
+<td><code>groups_add_field($fieldstring)</code></td>
+<td>Adds a field to the group table with the provided column string.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="password-filtering-functions">Password Filtering Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Password Filter Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>passfilter($signs = 6, $capitals = 0, $small = 0, $special = 0, $number = 0)</code></td>
+<td>Setup Password Filter Check Variable; the parameters represent the required minimum of needed characters, such as numbers, special characters, and capital letters.</td>
+</tr>
+<tr>
+<td><code>passfilter_check($passclear)</code></td>
+<td>Check if the string conforms to the password filters set by <code>passfilter()</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="password-functions">Password Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Password Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>password_gen($len = 12, $comb = "abcde12345")</code></td>
+<td>Generate a key with charset (combination string) and length. Useful for generating passwords or random strings.</td>
+</tr>
+<tr>
+<td><code>password_crypt($var, $hash = PASSWORD_BCRYPT)</code></td>
+<td>Encrypt a cleartext password into a hashed password. By default, all passwords are hashed using Bcrypt.</td>
+</tr>
+<tr>
+<td><code>password_check($cleartext, $crypted)</code></td>
+<td>Check the validity of a crypted password by comparing it with a cleartext password using Bcrypt.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="extrafield-functions">Extrafield Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Extrafield Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>extrafields($table_ext)</code></td>
+<td>Activate extrafield functionality by providing a table name, which will be generated and installed automatically.</td>
+</tr>
+<tr>
+<td><code>extrafield_del_field($fieldname)</code></td>
+<td>Delete an extrafield table column by providing the column name.</td>
+</tr>
+<tr>
+<td><code>extrafield_add_field($fieldstring)</code></td>
+<td>Add a column to the extrafield table with the specified column string.</td>
+</tr>
+<tr>
+<td><code>extrafield_get($id)</code></td>
+<td>Get the extrafield array for a user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="token-validation-time-functions">Token Validation Time Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Get Expire Time for Request Functions in Seconds (Interval)</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>activation_request_time($user)</code></td>
+<td>Get the time until the next activation request is possible with user ID.</td>
+</tr>
+<tr>
+<td><code>recover_request_time($user)</code></td>
+<td>Get the time until the next recovery request is possible with user ID.</td>
+</tr>
+<tr>
+<td><code>mail_edit_request_time($user)</code></td>
+<td>Get the time until the next mail edit request is possible with user ID.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="token-validation-functions">Token Validation Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Check Token Validation Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>activation_token_valid($user, $token)</code></td>
+<td>Check if the activation token is valid by providing the user ID and the token.</td>
+</tr>
+<tr>
+<td><code>recover_token_valid($user, $token)</code></td>
+<td>Check if the recovery token is valid by providing the user ID and the token.</td>
+</tr>
+<tr>
+<td><code>mail_edit_token_valid($user, $token)</code></td>
+<td>Check if the mail edit token is valid by providing the user ID and the token.</td>
+</tr>
+<tr>
+<td><code>session_token_valid($user, $token)</code></td>
+<td>Check if the session token is valid by providing the user ID and the token.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="user-operations">User Operations</h2>
+<p>If you do not provide an ID here, the actual logged-in executing user will be handled as the ID. In cases where the ID is optional, this will be the handling for that kind of execution or trigger of the functions listed below.</p>
+<h3 id="general-operations">General Operations</h3>
+<table>
+<thead>
+<tr>
+<th>User Operation Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get($id = false)</code></td>
+<td>Get user information from the table as an array.</td>
+</tr>
+<tr>
+<td><code>exists($id = false)</code></td>
+<td>Check if a user with the specified ID exists.</td>
+</tr>
+<tr>
+<td><code>delete($id = false)</code></td>
+<td>Delete a user.</td>
+</tr>
+<tr>
+<td><code>disable_user_session($id = false)</code></td>
+<td>Disable a user's session.</td>
+</tr>
+<tr>
+<td><code>delete_user_session($id = false)</code></td>
+<td>Delete a user's session.</td>
+</tr>
+<tr>
+<td><code>logout_all()</code></td>
+<td>Logout all users.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="confirmation-functions">Confirmation Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Operation Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>confirmed_user($id = false)</code></td>
+<td>Check if the user account is confirmed; returns "true" if confirmed.</td>
+</tr>
+<tr>
+<td><code>confirm_user($id = false)</code></td>
+<td>Confirm the User if not confirmed, this will prevent auto-delete as the user is non-provisioned for primary functions till confirmation!</td>
+</tr>
+</tbody>
+</table>
+<h3 id="registration-functions">Registration Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Operation Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addUser($nameref, $mail, $password = false, $rank = false, $activated = false)</code></td>
+<td>Add a new user to the database. If <code>$activated</code> is true, the user will not need additional activation. You can define the user's rank, password, mail, and user reference.</td>
+</tr>
+<tr>
+<td>add_user(<code>nameref</code>, <code>mail</code>, <code>password = false</code>, <code>rank = false</code>, <code>activated = false</code>)</td>
+<td>Adds a new user to the system. <strong>Parameters</strong>: <code>nameref</code> - The username reference. <code>mail</code> - The user's email. <code>password</code> - The user's password (optional). <code>rank</code> - The user's rank (optional). <code>activated</code> - Whether the user is activated (optional).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="function-purpose">Function Purpose</h4>
+<p>The <code>addUser</code> function in the <code>x_class_user</code> class is designed to add a new user to the database while performing necessary checks, handling unconfirmed email changes, and preparing data. The function prevents duplicate accounts, manages email verification, and ensures proper user data is stored.</p>
+<h4 id="function-parameters">Function Parameters</h4>
+<ol>
+<li><strong>$nameref:</strong> The username or another reference field, depending on the configuration.</li>
+<li><strong>$mail:</strong> The user's email address.</li>
+<li><strong>$password:</strong> The user's password (optional, defaults to <code>false</code>).</li>
+<li><strong>$rank:</strong> The user's rank or role (optional, defaults to <code>false</code>).</li>
+<li><strong>$activated:</strong> Whether the user is activated or not (optional, defaults to <code>false</code>).</li>
+</ol>
+<h4 id="function-workflow">Function Workflow</h4>
+<p><strong>Determine Reference Field:</strong> The function decides whether to use the email (<code>$mail</code>) or the <code>nameref</code> (username) as the reference, based on the configuration (<code>$this-&gt;login_field</code>).</p>
+<p><strong>Check for Existing Confirmed User:</strong> The function checks if there is an existing confirmed user (<code>user_confirmed = 1</code>) in the database with the same reference (email or username). If a confirmed user is found, the function returns <code>false</code> to prevent duplicate confirmed accounts.</p>
+<p><strong>Set Activation Status:</strong> The <code>$activated</code> parameter is converted to either <code>1</code> (activated) or <code>0</code> (not activated).</p>
+<p><strong>Set User Rank:</strong> If a <code>$rank</code> is not provided, it defaults to <code>0</code>.</p>
+<p><strong>Prepare Password:</strong> If a password is not provided or is empty, the function sets the password to <code>"NULL"</code>. Otherwise, the password is encrypted using the <code>password_crypt</code> method.</p>
+<p><strong>Insert the New User:</strong> The function inserts the new user into the database with the provided <code>nameref</code>, <code>mail</code>, encrypted <code>password</code>, rank, and activation status.</p>
+<p><strong>Return Success:</strong><br>
+If the user is successfully added, the function returns <code>true</code>.</p>
+<h3 id="block-functions">Block Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Block Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blocked_user($id = false)</code></td>
+<td>Check if the user is blocked; returns <code>true</code> if blocked, <code>false</code> otherwise.</td>
+</tr>
+<tr>
+<td><code>block_user($id = false)</code></td>
+<td>Block a user.</td>
+</tr>
+<tr>
+<td><code>unblock_user($id = false)</code></td>
+<td>Unblock a user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="enabledisable-functions">Enable/Disable Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Disable Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>disabled_user($id = false)</code></td>
+<td>Check if the user is disabled; returns <code>true</code> if disabled, <code>false</code> otherwise.</td>
+</tr>
+<tr>
+<td><code>disable_user($id = false)</code></td>
+<td>Disable a user.</td>
+</tr>
+<tr>
+<td><code>enable_user($id = false)</code></td>
+<td>Enable a user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="change-user-functions">Change User Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Change Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>change_pass($id = false, $new = false)</code></td>
+<td>Change the user password.</td>
+</tr>
+<tr>
+<td><code>change_password($id = false, $new = false)</code></td>
+<td>Change the user password.</td>
+</tr>
+<tr>
+<td><code>changeUserPass($id = false, $new = false)</code></td>
+<td>Change the user password.</td>
+</tr>
+<tr>
+<td><code>change_rank($id = false, $new = false)</code></td>
+<td>Change the user rank.</td>
+</tr>
+<tr>
+<td><code>changeUserShadowMail($id = false, $new)</code></td>
+<td>Change a user's shadow mail (mail not activated yet but user registered and awaits activation).</td>
+</tr>
+<tr>
+<td>change_shadow(<code>id</code>, <code>new = false</code>)</td>
+<td>Changes the shadow email of a specific user. <strong>Parameters</strong>: <code>id</code> - The user's ID. <code>new</code> - The new shadow email (optional).</td>
+</tr>
+<tr>
+<td>changeUserShadowMail(id<code>,</code>new = false)</td>
+<td>Alias for <code>change_shadow</code>. <strong>Parameters</strong>: Same as <code>change_shadow</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="change-user-mail-functions">Change User Mail Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Change Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>changeUserMail($id = false, $new)</code></td>
+<td>Change a user's mail. If the mail is unique, this deletes never-used, registered accounts with that mail.</td>
+</tr>
+<tr>
+<td><code>change_mail($id = false, $new)</code></td>
+<td>Change a user's mail. If the mail is unique, this deletes never-used, registered accounts with that mail.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="function-purpose_1">Function Purpose</h4>
+<p>The <code>changeUserMail</code> function in the <code>x_class_user</code> class is designed to update a user's email address in the database, handling both cases where email uniqueness must be enforced and where it does not. Here is a detailed explanation of its functionality:</p>
+<h4 id="function-parameters_1">Function Parameters</h4>
+<ol>
+<li><strong>$id:</strong> The ID of the user whose email address is to be changed. Defaults to <code>"undefined_framework_var"</code>.</li>
+<li><strong>$new:</strong> The new email address to be set. Defaults to <code>false</code>.</li>
+</ol>
+<h4 id="function-workflow_1">Function Workflow</h4>
+<p><strong>Check for Valid New Email:</strong> The function first checks if a new email address (<code>$new</code>) is provided. If not, it returns <code>false</code>, indicating that no change will occur.</p>
+<p><strong>Prepare New Email for Database:</strong> The new email address is trimmed of extra spaces and converted to lowercase. It is then prepared for binding in the SQL query.</p>
+<p><strong>Validate User ID:</strong> The function checks if the provided <code>$id</code> is valid using the <code>int_opid</code> method. If <code>int_opid</code> returns a false value, the function returns <code>false</code>, indicating an invalid ID. The <code>$id</code> is then processed by <code>int_opid</code> to ensure it is an integer.</p>
+<p><strong>Check New Email Validity:</strong> The function verifies that the new email address is not an empty string. If it is empty, the function returns <code>false</code>.</p>
+<p><strong>Update Non-Unique Mail:</strong> If <code>$this-&gt;mail_unique</code> is <code>false</code>, the function directly updates the email address in the database for the user with the specified ID. It uses a prepared statement to prevent SQL injection.</p>
+<p><strong>Update Unique Mail:</strong> If <code>$this-&gt;mail_unique</code> is <code>true</code>, the function performs additional checks:  </p>
+<ol>
+<li>It queries the database to fetch the current email address of the user with the given ID.  </li>
+<li>If the current email address is the same as the new email address (ignoring case), the function returns <code>true</code>, indicating no update is necessary.  </li>
+<li>If the current email address is different, the function checks if the new email address already exists and is confirmed using the <code>mailExistsActive</code> method. If it does exist, the function returns <code>false</code> to avoid duplication.  </li>
+<li>If the new email address does not already exist, the function:  <ul>
+<li>Deletes any unconfirmed user accounts (<code>user_confirmed = 0</code>) with the same email address from the database.  </li>
+<li>Updates any accounts with <code>user_shadow</code> (representing unconfirmed email changes) to clear the shadow status.  </li>
+<li>Updates the email address for the user with the specified ID.  </li>
+<li>Returns <code>true</code> upon successful update.  </li>
+</ul>
+</li>
+</ol>
+<p><strong>Return Failure:</strong><br>
+If none of the above conditions are met or if any checks fail, the function returns <code>false</code>.  </p>
+<h3 id="change-user-name-functions">Change User Name Functions</h3>
+<table>
+<thead>
+<tr>
+<th>User Change Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>change_name($id = false, $new)</code></td>
+<td>Change the user name.</td>
+</tr>
+<tr>
+<td><code>changeUserName($id = false, $new)</code></td>
+<td>Change the user name.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="function-purpose_2">Function Purpose</h4>
+<p>The <code>changeUserName</code> function in the <code>x_class_user</code> class is designed to update a user's username in the database. Here’s a detailed explanation of its workings:</p>
+<h4 id="function-parameters_2">Function Parameters</h4>
+<ol>
+<li><strong>$id:</strong> The ID of the user whose username is to be changed. Defaults to <code>"undefined_framework_var"</code>.</li>
+<li><strong>$new:</strong> The new username to be set. Defaults to <code>false</code>.</li>
+</ol>
+<h4 id="function-workflow_2">Function Workflow</h4>
+<p><strong>Check for Valid New Username:</strong> The function first checks if a new username is provided (<code>$new</code>). If not, it returns <code>false</code> immediately, indicating that no change will occur.  </p>
+<p><strong>Prepare New Username for Database:</strong> The new username is trimmed of extra spaces and prepared for binding in the SQL query.  </p>
+<p><strong>Validate User ID:</strong> The function checks if the provided <code>$id</code> is valid using the <code>int_opid</code> method. If <code>int_opid</code> returns a false value, the function returns <code>false</code>, indicating an invalid ID. The <code>$id</code> is then processed by <code>int_opid</code> to ensure it is an integer.  </p>
+<p><strong>Check New Username Validity:</strong> The function verifies that the new username is not an empty string. If it is empty, the function returns <code>false</code>.  </p>
+<p><strong>Update Non-Unique Username</strong>: If <code>$this-&gt;user_unique</code> is <code>false</code>, the function directly updates the username in the database for the user with the specified ID. It uses a prepared statement to prevent SQL injection.  </p>
+<p><strong>Update Unique Username</strong>: If <code>$this-&gt;user_unique</code> is <code>true</code>, the function performs the following additional steps:  </p>
+<ol>
+<li>It queries the database to fetch the current username of the user with the given ID.  </li>
+<li>If the current username is the same as the new username (ignoring case), the function returns <code>true</code> because no update is necessary.  </li>
+<li>If the current username is different, the function checks if the new username already exists and is confirmed using the <code>usernameExistsActive</code> method. If it does exist, the function returns <code>false</code> to avoid duplication.  </li>
+<li>If the new username does not already exist, the function proceeds to update the username in the database and returns <code>true</code> upon successful update.  </li>
+</ol>
+<p><strong>Return Failure:</strong><br>
+If none of the above conditions are met or if any checks fail, the function returns <code>false</code>.  </p>
+<h3 id="duplicate-check-functions">Duplicate Check Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Reference Existence Checks</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>refExists($ref)</code></td>
+<td>Check if the reference exists.</td>
+</tr>
+<tr>
+<td><code>refExistsActive($ref)</code></td>
+<td>Check if the reference exists for a confirmed user.</td>
+</tr>
+<tr>
+<td><code>usernameExists($ref)</code></td>
+<td>Check if the username exists.</td>
+</tr>
+<tr>
+<td><code>usernameExistsActive($ref)</code></td>
+<td>Check if the username exists for a confirmed user.</td>
+</tr>
+<tr>
+<td><code>mailExists($ref)</code></td>
+<td>Check if the mail exists.</td>
+</tr>
+<tr>
+<td><code>mailExistsActive($ref)</code></td>
+<td>Check if the mail exists for a confirmed user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="extra-data-functions">Extra Data Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Extra Data Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get_extra($id= false)</code></td>
+<td>Get extra data as an array from the user. (You can store your own data in an array if needed.)</td>
+</tr>
+<tr>
+<td><code>set_extra($id= false, $array)</code></td>
+<td>Set extra data from an array for the user. (You can store your own data in an array if needed.)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="login-as-functions">Login As Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Login As Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>login_as($id)</code></td>
+<td>Login as a user with the specified ID. Multi-login with the user logged in at the same time is normally possible.</td>
+</tr>
+<tr>
+<td><code>login_as_return()</code></td>
+<td>Return to normal state after <code>login_as()</code> has been successfully executed.</td>
+</tr>
+<tr>
+<td><code>login_as_is()</code></td>
+<td>Returns <code>true</code> if the current user is logged in as another user with <code>login_as()</code>; otherwise, returns <code>false</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="primary-functions">Primary Functions</h2>
+<h3 id="init-functions">Init Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Primary Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>logout()</code></td>
+<td>Logout the current logged-in user.</td>
+</tr>
+<tr>
+<td><code>init()</code></td>
+<td>Initialize the login with all configurations. Have to run once after configuration changes. Creates all needed sessions and restores login if already logged in.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="login-functions">Login Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Primary Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>login_request($ref, $pass, $cookies = false)</code></td>
+<td>Request login with reference, password, and an option to stay online with cookies. Returns codes for login success or failure.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="function-purpose_3">Function Purpose</h4>
+<p>The <code>login_request</code> function in the <code>x_class_user</code> class handles the user login process, including authentication, session management, and handling various login errors. Here’s a detailed breakdown of its functionality and the return codes it uses:</p>
+<h4 id="function-parameters_3">Function Parameters</h4>
+<ol>
+<li><strong>$ref:</strong> The username or email address of the user attempting to log in.</li>
+<li><strong>$password:</strong> The password provided by the user.</li>
+<li><strong>$stayLoggedIn:</strong> A boolean indicating whether the user wants to stay logged in across sessions (optional, defaults to <code>false</code>).</li>
+</ol>
+<h4 id="return-codes">Return Codes</h4>
+<ul>
+<li><strong>1:</strong> Successful login.</li>
+<li><strong>2:</strong> User not found (invalid reference).</li>
+<li><strong>3:</strong> Incorrect password.</li>
+<li><strong>4:</strong> User is blocked.</li>
+<li><strong>5:</strong> User is not confirmed.</li>
+<li><strong>6:</strong> User is auto-blocked due to multiple failed login attempts.</li>
+<li><strong>7:</strong> User is disabled.</li>
+</ul>
+<h3 id="activation-functions">Activation Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Activation Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>activation_request_id($id)</code></td>
+<td>Request activation for a user by ID without interval limits. Returns success or error codes.</td>
+</tr>
+<tr>
+<td><code>activation_request($ref)</code></td>
+<td>Request activation for an account with a reference. Returns success or error codes based on various conditions.</td>
+</tr>
+<tr>
+<td><code>activation_confirm($userid, $token, $newpass = false)</code></td>
+<td>Confirm activation with user ID and a valid token. Returns success or error codes based on various conditions.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="activation-request-id">Activation Request ID</h4>
+<p>Here you can see return values of the function: <code>activation_request_id</code>
+Requests an activation token for a user by their user ID if the user is not already confirmed.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Return Code</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Activation request successful.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>User ID is not numeric or user not found.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>User is already confirmed.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="activation-request">Activation Request</h4>
+<p>Here you can see return values of the function: <code>activation_request</code>
+Requests a new activation token for a user by their username or email, checking various conditions such as user status and request timing.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Return Code</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Activation request successful.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>User not found.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Activation request too soon (interval not reached).</td>
+</tr>
+<tr>
+<td>4</td>
+<td>User is already confirmed.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Activation is blocked for this user.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>User is disabled.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="activation-confirm">Activation Confirm</h4>
+<p>Here you can see return values of the function: <code>activation_confirm</code>
+Confirms the activation for a user using a provided token and optionally updates the user’s password.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Return Code</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Activation confirmed successfully.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>User ID is not numeric or token not found.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Activation token is invalid or expired.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Activation is blocked for this user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recover-functions">Recover Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Reset Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recover_request_id($id)</code></td>
+<td>Request account recovery by ID. Returns success or error codes.</td>
+</tr>
+<tr>
+<td><code>recover_request($ref)</code></td>
+<td>Request account recovery by reference. Returns success or error codes based on various conditions.</td>
+</tr>
+<tr>
+<td><code>recover_confirm($userid, $token, $newpass)</code></td>
+<td>Confirm account recovery with user ID, token, and new password. Returns success or error codes.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="recover-request-id">Recover Request ID</h4>
+<p>Here you can see return values of the function: <code>recover_request_id</code>
+Requests a password recovery token for a user identified by their user ID.</p>
+<table>
+<thead>
+<tr>
+<th>Return Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Token creation successful.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Invalid user ID or user not found.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="recover-request">Recover Request</h4>
+<p>Here you can see return values of the function: <code>recover_request</code>
+Requests a password recovery token for a user identified by their username or email.</p>
+<table>
+<thead>
+<tr>
+<th>Return Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Token creation successful.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>User not found.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Recovery request made too soon (interval not reached).</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Recovery is blocked for this user.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>User is disabled.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="recover-confirm">Recover Confirm</h4>
+<p>Here you can see return values of the function: <code>recover_confirm</code>
+Confirms a password recovery request using a token and updates the user’s password.</p>
+<table>
+<thead>
+<tr>
+<th>Return Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Recovery confirmed and password updated.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Invalid user ID or token not found.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Recovery token is invalid or expired.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Password recovery is blocked for this user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mail-change-functions">Mail Change Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Mail Edit Functions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mail_edit($id, $newmail, $nointervall = false)</code></td>
+<td>Create a new shadow mail. Returns success or error codes.</td>
+</tr>
+<tr>
+<td><code>mail_edit_confirm($userid, $token, $run = true)</code></td>
+<td>Confirm mail edit with user ID, token, and an optional flag to run the mail edit process. Returns success or error codes.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="mail-edit-returns">Mail Edit Returns</h4>
+<p>Here you can see return values of the function: <code>mail_edit</code>
+Initiates a request to change a user's email address. The function first validates the user ID and new email address, checks whether the user is disabled or if email changes are blocked. If an interval is specified, it ensures the required wait time has passed. It then generates a token for confirming the email change and stores the new email in a "shadow" state until confirmed. The function also handles logging and cleanup tasks related to the email change process.</p>
+<table>
+<thead>
+<tr>
+<th>Return Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Email change request processed successfully.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>User ID is invalid or user not found.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Email change request made too soon (interval not reached).</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>New email already exists for another active user.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Email change blocked for this user.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>User is disabled.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="mail-edit-confirm">Mail Edit Confirm</h4>
+<p>Here you can see return values of the function: <code>mail_edit_confirm</code>
+Confirms the email change request by verifying the provided token. It checks whether the token is valid and whether the user is allowed to make the change. If valid, it updates the user's email address, handles any conflicts with existing emails (e.g., if the new email is already in use by another account), and logs the changes. If the email address was previously set as a shadow (temporary), it ensures proper cleanup or handling based on the email uniqueness settings.</p>
+<table>
+<thead>
+<tr>
+<th>Return Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Email change confirmed successfully.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>User ID is invalid or token not found.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Email change token is invalid or expired.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>New email address is already in use.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Email change blocked for this user.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>Failure to change the user’s email.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="display-login-function">Display Login Function</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Function</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>display_login</code></td>
+<td>This function displays a login form with various customizable options such as registration and password reset buttons, captcha validation, and CSRF protection. It processes the login request and handles errors related to captcha and CSRF tokens.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="parameters">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Default Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spawn_register_button</code></td>
+<td><code>array</code></td>
+<td>Configures the "Register Now" button with <code>url</code> and <code>label</code> options.</td>
+<td><code>array("url" =&gt; "", "label" =&gt; "Register Now")</code></td>
+</tr>
+<tr>
+<td><code>spawn_cookie_checkbox</code></td>
+<td><code>string</code></td>
+<td>Label for the "Stay Logged In?" checkbox.</td>
+<td><code>"Stay Logged In?"</code></td>
+</tr>
+<tr>
+<td><code>spawn_reset_button</code></td>
+<td><code>array</code></td>
+<td>Configures the "Reset Account" button with <code>url</code> and <code>label</code> options.</td>
+<td><code>array("url" =&gt; "", "label" =&gt; "Reset Account")</code></td>
+</tr>
+<tr>
+<td><code>login_button_label</code></td>
+<td><code>string</code></td>
+<td>Label for the login button.</td>
+<td><code>"Login"</code></td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td><code>array</code></td>
+<td>Labels and placeholders for email and password fields. Options: <code>ref_placeholder</code>, <code>ref_label</code>, <code>pass_label</code>, <code>pass_placeholder</code>.</td>
+<td><code>array("ref_placeholder" =&gt; "Please enter your E-Mail", "ref_label" =&gt; "E-Mail", "pass_label" =&gt; "Password", "pass_placeholder" =&gt; "Please enter your password!")</code></td>
+</tr>
+<tr>
+<td><code>captcha</code></td>
+<td><code>array</code></td>
+<td>Configures captcha image and expected code for validation.</td>
+<td><code>array("url" =&gt; "captcha.jpg", "code" =&gt; "243fsdfsfds")</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="functionality">Functionality</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Step</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. <strong>CSRF Token Generation</strong></td>
+<td>Generates a CSRF token and stores it in the session for validation.</td>
+</tr>
+<tr>
+<td>2. <strong>Form Submission Check</strong></td>
+<td>Checks if the login form has been submitted.</td>
+</tr>
+<tr>
+<td>3. <strong>CSRF Validation</strong></td>
+<td>Validates the submitted CSRF token against the one stored in the session.</td>
+</tr>
+<tr>
+<td>4. <strong>Captcha Validation</strong></td>
+<td>Validates the captcha code if captcha is enabled.</td>
+</tr>
+<tr>
+<td>5. <strong>Login Request</strong></td>
+<td>Processes the login request by calling the <code>login_request</code> method with the submitted credentials.</td>
+</tr>
+<tr>
+<td>6. <strong>Error Handling</strong></td>
+<td>Sets <code>display_return_code</code> based on the result of the login request or encountered errors (captcha or CSRF error).</td>
+</tr>
+<tr>
+<td>7. <strong>HTML Output</strong></td>
+<td>Outputs the login form with all configured options, including the captcha image, labels, and buttons.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-values">Return Values</h4>
+<table>
+<thead>
+<tr>
+<th><strong>Value</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>display_return_code</code></td>
+<td>Stores the result of the login process or error codes (<code>captcha_error</code>, <code>csrf_error</code>).</td>
+</tr>
+</tbody>
+</table>
+<p>The function sets the display_return_code property based on the outcome of the login process. This property can hold various values, including the result of a successful login or specific error codes such as captcha_error or csrf_error. These return codes are used to inform the user or the system about the status of the login attempt, enabling appropriate responses or error handling</p></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+        <script src="../insert_js/extra.js"></script>
+      
+    
+  <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(() => { lightbox.reload() });
+</script></body>
+</html>

@@ -1,0 +1,63 @@
+services:
+  dnshttp:
+    build: 
+      context: .
+      no_cache: true
+    image: bugfishtm/dnshttp:4.1.0
+    pull_policy: never
+    restart: always
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "953:953/tcp"
+      - "953:953/udp"
+      - "853:853/tcp"
+    volumes:
+      - dnshttp-ssl:/opt/sf_ssl
+      - dnshttp-certbot:/etc/letsencrypt
+      - dnshttp-data:/var/www/html/_data
+      - dnshttp-mysql:/var/lib/mysql
+    environment:
+      TZ:                                       "${sf_timezone}"     
+      sf_ct_update_on_start:                    "${sf_ct_update_on_start}"  
+      sf_timezone:                              "${sf_timezone}"
+      sf_db_pass:                               "${sf_db_pass}"
+      sf_url:                                   "${sf_url}"
+      sf_secret:                                "${sf_secret}"    
+      sf_letsencrypt_enable:                    "${sf_letsencrypt_enable}"
+      sf_letsencrypt_domain:                    "${sf_letsencrypt_domain}"
+      sf_letsencrypt_email:                     "${sf_letsencrypt_email}"
+      sf_db_host:                               "${sf_db_host}"   
+      sf_db_db:                                 "${sf_db_db}"   
+      sf_db_user:                               "${sf_db_user}"   
+      sf_db_port:                               "${sf_db_port}"   
+      sf_db_prefix:                             "${sf_db_prefix}"   
+      sf_cookie_prefix:                         "${sf_cookie_prefix}"   
+      PHP_OPCACHE_ENABLE:                       "${APS_PHP_OPCACHE_ENABLE}"
+      PHP_OPCACHE_MEMORY_CONSUMPTION:           "${APS_PHP_OPCACHE_MEMORY_CONSUMPTION}"
+      PHP_OPCACHE_MAX_ACCELERATED_FILES:        "${APS_PHP_OPCACHE_MAX_ACCELERATED_FILES}"
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS:          "${APS_PHP_OPCACHE_VALIDATE_TIMESTAMPS}"
+      PHP_OPCACHE_JIT:                          "${APS_PHP_OPCACHE_JIT}"
+      PHP_OPCACHE_JIT_BUFFER_SIZE:              "${APS_PHP_OPCACHE_JIT_BUFFER_SIZE}"
+      PHP_ZLIB_OUTPUT_COMPRESSION:              "${APS_PHP_ZLIB_OUTPUT_COMPRESSION}"
+      PHP_OUTPUT_BUFFERING:                     "${APS_PHP_OUTPUT_BUFFERING}"
+      PHP_FPM_PM:                               "${APS_PHP_FPM_PM}"
+      PHP_FPM_PM_MAX_CHILDREN:                  "${APS_PHP_FPM_PM_MAX_CHILDREN}"
+      PHP_FPM_PM_START_SERVERS:                 "${APS_PHP_FPM_PM_START_SERVERS}"
+      PHP_FPM_PM_MIN_SPARE_SERVERS:             "${APS_PHP_FPM_PM_MIN_SPARE_SERVERS}"
+      PHP_FPM_PM_MAX_SPARE_SERVERS:             "${APS_PHP_FPM_PM_MAX_SPARE_SERVERS}"
+      PHP_FPM_PM_MAX_REQUESTS:                  "${APS_PHP_FPM_PM_MAX_REQUESTS}"    
+      MYSQL_INNODB_BUFFER_POOL_SIZE:             "${APS_MYSQL_SETUP_BUFFER_POOL_SIZE}"
+      APS_MYSQL_TABLE_OPEN_CACHE:                "${APS_MYSQL_TABLE_OPEN_CACHE}"
+      APS_MYSQL_SETUP_BUFFER_POOL_INSTANCES:     "${APS_MYSQL_SETUP_BUFFER_POOL_INSTANCES}"
+      APS_MYSQL_SETUP_LOG_SIZE:                  "${APS_MYSQL_SETUP_LOG_SIZE}"
+      APS_MYSQL_MAX_CONN:                        "${APS_MYSQL_MAX_CONN}"
+      APS_MYSQL_FLUSH_TRX_COMMIT:                "${APS_MYSQL_FLUSH_TRX_COMMIT}"
+      APS_MYSQL_CAPACITY:                        "${APS_MYSQL_CAPACITY}"  
+volumes:
+  dnshttp-ssl:
+  dnshttp-certbot:
+  dnshttp-mysql:
+  dnshttp-data:

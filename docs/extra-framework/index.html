@@ -1,0 +1,2204 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="download.html">
+      
+      
+      <link rel="icon" href="favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
+    
+    
+      
+        <title>Overview - Bugfish Framework</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.3cba04c6.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+      
+
+   <!-- META INJECTION START -->
+  <!-- META INJECTION START -->
+  <!-- META INJECTION START -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="subject" content="documentation">
+	<meta name="copyright" content="bugfish">
+	<meta name="language" content="en">
+	<meta name="robots" content="index,follow">
+	<meta name="author" content="bugfish, ynvnzmlzaa@gmail.com">
+	<meta property="og:image" content="./meta.png">    
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "WebSite",
+      "name": "Bugfish Framework",
+    }
+    </script>
+	<script type="application/ld+json">
+	{
+	  "@context": "http://schema.org",
+	  "@type": "TechArticle",
+	  "headline": "Overview",
+	  "description": "Explore comprehensive documentation for the Bugfish Framework. Access detailed guides and resources for PHP functions, PHP classes, CSS classes, and JavaScript functions. Find everything you need to enhance web development projects, optimize coding efficiency, and implement robust features. Navigate through each section for in-depth information and integration tips.",
+	  "articleSection": "Overview",
+	  "datePublished": "2025-03-04",
+	  "dateModified": "2025-03-04",
+	  "author": {
+		"@type": "Person",
+		"name": "Jan-Maurice Dahlmanns"
+	  },
+	  "publisher": {
+		"@type": "Organization",
+		"name": "Bugfish",
+		"logo": {
+		  "@type": "ImageObject",
+		  "url": "./logo.png"
+		}
+	  }
+	}
+	</script> 
+	<meta property="og:title" content="Overview - Bugfish Framework">
+	<meta name="description" content="Explore comprehensive documentation for the Bugfish Framework. Access detailed guides and resources for PHP functions, PHP classes, CSS classes, and JavaScript functions. Find everything you need to enhance web development projects, optimize coding efficiency, and implement robust features. Navigate through each section for in-depth information and integration tips.">  
+	<meta name="og:description" content="Explore comprehensive documentation for the Bugfish Framework. Access detailed guides and resources for PHP functions, PHP classes, CSS classes, and JavaScript functions. Find everything you need to enhance web development projects, optimize coding efficiency, and implement robust features. Navigate through each section for in-depth information and integration tips.">  
+  <!-- META INJECTION END -->  
+  <!-- META INJECTION END -->  
+  <!-- META INJECTION END -->  
+      
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="insert_css/extra.css">
+    
+      <link rel="stylesheet" href="insert_css/neoteroi-mkdocs.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bugfish-framework" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Bugfish Framework" class="md-header__button md-logo" aria-label="Bugfish Framework" data-md-component="logo">
+      
+  <img src="logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Bugfish Framework
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bugfishtm/bugfish-framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bugfish-framework
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Bugfish Framework" class="md-nav__button md-logo" aria-label="Bugfish Framework" data-md-component="logo">
+      
+  <img src="logo.png" alt="logo">
+
+    </a>
+    Bugfish Framework
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bugfishtm/bugfish-framework" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bugfish-framework
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="index.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#php-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#php-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Modules
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Framework
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#php-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#php-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Classes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#css-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSS: Classes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javascript-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      JavaScript: Functions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloads
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#warranty" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warranty
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Support
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="download.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Download
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CSS Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            CSS Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="css/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    xcss_xfpe.css
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    JavaScript Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            JavaScript Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="javascript/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    xjs_library.js
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PHP Functions
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            PHP Functions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_button.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_button.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_captcha.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_captcha.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_cookiebanner.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_cookiebanner.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_curl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_curl.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_eventbox.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_eventbox.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_folder.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_folder.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_library.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_library.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_rss.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_rss.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_table.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_table.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_thumbnail.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_thumbnail.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="functions/x_search.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_search.php
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PHP Classes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            PHP Classes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_2fa.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_2fa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_api.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_benchmark.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_benchmark
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_comment.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_comment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_crypt.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_crypt
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_csrf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_csrf
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_curl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_curl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_debug.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_debug
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_eventbox.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_eventbox
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_hitcounter.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_hitcounter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_ipbl.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_ipbl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_log.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_block.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_block
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_lang.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_lang
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_mail.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_mail_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_mail_template.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mail_template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_mysql.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mysql
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_mysql_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_mysql_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_perm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_perm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_perm_item.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_perm_item
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_redis.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_redis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_referer.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_referer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_table.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_table
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_user.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_user
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_var.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_var
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_version.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_version
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="classes/x_class_zip.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    x_class_zip
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="contributing.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="warranty.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Warranty
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="support.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Support
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="license.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://bugfishtm.blogspot.com/2023/05/impressum.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Impressum
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://bugfishtm.blogspot.com/2023/05/privacy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Privacy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#php-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#php-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Modules
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Framework
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#php-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#php-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      PHP: Classes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#css-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSS: Classes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javascript-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      JavaScript: Functions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloads
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#warranty" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warranty
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Support
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      License
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<div><h1 id="bugfish-framework">Bugfish Framework</h1>
+<p>Powerful, flexible, and secure—elevate your web development with Bugfish PHP Framework. This documentation has been updated with version <code>4.10</code>.</p>
+<hr>
+<h2 id="introduction">Introduction</h2>
+<p>Introducing the Bugfish PHP Framework: a robust toolkit designed to empower web developers with extensive functionality, flexibility, and top-notch security standards. With Bugfish, you gain access to a suite of classes and functions that not only streamline development but also enhance performance, ensuring your web applications operate at peak efficiency. Join the Bugfish PHP Framework community today and unleash the full potential of your web development projects.</p>
+<hr>
+<h2 id="requirements">Requirements</h2>
+<h3 id="php-version">PHP: Version</h3>
+<ul>
+<li>PHP 8.4 is recommended.</li>
+<li>Specific classes/functions requirements are listed in our documentation..</li>
+</ul>
+<h3 id="php-modules">PHP: Modules</h3>
+<ul>
+<li><strong><code>mysqli</code></strong> – MySQL database connectivity using improved extension.</li>
+<li><strong><code>gd</code></strong> – Image processing and manipulation (e.g., thumbnails).</li>
+<li><strong><code>session</code></strong> – Manages user sessions across page requests.</li>
+<li><strong><code>curl</code></strong> – Allows sending HTTP requests to external servers/APIs.</li>
+<li><strong><code>sockets</code></strong> – Enables low-level network communication (TCP/UDP).</li>
+<li><strong><code>mbstring</code></strong> – Multibyte string support (for UTF-8 and international text).</li>
+<li><strong><code>exif</code></strong> – Reads metadata from images (e.g., orientation, camera info).</li>
+<li><strong><code>dom</code></strong> – XML and HTML document parsing using DOM API.</li>
+<li><strong><code>hash</code></strong> – Provides hashing algorithms (e.g., SHA, MD5).</li>
+<li><strong><code>zip</code></strong> – Read/write ZIP compressed archives.</li>
+<li><strong><code>openssl</code></strong> – Secure data encryption, decryption, and SSL/TLS support.</li>
+<li><strong><code>redis</code></strong> – Redis client extension for caching and message brokering.</li>
+<li><strong><code>libxml</code> / <code>simplexml</code></strong> – Core XML parsing library and simplified interface.</li>
+<li><strong><code>fileinfo</code></strong> – Detects file types based on content.</li>
+<li><strong><code>json</code></strong> – Parses and encodes JSON data.</li>
+<li>Specific classes/functions requirements are listed in our documentation..</li>
+</ul>
+<hr>
+<h2 id="framework">Framework</h2>
+<p>Below is a list of all files that are included in the framework, along with their corresponding documentation. Each entry provides an overview of the file’s purpose and how it fits into the overall structure of the framework.</p>
+<h3 id="php-functions">PHP: Functions</h3>
+<p>Discover a collection of indispensable PHP functions crafted for seamless integration across various projects. Witness how these functions expedite and refine coding processes within web development. Comprehensive documentation for each function is provided below. To incorporate these functions seamlessly, include the PHP files within the designated <code>_framework/functions/x_*.php</code> folder.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>License</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./functions/x_button.html">x_button.php</a></td>
+<td>PHP script providing button UI components or helpers.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_captcha.html">x_captcha.php</a></td>
+<td>PHP implementation of CAPTCHA for spam prevention.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_cookiebanner.html">x_cookiebanner.php</a></td>
+<td>PHP code to display and manage cookie consent banners.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_curl.html">x_curl.php</a></td>
+<td>PHP wrapper or helper functions for cURL HTTP requests.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_eventbox.html">x_eventbox.php</a></td>
+<td>PHP component for displaying or managing event boxes/messages.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_folder.html">x_folder.php</a></td>
+<td>Collection of utility functions for folder operations in PHP.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_library.html">x_library.php</a></td>
+<td>Collection of utility functions for general use in PHP.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_rss.html">x_rss.php</a></td>
+<td>PHP script to generate or parse RSS feeds.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_table.html">x_table.php</a></td>
+<td>PHP helper for generating or manipulating HTML tables.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_thumbnail.html">x_thumbnail.php</a></td>
+<td>Collection of utility functions for thumbnail operations in PHP.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./functions/x_search.html">x_search.php</a></td>
+<td>PHP functions for search implementation and indexing.</td>
+<td>LGPL-2.1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="php-classes">PHP: Classes</h3>
+<p>These classes, located in <code>/_framework/classes/x_*</code>, are crucial for their functionality, efficiency, and thorough testing across various websites. They enhance development and save time. </p>
+<p>Note: Some classes require a database connection. They will install necessary tables automatically if configured correctly. Not all classes require MySQL; refer to the documentation for specific requirements. If MySQL is needed, provide a valid <code>x_class_mysql</code> object to the class.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>License</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./classes/x_class_2fa.html">x_class_2fa</a></td>
+<td>The TwoFactorAuthenticator class in PHP generates and verifies Time-Based One-Time Password (TOTP) codes for two-factor authentication (2FA). It offers methods for generating random secret keys, creating 2FA codes, and validating them, enhancing security in PHP applications.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_api.html">x_class_api</a></td>
+<td>Facilitates the creation of simple and secure API requests. This class needs PHP Module CURL to work properly. It supports token-authentication on API Requests and more.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_benchmark.html">x_class_benchmark</a></td>
+<td>Lets you benchmark resource consumption for sites on your website. PHP values related to benchmarking will be saved in a database per URL and overwritten if the URL is refreshed to monitor consumption even after changes.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_block.html">x_class_block</a></td>
+<td>Facilitates session-based user counting and block operations. Easily block users from various areas if they make bad decisions and raise their counter.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_comment.html">x_class_comment</a></td>
+<td>Enables commenting functionality, suitable for guestbooks or website comment sections. Can also act as a simple chat or logging tool.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_csrf.html">x_class_csrf</a></td>
+<td>Provides robust CSRF protection for web forms, supporting external actions. Includes functions to control everything related to CSRF keys, saving you time and adding basic security to your website.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_curl.html">x_class_curl</a></td>
+<td>Efficiently handles Curl requests and logs them for web operations. This class makes it easier to build PHP Curl requests. PHP Module CURL is needed to run this class.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_crypt.html">x_class_crypt</a></td>
+<td>Provides file and string encryption capabilities. Encrypt and decrypt strings/files using a simple encryption method.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_debug.html">x_class_debug</a></td>
+<td>Aids in debugging and offers development notifications and functions. Check if PHP modules are enabled or get benchmarks for your website.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_eventbox.html">x_class_eventbox</a></td>
+<td>Simplifies the display of user notifications and messages on a web page.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_hitcounter.html">x_class_hitcounter</a></td>
+<td>Counts website visitors per page URL with configurable options to handle various cases.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_ipbl.html">x_class_ipbl</a></td>
+<td>Implements IP blacklisting. Allows you to raise counters for IPs and block certain areas if an IP is acting suspiciously. Can help prevent brute-force attacks if implemented correctly.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_log.html">x_class_log</a></td>
+<td>Provides a class for logging operations, allowing you to make log entries for almost every possibility.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_lang.html">x_class_lang</a></td>
+<td>Manages language translation for multi-language websites with functions and parameters for adding and managing translation keys.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_mail.html">x_class_mail</a></td>
+<td>Handles mail sending operations with a subclass for sending operation items. Depends on <code>x_class_phpmailer</code>.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_mail_item.html">x_class_mail_item</a></td>
+<td>Together with x_class_mail simplifies single object transmissions. Depends on <code>x_class_phpmailer</code>.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_mail_template.html">x_class_mail_template</a></td>
+<td>Creates mail templates with substitutions and footer/header options, compatible with <code>x_class_mail</code>. Simplifies the preparation of email templates.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_mysql.html">x_class_mysql</a></td>
+<td>Provides MySQL database handling capabilities with additional features. Most classes need an <code>x_class_mysql</code> object to run properly. Includes a database logging system to store errors and more.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_mysql_item.html">x_class_mysql_item</a></td>
+<td>Provides MySQL database handling capabilities for single database table elements.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PHPMailer/PHPMailer">x_class_mail_phpmailer</a></td>
+<td>Manages email sending operations within the framework. Note: This class is from PHPMailer, not created by Bugfish.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_perm.html">x_class_perm</a></td>
+<td>Controls user permissions and management functionalities. Ideal for implementing a permission system.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_perm_item.html">x_class_perm_item</a></td>
+<td>Controls user permissions, including single-item permission objects. Ideal for implementing a permission system.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_referer.html">x_class_referer</a></td>
+<td>Logs visitor referrers with configuration functions to control how referrers are saved in the database.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_redis.html">x_class_redis</a></td>
+<td>Offers control over Redis functionality. Caches content on a Redis server to improve website speed. Requires PHP Module REDIS.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_table.html">x_class_table</a></td>
+<td>Simplifies the creation of dynamic HTML tables with PHP editing capabilities.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_user.html">x_class_user</a></td>
+<td>Creates various types of user logins with full functionality for password recovery, mail editing, and token operations. A comprehensive login/authentication and token system.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_var.html">x_class_var</a></td>
+<td>Controls setup variables for websites and includes a function for creating forms to change these values. Ideal for managing constants.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_version.html">x_class_version</a></td>
+<td>Retrieves version and author information about the currently included framework.</td>
+<td>LGPL-2.1</td>
+</tr>
+<tr>
+<td><a href="./classes/x_class_zip.html">x_class_zip</a></td>
+<td>Enables file compression and decompression, compatible with <code>x_class_crypt</code> for direct encryption and decryption. Requires PHP Module ZIP.</td>
+<td>LGPL-2.1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="css-classes">CSS: Classes</h3>
+<p>Introducing the "Bugfish CSS Framework" – a solution for efficient web design. Simplify your development process with a comprehensive collection of pre-built classes designed to expedite the creation of responsive web layouts. To use it, include the CSS files located in the <code>css</code> folder.</p>
+<p>Find the CSS Classes file in: <code>/_framework/css/xcss_xfpe.css</code></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>License</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./css/index.html">CSS Classes Library</a></td>
+<td>LGPL-2.1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="javascript-functions">JavaScript: Functions</h3>
+<p>Access a comprehensive array of JavaScript functions designed for integration across diverse projects, enhancing coding speed and efficiency in web development. Detailed documentation for each function is provided below. To incorporate these functions, include the JavaScript file in the <code>_javascript</code> subfolder within the central <code>_framework</code> folder. This implementation optimizes your coding process and elevates your web project's performance.</p>
+<p>Find the JavaScript function file in: <code>/_framework/javascript/xjs_library.js</code></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>License</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./javascript/index.html">JavaScript Function Library</a></td>
+<td>LGPL-2.1</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="downloads">Downloads</h2>
+<p>The <a href="./download.html">Downloads Section</a> provides all the necessary files to get started with the project, including the latest software versions and any related resources.</p>
+<hr>
+<h2 id="contributing">Contributing</h2>
+<p>Find out how you can contribute to the project by visiting the <a href="./contributing.html">Contributing Page</a>. Whether you want to report bugs, suggest features, or submit improvements, we welcome your involvement.</p>
+<hr>
+<h2 id="warranty">Warranty</h2>
+<p>Review the terms of our warranty on the <a href="./warranty.html">Warranty Information Page</a>. This page outlines the scope of support and any applicable guarantees.</p>
+<hr>
+<h2 id="support">Support</h2>
+<p>If you need assistance, visit the <a href="./support.html">Support Page</a> to find the available channels for getting help with any issues or questions you might have.</p>
+<hr>
+<h2 id="license">License</h2>
+<p>Get the full details on licensing by checking out the <a href="./license.html">License Information Page</a>. This section includes the terms and conditions under which the project is distributed.</p></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+        <script src="insert_js/extra.js"></script>
+      
+    
+  <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(() => { lightbox.reload() });
+</script></body>
+</html>
