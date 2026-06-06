@@ -38,7 +38,7 @@
 	/*************************************************************************
 		Docker Define Var for installations
 	*************************************************************************/	
-	if(!defined("_DNSHTTP_DOCKERIZED_")) { define("_DNSHTTP_DOCKERIZED_", false); }
+	if(!defined("_DNSHTTP_DOCKERIZED_")) { define("_DNSHTTP_DOCKERIZED_", true); }
 	
 	/*************************************************************************
 		Extended Sync Cron Configuration Variables

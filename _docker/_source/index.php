@@ -27,7 +27,7 @@
 	/*************************************************************************
 		Docker Define Var for installations
 	*************************************************************************/	
-	define("_DNSHTTP_DOCKERIZED_", false);
+	define("_DNSHTTP_DOCKERIZED_", true);
 	
 	/*************************************************************************
 		Installation if no Settings.php has been found.

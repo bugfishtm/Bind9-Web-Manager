@@ -25,54 +25,30 @@
 	#	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 	
 	/*************************************************************************
-		Docker Define Var for installations
+		Include Settings
 	*************************************************************************/	
-	define("_DNSHTTP_DOCKERIZED_", false);
+	if(file_exists("../_data/settings.php")) { require_once("../_data/settings.php"); }
+		else { echo dnshttp_api_output_install_error(); exit(); }
+	if(file_exists("../_initialize/initialize.php")) { require_once("../_initialize/initialize.php"); }
+		else { echo dnshttp_api_output_install_error(); exit(); }
 	
 	/*************************************************************************
-		Installation if no Settings.php has been found.
+		Remove Session Write Lock
 	*************************************************************************/	
-	if(!file_exists("./_data/settings.php")) {
-		$mysql = array();
-		require_once("./_template/tpl_install.php");
-		exit();
-	}
+	session_write_close();
 	
 	/*************************************************************************
-		Include Required Settings
+		Check if Request is IP-Blocked
 	*************************************************************************/	
-	require_once("./_data/settings.php");
+	dnshttp_api_blacklist_check($ipbl);
 	
 	/*************************************************************************
-		Include Required Initialization
+		Check if Token is Valid
 	*************************************************************************/	
-	if(file_exists("./_initialize/initialize.php")) { require_once("./_initialize/initialize.php"); }
-		else { echo "ERROR: initialize.php does not exist. Please check your instance configuration!"; exit(); }
-		
-	/*************************************************************************
-		User IP is Blacklisted.
-	*************************************************************************/	
-	if($ipbl->isblocked()) {
-		require_once("./_template/tpl_blocked.php");
-		exit();
-	}	
+	dnshttp_api_token_check($mysql, $ipbl, @$_POST["token"]);
 	
 	/*************************************************************************
-		Variables for CSRF and CookieBanner
+		Echo Online if all Okay
 	*************************************************************************/	
-	x_cookieBanner_Pre(_COOKIES_);	
-	
-	/*************************************************************************
-		User is not logged In.
-	*************************************************************************/	
-	if(!$user->loggedIn) {	
-		$csrf = new x_class_csrf(_COOKIES_, _CSRF_VALID_LIMIT_TIME_); 
-		require_once("./_template/tpl_login.php");
-		exit();
-	}
-	
-	/*************************************************************************
-		Default if everything else alright.
-	*************************************************************************/	
-	$permsobj = new x_class_perm($mysql, _TABLE_PERM_, "dnshttp");
-	require_once("./_default/default_loader.php");
+	echo dnshttp_api_output_ok();
+	exit();

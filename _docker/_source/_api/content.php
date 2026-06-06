@@ -25,54 +25,44 @@
 	#	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 	
 	/*************************************************************************
-		Docker Define Var for installations
+		Include Settings
 	*************************************************************************/	
-	define("_DNSHTTP_DOCKERIZED_", false);
+	if(file_exists("../_data/settings.php")) { require_once("../_data/settings.php"); }
+		else { echo dnshttp_api_output_install_error(); exit(); }
+	if(file_exists("../_initialize/initialize.php")) { require_once("../_initialize/initialize.php"); }
+		else { echo dnshttp_api_output_install_error(); exit(); }
 	
 	/*************************************************************************
-		Installation if no Settings.php has been found.
+		Remove Session Write Lock
 	*************************************************************************/	
-	if(!file_exists("./_data/settings.php")) {
-		$mysql = array();
-		require_once("./_template/tpl_install.php");
+	session_write_close();
+	
+	/*************************************************************************
+		Check if Request is IP-Blocked
+	*************************************************************************/	
+	dnshttp_api_blacklist_check($ipbl);
+	
+	/*************************************************************************
+		Check if Token is Valid
+	*************************************************************************/	
+	dnshttp_api_token_check($mysql, $ipbl, @$_POST["token"]);
+	
+	/*************************************************************************
+		Echo Requested Output
+	*************************************************************************/	
+	$domain = trim(@$_POST["domain"] ?? '');
+	if(strlen($domain ?? '') <= 0) {
+		echo "error-domain-no-exist";
 		exit();
 	}
-	
-	/*************************************************************************
-		Include Required Settings
-	*************************************************************************/	
-	require_once("./_data/settings.php");
-	
-	/*************************************************************************
-		Include Required Initialization
-	*************************************************************************/	
-	if(file_exists("./_initialize/initialize.php")) { require_once("./_initialize/initialize.php"); }
-		else { echo "ERROR: initialize.php does not exist. Please check your instance configuration!"; exit(); }
-		
-	/*************************************************************************
-		User IP is Blacklisted.
-	*************************************************************************/	
-	if($ipbl->isblocked()) {
-		require_once("./_template/tpl_blocked.php");
+	$bind = array();
+	$bind[0]["value"] = strtolower($domain);
+	$bind[0]["type"] = "s";
+	$ar = $mysql->select("SELECT id, content FROM "._TABLE_DOMAIN_REG_." WHERE LOWER(TRIM(domain)) = ?", false, $bind);
+	if(is_array($ar)) {
+		echo $ar["content"];
 		exit();
-	}	
-	
-	/*************************************************************************
-		Variables for CSRF and CookieBanner
-	*************************************************************************/	
-	x_cookieBanner_Pre(_COOKIES_);	
-	
-	/*************************************************************************
-		User is not logged In.
-	*************************************************************************/	
-	if(!$user->loggedIn) {	
-		$csrf = new x_class_csrf(_COOKIES_, _CSRF_VALID_LIMIT_TIME_); 
-		require_once("./_template/tpl_login.php");
+	} else { 
+		echo "error-domain-no-exist";
 		exit();
 	}
-	
-	/*************************************************************************
-		Default if everything else alright.
-	*************************************************************************/	
-	$permsobj = new x_class_perm($mysql, _TABLE_PERM_, "dnshttp");
-	require_once("./_default/default_loader.php");
