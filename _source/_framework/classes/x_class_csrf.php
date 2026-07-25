@@ -43,7 +43,7 @@
 		function __construct($cookie_extension = "", $second_valid = 300, $external_action = false) {
 			if (session_status() !== PHP_SESSION_ACTIVE) { @session_start(); }
 			// Generate new Key and Save to Parameters
-			$this->c_key			 = mt_rand(100000000,900000000);
+			$this->c_key			 = bin2hex(random_bytes(32));
 			$this->c_key_time		 = @$_SESSION[$this->extension."x_class_csrf_tms"];
 			// Cookie Extension
 			$this->extension  	 = $cookie_extension;
@@ -75,7 +75,7 @@
 			if(!$override_valid_time) { $override_valid_time = $this->valid_time;}
 			$tmp_s	=	@$_SESSION[$this->extension."x_class_csrf"];
 			$tmp_st	=	@$_SESSION[$this->extension."x_class_csrf_tms"];
-			if(@$code == $tmp_s AND @$code != NULL AND trim($code  ?? '') != "") {
+			if(is_string($code) AND is_string($tmp_s) AND $tmp_s !== "" AND hash_equals($tmp_s, $code)) {
 				if((time() - $tmp_st) < $override_valid_time AND $tmp_st != NULL AND isset($tmp_st)) {
 						return true;
 				} return false;
@@ -87,13 +87,13 @@
 		public function check_lkey($code, $override_valid_time = false) {
 			if(@$this->l_key_time == false) { $cct = "undef"; } else { $cct = @$this->l_key_time; }	
 			if(!$override_valid_time) { $override_valid_time = $this->valid_time; }
-			if(@$code == @$this->l_key AND @$code != NULL AND trim($code  ?? '') != "") {
+			if(is_string($code) AND is_string($this->l_key) AND $this->l_key !== "" AND hash_equals($this->l_key, $code)) {
 				if((time() - $cct) < $override_valid_time AND $cct != NULL AND isset($cct)) {
 					return true;
 				}			
 			} 
 			return false;
-		} 			
+		} 				
 
 		// Deconstruct and Apply new CSRF to Session
 		function __destruct() {

@@ -49,7 +49,7 @@
 				$valid_password = true;
 				if (@$_POST["password1"] == @$_POST["password2"]) {
 					if (trim(@$_POST["password1"]) != "") {
-						if (strlen(@$_POST["password1"]) <= 33) {
+						if (strlen(@$_POST["password1"]) <= 32) {
 							if (strlen(@$_POST["password1"]) >= 8) {
 								if ((preg_match('/[0-9]/', $_POST["password1"]) && preg_match('/[a-z]/', $_POST["password1"]) && preg_match('/[A-Z]/', $_POST["password1"]))) {
 								} else  { $valid_password = false;  }
@@ -71,7 +71,7 @@
 					Header("Location: ./?site=user_list&id=".$userid."");
 					exit();
 				} elseif(!$valid_username) {
-					x_eventBoxPrep("The username must be between 4 and 16 characters long.", "error", _COOKIES_);
+					x_eventBoxPrep("The username must be between 4 and 20 characters long.", "error", _COOKIES_);
 				} else {
 					x_eventBoxPrep("The password must be between 8 and 32 characters long and include at least one uppercase letter, one lowercase letter, and one numeric digit.", "error", _COOKIES_);
 				}

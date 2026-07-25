@@ -4,6 +4,9 @@
 > [!TIP]
 > No new features are currently planned for this project. However, users are welcome to create issues or feature requests, which will be reviewed and responded to within 1–3 weeks.
 
+> [!NOTE]
+> This release has been enhanced using AI (Claude Opus 5.0).
+
 ## 🚀 Introduction
 
 Bind9 Web Manager (DNSHTTP) is a web-based management interface for BIND9 DNS servers. It centralizes domain and record management, server replication, security controls, and operational insights into a single platform — making DNS administration more straightforward for both single-server setups and multi-server architectures.

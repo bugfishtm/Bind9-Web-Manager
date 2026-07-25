@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DnsHTTP – Changelog 4.1.3</title>
+<style>
+	:root{
+		--bg:#f7f7f8; --card:#fff; --fg:#1b1c1e; --muted:#6b7075;
+		--line:#e3e5e8; --accent:#2f6fed; --sec:#b3261e;
+	}
+	@media (prefers-color-scheme:dark){
+		:root{ --bg:#141517; --card:#1c1e21; --fg:#e6e7e9; --muted:#9aa0a6;
+			   --line:#2c2f33; --accent:#6a9bff; --sec:#f2857b; }
+	}
+	*{box-sizing:border-box}
+	body{margin:0;padding:32px 16px;background:var(--bg);color:var(--fg);
+		font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+	main{max-width:880px;margin:0 auto}
+	header{margin-bottom:28px}
+	h1{font-size:26px;margin:0 0 6px}
+	.rel{color:var(--muted);font-size:13.5px}
+	.rel b{color:var(--fg)}
+	section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+		padding:18px 22px;margin-bottom:16px}
+	h2{font-size:15px;letter-spacing:.04em;text-transform:uppercase;
+		margin:0 0 12px;color:var(--accent)}
+	section.security h2{color:var(--sec)}
+	ul{margin:0;padding-left:20px}
+	li{margin:0 0 7px}
+	li:last-child{margin-bottom:0}
+	code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;
+		background:rgba(127,127,127,.14);padding:1px 5px;border-radius:4px}
+	footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+	<h1>DnsHTTP – Changelog</h1>
+	<p class="rel">Release <b>4.1.3</b> · Framework <b>4.13</b> — previously 4.1.2 / 4.11</p>
+</header>
+
+<section class="security">
+	<h2>Security</h2>
+	<ul>
+		<li>All domain names are normalised to punycode (IDN-safe) and strictly validated before they are used as file paths, shell arguments or <code>named.conf</code> entries; every <code>named-checkzone</code> / <code>named-compilezone</code> call now uses <code>escapeshellarg()</code>. Closes command-injection, path-traversal and config-injection paths.</li>
+		<li><code>$INCLUDE</code> is stripped from user supplied zone data (web editor and API) — it made bind read arbitrary local files once the zone was written out.</li>
+		<li>API authentication now also matches the requested <code>section</code>, and rejects blocked, disabled or unconfirmed accounts. Previously a blocked user kept full API access as long as the token existed.</li>
+		<li><code>x_class_crypt</code> now uses authenticated encryption: AEAD tag for GCM/CCM ciphers, encrypt-then-HMAC otherwise. Tampered ciphertext returns <code>false</code> instead of garbage.</li>
+		<li>CSRF tokens, session keys, API tokens and generated passwords now come from <code>random_bytes()</code> / <code>random_int()</code> instead of <code>mt_rand()</code> / <code>str_shuffle()</code>; all token comparisons use <code>hash_equals()</code>.</li>
+		<li>Session ID is regenerated on successful login (session fixation). Auth cookies are now <code>HttpOnly</code>, <code>SameSite=Lax</code>, <code>path=/</code> and <code>Secure</code> over HTTPS.</li>
+		<li>Every <code>unserialize()</code> call hardened with <code>allowed_classes =&gt; false</code>.</li>
+		<li>Output escaping added for comments, table cells, conflict page, search form, zone serials and RSS items (feed links/covers are now restricted to <code>http(s)</code> URLs).</li>
+		<li>New per-server option <em>“Allow invalid SSL certificates”</em>. When disabled, outgoing API requests verify peer and host — verification used to be off unconditionally.</li>
+		<li>Comment upvotes moved from GET to POST with a CSRF token; <code>login_as()</code> got a privilege guard with an optional minimum rank.</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Replication &amp; Sync</h2>
+	<ul>
+		<li><code>sync.php</code> now takes an exclusive lock — two overlapping runs could leave bind with a half-written configuration.</li>
+		<li><code>_api/list.php</code> always answers plain serialised data. An <em>empty</em> domain list was returned gzip+base64 encoded, which the reading side could not decode — a peer with zero replicable domains was reported as a broken connection.</li>
+		<li>Replicated domains are no longer wiped when the server list query fails; a transient database error used to take every slave zone out of service.</li>
+		<li>Domains flagged <code>set_no_replicate</code> are now really kept out of the published registration table, and existing rows are dropped within the same run.</li>
+		<li>Preferred-entry handling fixed: exactly one preferred row per name across both tables. Two preferred rows produced two <code>zone</code> stanzas for one name and bind rejected the whole generated config.</li>
+		<li>Slave zones require a valid master IP (IPv4, falling back to IPv6); unresolvable local hostnames are no longer written into <code>allow-transfer</code>.</li>
+		<li>Server status “Compressed” is only reported after the authenticated probe succeeded; the SSL setting is passed through all API calls.</li>
+		<li>Fixed the broken slave-domain cleanup query (a second <code>WHERE</code> instead of <code>AND</code>) and stale parameter bindings that silently discarded zone-check diagnostics.</li>
+		<li>Zone names declared by more than one source are now logged as a warning instead of silently overwriting each other.</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Zone Handling &amp; Editor</h2>
+	<ul>
+		<li>SOA serial matching rewritten. The old pattern could run across newlines and rewrite the number of a completely unrelated record.</li>
+		<li>The SOA serial is now auto-incremented and stored on every zone save — both in the web editor and through the API — so slaves actually pick up changes.</li>
+		<li>Serial rollover past 99 edits per day now moves to the next day’s date instead of getting stuck.</li>
+		<li>The editor no longer drops unknown record types. Opening a zone and pressing save silently deleted <code>DS</code>, <code>DNSKEY</code>, <code>TLSA</code>, <code>SSHFP</code>, <code>SVCB</code>, <code>HTTPS</code>, <code>NAPTR</code>, <code>DNAME</code>, …</li>
+		<li>The leading <code>$ORIGIN</code> line is only stripped when it really is one — before it ate the <code>$TTL</code> line, or the first character when the text had no line break at all.</li>
+		<li>Saving zone data of a replicated (slave) domain now reports an error instead of a false success.</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Interface &amp; Administration</h2>
+	<ul>
+		<li>Duplicate domain creation is detected platform-wide (web + API). The failed insert used to be swallowed and still reported as success.</li>
+		<li>Creating a name that is already served locally or replicated in now warns that the entry starts in conflict.</li>
+		<li>Server create/edit forms got the SSL verification checkbox.</li>
+		<li>“Last run … minutes ago” on dashboard and debugging page is correct again for runs older than a day.</li>
+		<li>Dashboard label corrected to “Slave Domains (Registered)”; blacklist hint points to <code>./_cronjob/blacklist.php</code>.</li>
+		<li>Password length check off-by-one fixed (33 → 32), labels now state “Min 8”, username error message corrected to 20 characters.</li>
+		<li>Footer and login page: Impressum / Help / Github links now each test their own constant.</li>
+		<li>Cookie banner redirects back to the actual request URI instead of a rebuilt one.</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Framework &amp; Setup</h2>
+	<ul>
+		<li><code>x_class_mysql</code>: <code>decrease()</code> actually decreases now (it was writing the increase field); debug <code>error_log()</code> on every insert removed.</li>
+		<li><code>x_class_user</code>: password policy checks count occurrences correctly via <code>preg_match_all()</code> — the rules were effectively inverted. <code>confirm_user()</code> no longer fails on an undefined variable.</li>
+		<li><code>x_class_mail</code>: failed sends are logged as failures instead of successes.</li>
+		<li><code>x_class_ipbl</code>: <code>ip_counter($ip)</code> now uses the IP that was passed in.</li>
+		<li>Comment counters and upvote state are stored/read correctly; <code>x_class_referer</code> returns its result instead of discarding it.</li>
+		<li>File and directory modes are converted with <code>octdec()</code> — permissions were passed as strings; the log directory is created at its real path instead of a folder literally named <code>folder</code>.</li>
+		<li>Installer check parses <code>memory_limit</code> / <code>post_max_size</code> with M/G/K suffixes and unlimited values.</li>
+		<li>Schema: new columns <code>set_no_replicate</code> (domains) and <code>ssl_insecure</code> (servers), added automatically on upgrade; <code>AUTO_INCREMENT</code> columns are no longer <code>UNSIGNED</code>.</li>
+	</ul>
+</section>
+
+<footer>DnsHTTP 4.1.3 — generated changelog</footer>
+
+</main>
+</body>
+</html>

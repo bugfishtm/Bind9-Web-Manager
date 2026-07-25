@@ -42,9 +42,15 @@
 			$cover = $feed[$x]['img'];
 			$date = date('Y/m/d H:i:s', strtotime($feed[$x]['date']));
 			if($cover == NULL OR trim($cover ?? '') == "") { $cover = $defaultcover;}
-			echo '<div class="x_rss_item" onclick="location.href = \''.$link.'\';" >';
 			if(is_string($cover)) { if( substr($cover, 0, 4) != "http") { $cover = "https://".$cover; } }
-			if(trim($cover ?? '') != "" AND $cover != NULL AND strlen($cover) > 7) {echo '<img class="x_rss_image" src="'.$cover.'">';}
+			// Feed content is untrusted: only allow http(s) URLs and escape before output to prevent XSS
+			$safe_link  = (is_string($link)  AND preg_match('#^https?://#i', $link))  ? $link  : '#';
+			$safe_cover = (is_string($cover) AND preg_match('#^https?://#i', $cover)) ? $cover : $defaultcover;
+			// Strip characters that could break out of the inline JS string / HTML attribute context
+			$js_link    = htmlspecialchars(str_replace(array("'", '"', '\\', '<', '>', "\r", "\n"), '', $safe_link), ENT_QUOTES);
+			$cover_attr = htmlspecialchars($safe_cover, ENT_QUOTES);
+			echo '<div class="x_rss_item" onclick="location.href = \''.$js_link.'\';" >';
+			if(trim($cover_attr ?? '') != "" AND strlen($cover_attr) > 7) {echo '<img class="x_rss_image" src="'.$cover_attr.'">';}
 			echo '<section class="x_rss_title" title="'.$title.'">'.$title.'</section>';
 			echo '<section class="x_rss_date">Posted on '.$date.'</section><br clear="left"></div>';}
 		}

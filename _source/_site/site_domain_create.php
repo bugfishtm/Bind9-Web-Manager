@@ -46,17 +46,28 @@
 		$new_domain = strtolower(trim(@$_POST["domain"] ?? '') ?? '');
 		if($new_domain == "") { x_eventBoxPrep("Please enter a valid domain name.", "error", _COOKIES_); goto endofex; }
 		if(!dnshttp_isValidDomain($new_domain)) { x_eventBoxPrep("Please enter a valid domain name.", "error", _COOKIES_); goto endofex; }
+		// IDN: store the canonical punycode/ASCII form so master and slave tables match (conflict detection).
+		$new_domain = idn_to_ascii($new_domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+		if($new_domain === false) { x_eventBoxPrep("Please enter a valid domain name.", "error", _COOKIES_); goto endofex; }
 		$disablerep = 0;
 		if(@$_POST["disablerep"]) { $disablerep = 1; } else  { $disablerep = 0 ;}
-		
-		
 
 		$bindnew = array();
-		$bindnew[0]["value"] = strtolower(trim(@$_POST["domain"]));
-		$checkexistant = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE fk_user = '".$user->user_id."' AND TRIM(LOWER(domain)) = ?", false, $bindnew);
-		
-		if(!$checkexistant) { 		
-			
+		$bindnew[0]["value"] = $new_domain;
+		// The unique key on this table is (domain, domain_type), so only one 'user' row can exist
+		// per name across the whole platform. Checking only this user's own rows let the INSERT
+		// below hit that key, fail, get swallowed, and still report success to the user.
+		$checkexistant = $mysql->select("SELECT fk_user FROM "._TABLE_DOMAIN_BIND_." WHERE domain_type = 'user' AND TRIM(LOWER(domain)) = ?", false, $bindnew);
+
+		// Creating a name this server already serves is allowed on purpose - that is what the
+		// conflict handling exists for, and an administrator decides which entry wins on the
+		// conflicts page. It is only detected here so the user can be told what to expect,
+		// because until it is resolved the duplicate keeps the zone out of the served config.
+		$servedalready = false;
+		if(!$checkexistant) { $servedalready = dnshttp_domain_served_by($mysql, $new_domain); }
+
+		if(!$checkexistant) {
+
 			$new_domain_converted = idn_to_ascii($new_domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
 			$newsoa = generateSoaSerial();
 			$new_content = "\$TTL "._USER_DOMAIN_MINIMUM_."
@@ -66,7 +77,7 @@ mail IN MX 10 mail.".$new_domain_converted.".
 ftp IN CNAME www.".$new_domain_converted.".
 @ IN TXT \"v=spf1 include:_spf.".$new_domain." ~all\"
 _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$new_domain."\"";
-		
+
 			$bind = array();
 			$bind[0]["value"] = $new_domain;
 			$bind[1]["value"] = $new_content;
@@ -79,13 +90,27 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$new_domain."\"";
 														, '".$newsoa."'
 													);", $bind);
 													
-			x_eventBoxPrep("Domain has been created, please start adding records to the domain!", "ok", _COOKIES_);
-			$checkserverid = $mysql->insert_id; 
+			// Confirm the row really landed before telling the user it did.
+			$checkserverid = $mysql->insert_id;
+			if(!is_numeric($checkserverid) OR $checkserverid <= 0) {
+				x_eventBoxPrep("The domain could not be created because of a database error, please try again or contact your administrator.", "error", _COOKIES_); goto endofex;
+			}
+			// Only one event box message survives per request, so the conflict warning replaces the
+			// plain success text rather than being queued behind it.
+			if($servedalready === "local") {
+				x_eventBoxPrep("Domain has been created, but this name is already configured on this server. Both entries are now in conflict and the name will not answer queries until an administrator selects the preferred entry.", "warning", _COOKIES_);
+			} elseif($servedalready === "remote") {
+				x_eventBoxPrep("Domain has been created, but this name is already being replicated to this server from another master. Both entries are now in conflict and the name will not answer queries until an administrator selects the preferred entry.", "warning", _COOKIES_);
+			} else {
+				x_eventBoxPrep("Domain has been created, please start adding records to the domain!", "ok", _COOKIES_);
+			}
 			Header("Location: ./?site=domain_list&bind_id=".$checkserverid."");
 			exit();
-		
+
 		} else {
-			x_eventBoxPrep("This domain is already registered on your user account!", "error", _COOKIES_); goto endofex;
+			if($checkexistant["fk_user"] == $user->user_id) { x_eventBoxPrep("This domain is already registered on your user account!", "error", _COOKIES_); }
+				else { x_eventBoxPrep("This domain is already registered on this platform and cannot be created a second time.", "error", _COOKIES_); }
+			goto endofex;
 		}
 
 	}

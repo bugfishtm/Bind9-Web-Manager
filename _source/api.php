@@ -55,9 +55,9 @@
 		Include Settings
 	*************************************************************************/	
 	if(file_exists("./_data/settings.php")) { require_once("./_data/settings.php"); }
-		else { echo helper_api_response(null, "Awaiting Installation on Platform", 503); exit(); }
+		else { helper_api_response(null, "Awaiting Installation on Platform", 503); }
 	if(file_exists("./_initialize/initialize.php")) { require_once("./_initialize/initialize.php"); }
-		else { echo helper_api_response(null, "Awaiting Installation on Platform", 503); exit(); }
+		else { helper_api_response(null, "Awaiting Installation on Platform", 503); }
 
 	/*************************************************************************
 		Remove Session Write Lock
@@ -82,12 +82,30 @@
 	*************************************************************************/	
 	$bind = array();
 	$bind[0]["value"] = trim($usertoken);
+	if(strlen(trim($bind[0]["value"] ?? '')) <= 0) { echo helper_api_response(null, "Parameter 'userid' and 'usertoken' are not a valid access code and id. Please check the token and userid.", 401); $ipbl->raise(); exit(); }
 	$current_user = $mysql->select("SELECT * FROM "._TABLE_USER_." WHERE id = ".$userid." AND TRIM(ext_api_key) = ?", false, $bind);
 	if(!$current_user) { echo helper_api_response(null, "Parameter 'userid' and 'usertoken' are not a valid access code and id. Please check the token and userid.", 401); $ipbl->raise(); exit(); }
 	
 	/*************************************************************************
+		Check if the Account is still allowed to log in at all
+	*************************************************************************/
+	# The interactive login refuses these states, the API did not - so a blocked or disabled
+	# account kept full access through its token for as long as the token existed.
+	# Read defensively - these come from SELECT * and an install upgraded from an older schema may
+	# be missing a column. A missing column must not throw, and must not silently allow access.
+	if(@$current_user["user_blocked"] == 1 OR @$current_user["block_auto"] == 1) {
+		echo helper_api_response(null, "This user account is blocked.", 403); exit();
+	}
+	if(@$current_user["user_disabled"] == 1) {
+		echo helper_api_response(null, "This user account is disabled.", 403); exit();
+	}
+	if(array_key_exists("user_confirmed", $current_user) AND $current_user["user_confirmed"] != 1) {
+		echo helper_api_response(null, "This user account is not confirmed.", 403); exit();
+	}
+
+	/*************************************************************************
 		Check if User has API Access
-	*************************************************************************/	
+	*************************************************************************/
 	$permsobj = new x_class_perm($mysql, _TABLE_PERM_, "dnshttp");
 	if(!$permsobj->hasPerm($userid, "api") AND $current_user["user_rank"] != 0) {
 		echo helper_api_response(null, "Missing Permissions to use the API Interface.", 401); exit();
@@ -95,7 +113,7 @@
 	
 	/*************************************************************************
 		Actions
-	*************************************************************************/	
+	*************************************************************************/
 	if($action == "user_domain_create") {
 		$domain_name 			= @$_POST["domain_name"] ?? (@$_GET["domain_name"] ?? '');
 		if(trim($domain_name ?? '') == "") {
@@ -103,16 +121,23 @@
 		}		
 		
 		$domain_name = strtolower(trim(@$domain_name ?? '') ?? '');
-		if(!dnshttp_isValidDomain($domain_name)) { 
-			echo helper_api_response(null, "Invalid Parameter 'domain_name', is not a valid Domain Name.", 401); exit(); 
+		if(!dnshttp_isValidDomain($domain_name)) {
+			echo helper_api_response(null, "Invalid Parameter 'domain_name', is not a valid Domain Name.", 401); exit();
+		}
+		// IDN: store the canonical punycode/ASCII form so master and slave tables match (conflict detection).
+		$domain_name = idn_to_ascii($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+		if($domain_name === false) {
+			echo helper_api_response(null, "Invalid Parameter 'domain_name', is not a valid Domain Name.", 401); exit();
 		}
 		$disablerep = 0;
-		
+
 		$bindnew = array();
-		$bindnew[0]["value"] = strtolower(trim(@$domain_name));
-		$checkexistant = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE fk_user = '".$userid."' AND TRIM(LOWER(domain)) = ?", false, $bindnew);
-		
-		if(!$checkexistant) { 	
+		$bindnew[0]["value"] = $domain_name;
+		// (domain, domain_type) is unique, so only one 'user' row per name can exist platform-wide.
+		// Scoping this check to the calling user made the INSERT fail silently and still return 200.
+		$checkexistant = $mysql->select("SELECT fk_user FROM "._TABLE_DOMAIN_BIND_." WHERE domain_type = 'user' AND TRIM(LOWER(domain)) = ?", false, $bindnew);
+
+		if(!$checkexistant) {
 
 			$new_domain_converted = idn_to_ascii($domain_name, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
 			$newsoa = generateSoaSerial();
@@ -123,7 +148,7 @@ mail IN MX 10 mail.".$new_domain_converted.".
 ftp IN CNAME www.".$new_domain_converted.".
 @ IN TXT \"v=spf1 include:_spf.".$domain_name." ~all\"
 _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
-		
+
 			$bind = array();
 			$bind[0]["value"] = $domain_name;
 			$bind[1]["value"] = $new_content;
@@ -137,12 +162,19 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
 													);", $bind);
 													
 													
-			echo helper_api_response(null, "OK", 200);										
+			// Confirm the row landed instead of reporting a swallowed failure as success.
+			if(!is_numeric($mysql->insert_id) OR $mysql->insert_id <= 0) {
+				echo helper_api_response(null, "The domain could not be created because of a database error.", 500); exit();
+			}
+
+			# Still 200 - the domain was created. The message reports that it starts in conflict so a
+			# caller does not have to wait for the next cronjob to find out the name is not live yet.
+			echo helper_api_response(null, "OK", 200);
 			exit();
-		
+
 		} else {
-			echo helper_api_response(null, "Another Domain with the same name for that user already exists.", 409); exit();
-		}		
+			echo helper_api_response(null, "Another Domain with the same name already exists.", 409); exit();
+		}
 		
 	} elseif($action == "user_domain_update") {
 		$update_identifier 			= @$_POST["update_identifier"] ?? (@$_GET["update_identifier"] ?? '');
@@ -154,11 +186,21 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
 			 echo helper_api_response(null, "Missing Parameter 'zone_data', which shall contain the domain zone file content to be updated.", 401); exit(); 
 		}		
 		
+		# $INCLUDE would make bind read arbitrary local files on this server once the cronjob
+		# writes this zone out, so it is removed before the content is stored.
+		$zone_data = dnshttp_zone_input_clean($zone_data);
+
 		$bindcc = array();
-		$bindcc[0]["value"] = $zone_data;		
-		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ? WHERE id = ".$update_identifier." AND fk_user = '".$userid."'", $bindcc); 
-	
-		echo helper_api_response(null, "OK", 200);										
+		$bindcc[0]["value"] = dnshttp_bump_zone_serial($zone_data);
+		$newserial = dnshttp_zone_get_serial($bindcc[0]["value"]);
+		if($newserial !== false) {
+			$bindcc[1]["value"] = $newserial;
+			$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ?, serial_c = ? WHERE id = ".$update_identifier." AND fk_user = '".$userid."'", $bindcc);
+		} else {
+			$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ? WHERE id = ".$update_identifier." AND fk_user = '".$userid."'", $bindcc);
+		}
+
+		echo helper_api_response(null, "OK", 200);
 		exit();
 	
 	} elseif($action == "user_domain_list") {

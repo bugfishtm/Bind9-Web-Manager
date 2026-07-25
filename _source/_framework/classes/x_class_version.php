@@ -40,7 +40,7 @@
 			$this->website = "https://www.bugfish.eu";
 			$this->github  = "https://github.com/bugfishtm/bugfish-framework";
 			$this->documentation  = "https://bugfishtm.github.io/Bugfish-framework";
-			$this->version = "4.11";
+			$this->version = "4.13";
 		}
 	
 		// Optional: Prevent modifications after instantiation (using a private setter)

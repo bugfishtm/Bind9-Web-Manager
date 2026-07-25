@@ -41,8 +41,29 @@
 		else { echo "ERROR: _initialize/initialize.php does not exist. Please check your instance configuration!"; exit(); }
 		
 	/*************************************************************************
+		Single Run Lock
+	*************************************************************************/
+	# A run writes shared state: the named-compilezone scratch file, the generated
+	# dnshttp.named.conf.local and the zone files themselves. Two overlapping runs interleave
+	# those writes and can leave bind with a half-written configuration, so a second run exits.
+	$sync_lock_file   = dirname(__FILE__)."/../_data/sync.lock";
+	$sync_lock_handle = @fopen($sync_lock_file, "c");
+	if($sync_lock_handle) {
+		if(!@flock($sync_lock_handle, LOCK_EX | LOCK_NB)) {
+			echo "ERROR: Another sync.php run is still in progress, exiting without changes.\r\n";
+			$log->warning("Cronjob sync.php aborted, a previous run is still in progress.", "cron_sync");
+			exit();
+		}
+	} else {
+		# Only an actual conflicting run may stop a sync. A lock file that cannot be created is an
+		# environment problem and must not halt DNS replication, so carry on and just record it.
+		echo "WARN: Lock file could not be created, running without overlap protection.\r\n";
+		$log->warning("Cronjob sync.php could not create its lock file at ".$sync_lock_file." - running without overlap protection.", "cron_sync");
+	}
+
+	/*************************************************************************
 		Start Message
-	*************************************************************************/		
+	*************************************************************************/
 	$log->info("Cronbjob sync.php has been started.", "cron_sync");
 	
 	/*************************************************************************
@@ -52,5 +73,14 @@
 		
 	/*************************************************************************
 		End Message
-	*************************************************************************/		
+	*************************************************************************/
 	$log->info("Cronbjob sync.php has been finished.", "cron_sync");
+
+	/*************************************************************************
+		Release Single Run Lock
+	*************************************************************************/
+	# flock()/fclose() on a false handle is a TypeError in PHP 8, which @ does not suppress.
+	if($sync_lock_handle) {
+		@flock($sync_lock_handle, LOCK_UN);
+		@fclose($sync_lock_handle);
+	}

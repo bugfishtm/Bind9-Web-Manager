@@ -77,8 +77,11 @@
 					
 					$bindnew = array();
 					$bindnew[0]["value"] = trim($xxip6);
-					$mysql->query("UPDATE "._TABLE_SERVER_." SET ip6 = ? WHERE id = \"".$_POST["exec_ref"]."\";", $bindnew);		
-					
+					$mysql->query("UPDATE "._TABLE_SERVER_." SET ip6 = ? WHERE id = \"".$_POST["exec_ref"]."\";", $bindnew);
+
+					if(@$_POST["sslinsecure"]) { $sslinsec = 1; } else { $sslinsec = 0; }
+					$mysql->query("UPDATE "._TABLE_SERVER_." SET ssl_insecure = '".$sslinsec."' WHERE id = \"".$_POST["exec_ref"]."\";");
+
 					$mysql->query("UPDATE "._TABLE_SERVER_." SET server_type = '".$master."' WHERE id = \"".$_POST["exec_ref"]."\";");
 					x_eventBoxPrep("Server has been updated! If the API-URL hast not been updated, it may be the case that this URL is a duplicate at another Server which is registered here...", "ok", _COOKIES_);	
 				}
@@ -543,8 +546,27 @@
 								</div>	
 
 								<div class="col-md-12">
-								
-								The new server can be both, slave and/or master server! If you activate Master-Server than this Server will try to replicate Domains out of this new added or edited server!<br />	
+
+								Choose how SSL certificates of this servers API endpoint are handled on outgoing connections!<br />
+
+								  <div class="form-check" style="margin-right: 15px;">
+									<input
+									  class="form-check-input"
+									  type="checkbox"
+									  name="sslinsecure"
+									  id="invalidCheck8"
+									  <?php if($current_user["ssl_insecure"] ?? 1) { echo "checked"; } ?>
+									/>
+									<label class="form-check-label" for="invalidCheck8">
+									 Allow invalid SSL-Certificates [Accept self-signed or expired certificates when connecting to this server]
+									</label>
+								  </div>
+
+								</div>
+
+								<div class="col-md-12">
+
+								The new server can be both, slave and/or master server! If you activate Master-Server than this Server will try to replicate Domains out of this new added or edited server!<br />
 
 								  <div class="form-check" style="margin-right: 15px;">
 									<input

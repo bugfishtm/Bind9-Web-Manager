@@ -114,7 +114,7 @@
 			if ($csrf->check($_POST['csrf'])) {
 				if (@$_POST["password1"] == @$_POST["password2"]) {
 					if (trim(@$_POST["password1"] ?? '') != "") {
-						if (strlen(@$_POST["password1"]) <= 33) {
+						if (strlen(@$_POST["password1"]) <= 32) {
 							if (strlen(@$_POST["password1"]) >= 8) {
 								if ((preg_match('/[0-9]/', $_POST["password1"]) && preg_match('/[a-z]/', $_POST["password1"]) && preg_match('/[A-Z]/', $_POST["password1"]))) {
 									$user->changeUserPass($_GET["id"], $_POST["password1"]) ;
@@ -159,7 +159,7 @@
 		*************************************************************************/
 		if(@$_GET["op"] == "generate" || @$_GET["op"] == "regenerate") {
 			if ($csrf->check(@$_GET['csrf'])) {
-				$key = substr(str_shuffle(str_repeat('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 64)), 0, 64);
+				$key = dnshttp_api_token_generate(64);
 				$mysql->query("UPDATE "._TABLE_USER_." SET ext_api_key = '".$key."' WHERE id = ".$_GET["id"]."");
 				//$log->info("User <b>#".$user->user_id."</b> (".htmlspecialchars($user->user_name ?? '').") has generated an API Key for external access.", "user_".$current_user["id"]);
 				x_eventBoxPrep("The external API Access Token on your account has been regenerated, you can now execute external commands via the api interface!", "ok", _COOKIES_);
@@ -346,11 +346,11 @@
 					  <form method="post">
 						<div class="card-body">
 						  <div class="mb-3">
-							<label for="exampleInputPassword1" class="form-label">New Password <br /><small>(Min 10/Max 32 Signs)</small></label>
+							<label for="exampleInputPassword1" class="form-label">New Password <br /><small>(Min 8/Max 32 Signs)</small></label>
 							<input type="password" name='password1' class="form-control" placeholder="New Password" autocomplete="off" required/>
 						  </div>
 						  <div class="mb-3">
-							<label for="exampleInputPassword1" class="form-label">New Password Confirmation <br /><small>(Min 10/Max 32 Signs)</small></label>
+							<label for="exampleInputPassword1" class="form-label">New Password Confirmation <br /><small>(Min 8/Max 32 Signs)</small></label>
 							<input type="password" name='password2' class="form-control" placeholder="New Password Confirmation" autocomplete="off" required/>
 						  </div>
 						</div>

@@ -62,7 +62,7 @@
 			$c_domain_id_r = "api_id";
 			$c_tpe_raw = "Slave";
 			$c_domain_id = $_GET["api_id"];
-			$current_user = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_API_." WHERE id = ".@$_GET["api_id"]."". false);
+			$current_user = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_API_." WHERE id = ".@$_GET["api_id"]."", false);
 			if(!$current_user) { Header("Location: ../"); exit(); }
 			define("_SUB_PAGE_TITLE_", htmlspecialchars($current_user["domain"] ?? '')." / Slave Domain");
 			$_GET["bind_id"] = "";			
@@ -70,7 +70,7 @@
 			$c_domain_id_r = "bind_id";
 			$c_tpe_raw = "Master";
 			$c_domain_id = $_GET["bind_id"];
-			$current_user = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".@$_GET["bind_id"]."". false);
+			$current_user = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".@$_GET["bind_id"]."", false);
 			if(!$current_user) { Header("Location: ../"); exit(); }
 			if($current_user["fk_user"] == $user->user_id) {
 			} else {
@@ -117,9 +117,27 @@
 			if($permsobj->hasPerm($user->user_id, "domain_conflicts") OR $user->user_rank == 0) {
 				if ($csrf->check(@$_GET['csrf'])) {
 					
-					if(is_numeric($_GET["api_id"])) { $mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 1, conflict = 0 WHERE id = ".$_GET["api_id"].""); }
-					if(is_numeric($_GET["bind_id"])) { $mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET preferred = 1, conflict = 0 WHERE id = ".$_GET["bind_id"].""); }
-					
+					// Exactly one entry per domain name may be preferred. With two of them the sync
+					// writes two "zone" stanzas for the same name and bind rejects the whole
+					// generated config, which takes every zone on this server down.
+					// 'conflict' is deliberately left alone here - the cronjob recomputes it, and
+					// clearing it on one side only produced an inconsistent pair.
+					// Order matters: mark the winner FIRST, then clear the others while excluding it.
+					// Clearing first would leave no preferred entry at all if the second statement
+					// did not run, and a conflicted domain with nothing preferred stops resolving.
+					$bindpref = array();
+					$bindpref[0]["value"] = strtolower(trim($current_user["domain"] ?? ''));
+					if(is_numeric($_GET["api_id"])) {
+						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 1 WHERE id = ".$_GET["api_id"]."");
+						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0 WHERE LOWER(TRIM(domain)) = ? AND id <> ".$_GET["api_id"]."", $bindpref);
+						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET preferred = 0 WHERE LOWER(TRIM(domain)) = ?", $bindpref);
+					}
+					if(is_numeric($_GET["bind_id"])) {
+						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET preferred = 1 WHERE id = ".$_GET["bind_id"]."");
+						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET preferred = 0 WHERE LOWER(TRIM(domain)) = ? AND id <> ".$_GET["bind_id"]."", $bindpref);
+						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0 WHERE LOWER(TRIM(domain)) = ?", $bindpref);
+					}
+
 					x_eventBoxPrep("This domain will now replicate to other servers.", "ok", _COOKIES_);
 					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."&api_id=".$_GET["api_id"]."");
 					exit();
@@ -160,13 +178,36 @@
 		if(@$_GET["op"] == "saverecords") {
 			if ($csrf->check(@$_GET['csrf'])) {
 				if (isset($_POST["zone"])) {
-					//echo nl2br($_POST["zone"]); exit();
-					$bindcc = array();
-					$bindcc[0]["value"] = substr($_POST["zone"], strpos($_POST["zone"], "\n") + 1);;
-					if(is_numeric($_GET["bind_id"])) { 
-						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ? WHERE id = ".$_GET["bind_id"]."", $bindcc); 
+					// The editor emits "$ORIGIN <name>" as its first line and that is not stored.
+					// This used to cut the first line unconditionally, which ate the $TTL line when
+					// the origin field had been cleared, and ate the first CHARACTER when the text
+					// contained no newline at all (strpos returns false, false + 1 = 1).
+					$rawzone = (string)$_POST["zone"];
+					$firstbreak = strpos($rawzone, "\n");
+					if($firstbreak !== false AND preg_match('/^\s*\$ORIGIN\b/i', substr($rawzone, 0, $firstbreak))) {
+						$zoneinput = substr($rawzone, $firstbreak + 1);
+					} else {
+						$zoneinput = $rawzone;
 					}
-					x_eventBoxPrep("The domain has successfully been changed.", "ok", _COOKIES_);
+					// $INCLUDE would make bind read arbitrary local files once the cronjob writes
+					// this zone out, so it is removed before the content is stored.
+					$zoneinput = dnshttp_zone_input_clean($zoneinput);
+					if(is_numeric($_GET["bind_id"])) {
+						$bindcc = array();
+						$bindcc[0]["value"] = dnshttp_bump_zone_serial($zoneinput);
+						$newserial = dnshttp_zone_get_serial($bindcc[0]["value"]);
+						if($newserial !== false) {
+							$bindcc[1]["value"] = $newserial;
+							$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ?, serial_c = ? WHERE id = ".$_GET["bind_id"]."", $bindcc);
+						} else {
+							$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ? WHERE id = ".$_GET["bind_id"]."", $bindcc);
+						}
+						x_eventBoxPrep("The domain has successfully been changed.", "ok", _COOKIES_);
+					} else {
+						// Reached with an api_id, where nothing was ever written. Reporting success
+						// here told the user their edit had been saved when it had not.
+						x_eventBoxPrep("Zone data of a replicated (slave) domain cannot be changed here - it is maintained on its master server.", "error", _COOKIES_);
+					}
 					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."&api_id=".$_GET["api_id"]."");
 					exit();
 				} else  { x_eventBoxPrep("Zone Data Error!", "error", _COOKIES_); Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."&api_id=".$_GET["api_id"].""); exit(); }
@@ -636,10 +677,15 @@
 			  <div class="modal-dialog"   style="min-width: 90% !important;">
 				<div class="modal-content">
 				  <div class="modal-header">
-					<h5 class="modal-title">Domain Record Change<br /><small>Serial <?php echo $current_user["serial_c"]; ?>/<?php echo incrementSOASerial($current_user["serial_c"] ?? ''); ?> </small></h5>
+					<h5 class="modal-title">Domain Record Change<br /><small>Serial <?php echo htmlspecialchars($current_user["serial_c"] ?? ''); ?>/<?php echo incrementSOASerial($current_user["serial_c"] ?? ''); ?> </small></h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick="dnshttp_userui_changerecord_close()"></button>
 				  </div>
-				  <div class="modal-body" id="dns-zone-editor"  data-zone="<?php echo preg_replace('/\b'.$current_user["serial_c"].'\b/', incrementSOASerial($current_user["serial_c"] ?? ''), htmlentities($current_user["content"] ?? ''), 1); ?>">
+				  <div class="modal-body" id="dns-zone-editor"  data-zone="<?php
+						$c_serial_raw = trim($current_user["serial_c"] ?? '');
+						$c_zone_attr = htmlentities($current_user["content"] ?? '');
+						if($c_serial_raw !== '') { $c_zone_attr = preg_replace('/\b'.preg_quote($c_serial_raw, '/').'\b/', incrementSOASerial($c_serial_raw), $c_zone_attr, 1); }
+						echo $c_zone_attr;
+				  ?>">
 					
 				  </div>
 				  <div class="modal-footer">
@@ -737,7 +783,11 @@
 					if (i < tokens.length && /^\d+$/.test(tokens[i])) ttl = parseTTL(tokens[i++]);
 				 
 					const type = tokens[i++]?.toUpperCase();
-					if (!type || !RECORD_TYPES.includes(type)) continue;
+					/* Keep every record type, not only the ones the dropdown offers. Dropping
+					   unknown types here meant that simply opening a zone and pressing Save
+					   silently deleted DS, DNSKEY, TLSA, SSHFP, SVCB, HTTPS, NAPTR, DNAME, ...
+					   because exportZone() only writes back what this parser kept. */
+					if (!type || !/^[A-Z][A-Z0-9-]*$/.test(type)) continue;
 				 
 					const rdata = tokens.slice(i).join(' ');
 					zone.records.push({ id: uid(), name, ttl, class: cls, type, rdata });
@@ -835,8 +885,13 @@
 				function typeColor(t) { return TYPE_COLORS[t] || '#6b7280'; }
 				 
 				function typeOptions(sel) {
-				  return RECORD_TYPES.map(t =>
-					`<option value="${t}"${t===sel?' selected':''}>${t}</option>`
+				  /* A type the zone uses but the dropdown does not list must still appear as an
+					 option, otherwise the select would silently rewrite it to the first entry. */
+				  const list = (sel && !RECORD_TYPES.includes(sel))
+					? RECORD_TYPES.concat([sel])
+					: RECORD_TYPES;
+				  return list.map(t =>
+					`<option value="${esc(t)}"${t===sel?' selected':''}>${esc(t)}</option>`
 				  ).join('');
 				}
 				 

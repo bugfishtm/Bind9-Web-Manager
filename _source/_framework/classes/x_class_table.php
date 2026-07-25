@@ -296,7 +296,7 @@
 								if($deleting) { $id = $value[$this->idf]; }
 								foreach($value AS $keyx => $valuex) {  if($keyx == $this->idf) { continue;} 
 									echo "<td>";
-										echo $valuex;
+										echo htmlspecialchars($valuex ?? '');
 									echo "</td>";
 								}
 								if($deleting OR $editing) {

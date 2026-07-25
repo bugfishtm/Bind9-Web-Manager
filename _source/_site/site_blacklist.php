@@ -93,7 +93,7 @@
 	</div>
 
 	<!----------------- Show Alert Boxes -------------------->
-    <div class="callout callout-info mb-3">The IP addresses listed below are blocked from accessing this web interface, including all API requests. To automatically reset blocked IPs, configure ./_cronjob/daily.php as a periodic task. The blacklist operation limit can be adjusted via the _IP_BLACKLIST_DAILY_OP_LIMIT_ setting in settings.php. IPs are blocked after exceeding the configured threshold of token or login failures.</div>
+    <div class="callout callout-info mb-3">The IP addresses listed below are blocked from accessing this web interface, including all API requests. To automatically reset blocked IPs, configure ./_cronjob/blacklist.php as a periodic task. The blacklist operation limit can be adjusted via the _IP_BLACKLIST_DAILY_OP_LIMIT_ setting in settings.php. IPs are blocked after exceeding the configured threshold of token or login failures.</div>
 
 	<!----------------- Table Element  -------------------->
 	<div class="card mb-4 tablecard">

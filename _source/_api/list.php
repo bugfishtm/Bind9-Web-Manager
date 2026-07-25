@@ -51,14 +51,17 @@
 		Echo Requested Output
 	*************************************************************************/	
 	$domar	=	array();
-	$ar = $mysql->select("SELECT domain FROM "._TABLE_DOMAIN_REG_."", true);	
-	if(is_array($ar)) {	
+	// This table only holds domains cleared for replication - the sync cronjob applies
+	// set_no_replicate when it fills it, so nothing has to be filtered out again here.
+	$ar = $mysql->select("SELECT domain FROM "._TABLE_DOMAIN_REG_."", true);
+	// The empty result used to be returned gzip+base64 encoded while the populated one was returned
+	// plain. The receiving side runs dnshttp_decompress(), which is a passthrough, so the encoded
+	// form never unserializes and a peer holding zero replicable domains was reported as a broken
+	// connection instead of an empty list. Always answer in the one format the reader understands.
+	if(is_array($ar)) {
 		foreach($ar AS $key => $value) { array_push($domar, trim($value["domain"])); }
-		echo serialize($domar);
-		exit();
-	} else { 
-		echo dnshttp_compress(serialize($domar));
-		exit();
-	}	
+	}
+	echo serialize($domar);
+	exit();
 	
 	

@@ -140,7 +140,7 @@
 			  </div>
 			</div>	
 
-			<input type="hidden"	name="site"			value="<?php echo @$_GET["site"]; ?>">
+			<input type="hidden"	name="site"			value="<?php echo htmlentities(@$_GET["site"] ?? ''); ?>">
 			<input type="hidden"	name="id"			value="<?php if(is_numeric(@$_GET["id"]))  { echo @$_GET["id"]; } ?>">
 			<input type="hidden"	name="bind_id"		value="<?php if(is_numeric(@$_GET["bind_id"]))  { echo @$_GET["bind_id"]; } ?>">
 			<input type="hidden"	name="api_id"		value="<?php if(is_numeric(@$_GET["api_id"]))  { echo @$_GET["api_id"]; } ?>">

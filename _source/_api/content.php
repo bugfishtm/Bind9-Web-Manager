@@ -58,6 +58,8 @@
 	$bind = array();
 	$bind[0]["value"] = strtolower($domain);
 	$bind[0]["type"] = "s";
+	// Only replication-cleared domains are in this table (see the sync cronjob), so a domain with
+	// set_no_replicate has no row here and answers error-domain-no-exist below.
 	$ar = $mysql->select("SELECT id, content FROM "._TABLE_DOMAIN_REG_." WHERE LOWER(TRIM(domain)) = ?", false, $bind);
 	if(is_array($ar)) {
 		echo $ar["content"];

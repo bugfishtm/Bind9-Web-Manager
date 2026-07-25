@@ -291,13 +291,13 @@
 				return true;
 			} else {
 				// Mail Sending Fail
-				$this->log_execute($subject, $HEADER.$content.$FOOTER, $receiver, $attachment, $cc, $bcc, true, $tmp_mailer->ErrorInfo, $settings);	
+				$this->log_execute($subject, $HEADER.$content.$FOOTER, $receiver, $attachment, $cc, $bcc, false, $tmp_mailer->ErrorInfo, $settings);
 				$this->set_info($tmp_mailer->ErrorInfo);
 				unset($tmp_mailer);
 				return false;
 			}
-		} 
-		
+		}
+
 		public function object() {
 			return new x_class_mail_item($this);
 		}

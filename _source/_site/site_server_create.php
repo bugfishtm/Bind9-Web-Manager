@@ -50,19 +50,20 @@
 		if(filter_var(@$_POST["ip"], FILTER_VALIDATE_IP) === false AND filter_var(@$_POST["ip6"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false) { x_eventBoxPrep("IPv4 and IPv6 invalid! You must provide at least one valid ip!", "error", _COOKIES_); goto endofex; }
 		if(filter_var(@$_POST["ip"], FILTER_VALIDATE_IP) !== false) { $xxip = @$_POST["ip"]; } else { $xxip = ""; }
 		if(filter_var(@$_POST["ip6"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) { $xxip6 = @$_POST["ip6"]; } else { $xxip6 = ""; }
-		
+		if(@$_POST["sslinsecure"]) { $sslinsec = 1; } else { $sslinsec = 0; }
+
 		$bindnew = array();
 		$bindnew[0]["value"] = strtolower(trim($apipathfinal));
-		
+
 		$checkexistant = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE TRIM(LOWER(api_path)) = ?", false, $bindnew);
-		
-		if(!$checkexistant) { 
+
+		if(!$checkexistant) {
 			$bindnew = array();
 			$bindnew[0]["value"] = trim($apipathfinal);
 			$bindnew[1]["value"] = trim($_POST["token"]);
 			$bindnew[2]["value"] = trim($xxip);
 			$bindnew[3]["value"] = trim($xxip6);
-			$mysql->query("INSERT INTO "._TABLE_SERVER_." (api_path, api_token, server_type, fk_user, ip, ip6, enabled, apiok, emptydomains, tokenbadlastreq, weblacklisted, domains) 
+			$mysql->query("INSERT INTO "._TABLE_SERVER_." (api_path, api_token, server_type, fk_user, ip, ip6, enabled, apiok, emptydomains, tokenbadlastreq, weblacklisted, domains, ssl_insecure)
 														VALUES ( ?
 														, ?
 														, '".$master."'
@@ -75,6 +76,7 @@
 														, 2
 														, 2
 														, 0
+														, '".$sslinsec."'
 													);", $bindnew);
 													
 													
@@ -186,8 +188,27 @@
 				</div>	
 
 				<div class="col-md-12">
-				
-				The new server can be both, slave and/or master server! If you activate Master-Server than this Server will try to replicate Domains out of this new added or edited server!<br />	
+
+				Choose how SSL certificates of this servers API endpoint are handled on outgoing connections!<br />
+
+				  <div class="form-check" style="margin-right: 15px;">
+					<input
+					  class="form-check-input"
+					  type="checkbox"
+					  name="sslinsecure"
+					  id="invalidCheck8"
+					  <?php if(!isset($_POST["path"]) OR @$_POST["sslinsecure"]) { echo "checked"; } ?>
+					/>
+					<label class="form-check-label" for="invalidCheck8">
+					 Allow invalid SSL-Certificates [Accept self-signed or expired certificates when connecting to this server]
+					</label>
+				  </div>
+
+				</div>
+
+				<div class="col-md-12">
+
+				The new server can be both, slave and/or master server! If you activate Master-Server than this Server will try to replicate Domains out of this new added or edited server!<br />
 
 				  <div class="form-check" style="margin-right: 15px;">
 					<input

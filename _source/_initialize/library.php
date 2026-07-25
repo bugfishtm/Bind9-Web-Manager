@@ -38,23 +38,74 @@
 	
 	function incrementSOASerial(string $serial): string {
 		$today = date('Ymd');
-		
-		// If serial is in YYYYMMDDNN format and date matches today
 		if (strlen($serial) === 10 && substr($serial, 0, 8) === $today) {
 			$seq = (int)substr($serial, 8) + 1;
-			if ($seq > 99) $seq = 99; // max 99 changes per day
-			return $today . str_pad($seq, 2, '0', STR_PAD_LEFT);
+			if ($seq <= 99) {
+				return $today . str_pad($seq, 2, '0', STR_PAD_LEFT);
+			}
+			// >99 edits today: bump to tomorrow's date so the serial keeps rising
+			$next = date('Ymd', strtotime('+1 day')) . '01';
+			return (string)max((int)$next, (int)$serial + 1);
 		}
-		
-		// Date changed or different format — reset to today with 01
-		// But ensure we always increment (serial must never go backwards)
+		// Different/older format — never go backwards
 		$new = $today . '01';
-		return $new > $serial ? $new : (string)($serial + 1);
+		return (int)$new > (int)$serial ? $new : (string)((int)$serial + 1);
+	}
+
+	// Matches the serial field of an SOA record, in both the parenthesised and the bare
+	// single-line layout: SOA <mname> <rname> [(] <serial> ...
+	// The previous pattern used [^\(]* with the /s modifier, so on a zone whose SOA has no
+	// parentheses it walked across newlines to the next "(" anywhere in the file and rewrote
+	// whatever number followed it - silently corrupting an unrelated record.
+	define("_DNSHTTP_SOA_SERIAL_REGEX_", '/(\bSOA\b[^\S\r\n]+[^\s()]+[^\S\r\n]+[^\s()]+[^\S\r\n]*(?:\([^\d]*)?)(\d{1,10})\b/i');
+
+	// Best-effort auto-increment of the SOA serial inside raw zone text so slaves pick up edits.
+	function dnshttp_bump_zone_serial(string $zone): string {
+		$out = preg_replace_callback(
+			_DNSHTTP_SOA_SERIAL_REGEX_,
+			function($m){ return $m[1].incrementSOASerial($m[2]); },
+			$zone, 1
+		);
+		// On a pattern failure keep the zone byte-identical rather than returning null.
+		return ($out === null) ? $zone : $out;
+	}
+
+	// Is this zone name already served by this instance, in any form? Returns 'local' for an entry
+	// in the bind table (a master zone, or another user's domain), 'remote' for one replicated in
+	// from a peer, or false.
+	// Informational only - creating a duplicate is a supported operation, the conflict handling
+	// covers it and an administrator picks the winner on the conflicts page. This exists so the
+	// creating user can be told the new entry starts out in conflict, because until that is
+	// resolved neither entry is written to the served configuration.
+	function dnshttp_domain_served_by($mysql, $domain) {
+		$b = array();
+		$b[0]["value"] = strtolower(trim($domain ?? ''));
+		$b[0]["type"]  = "s";
+		if(is_array($mysql->select("SELECT id FROM "._TABLE_DOMAIN_BIND_." WHERE LOWER(TRIM(domain)) = ?", false, $b))) { return "local"; }
+		if(is_array($mysql->select("SELECT id FROM "._TABLE_DOMAIN_API_." WHERE LOWER(TRIM(domain)) = ?", false, $b))) { return "remote"; }
+		return false;
+	}
+
+	// Zone text submitted by a user. $INCLUDE is removed because it makes bind read arbitrary local
+	// files on this server when the zone is written out - that is the whole reason this exists.
+	// $GENERATE is deliberately left alone: it is a legitimate bind feature with no file access, and
+	// removing it would take a capability away from anyone writing zone data through the API.
+	// Note the record editor in the web UI does not round-trip $GENERATE, so a zone using it should
+	// be maintained through the API rather than opened and saved in the editor.
+	function dnshttp_zone_input_clean($zone) {
+		return preg_replace('/^[ \t]*\$INCLUDE\b[^\r\n]*/im', '; $INCLUDE removed - not permitted in user zone data', (string)$zone);
+	}
+
+	// Read the current SOA serial out of raw zone text (same match as the bump above).
+	function dnshttp_zone_get_serial(string $zone) {
+		if(preg_match(_DNSHTTP_SOA_SERIAL_REGEX_, $zone, $m)) { return $m[2]; }
+		return false;
 	}
 
 	function dnshttp_decompress(string $compressed): string {
+		// Compression between instances is intentionally disabled - passthrough!
 		return $compressed;
-		return gzdecompress(base64_decode($compressed));
+		return gzuncompress(base64_decode($compressed));
 	}
 	
 	function dnshttp_api_output_ok()				{ return "online"; }
@@ -87,17 +138,20 @@
 	function dnshttp_server_check_and_set($mysql, $checkserverid) { server_check_and_set($mysql, $checkserverid); }
 	
 	function server_check_and_set($mysql, $checkserverid) {
-		$apipathroot	=	dnshttp_server_get($mysql, $checkserverid)["api_path"];
+		$checkserverrow	=	dnshttp_server_get($mysql, $checkserverid);
+		if(!is_array($checkserverrow)) { return; }
+		$apipathroot	=	$checkserverrow["api_path"];
+		$sslinsecurenow	=	$checkserverrow["ssl_insecure"] ?? 1;
 		$apipath		=	$apipathroot."/_api/list_count.php";
-		$returncurl 	=   dnshttp_api_getcontent($mysql, $apipath, dnshttp_server_get($mysql, $checkserverid)["api_token"]);
-		
-		if(trim($returncurl ?? '') == "token-error") { 
+		$returncurl 	=   dnshttp_api_getcontent($mysql, $apipath, $checkserverrow["api_token"], "", $sslinsecurenow);
+
+		if(trim($returncurl ?? '') == "token-error") {
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET apiok = 0 WHERE id = \"".$checkserverid."\";");
-			$mysql->query("UPDATE "._TABLE_SERVER_." SET weblacklisted = 0 WHERE id = \"".$checkserverid."\";"); 
-			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 1 WHERE id = \"".$checkserverid."\";"); 
+			$mysql->query("UPDATE "._TABLE_SERVER_." SET weblacklisted = 0 WHERE id = \"".$checkserverid."\";");
+			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 1 WHERE id = \"".$checkserverid."\";");
 		}
-		
-		if($returncurl == "ip-blacklisted") { 
+
+		if(trim($returncurl ?? '') == "ip-blacklisted") {
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET apiok = 0 WHERE id = \"".$checkserverid."\";");
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET weblacklisted = 1 WHERE id = \"".$checkserverid."\";"); 
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 0 WHERE id = \"".$checkserverid."\";"); 
@@ -109,36 +163,42 @@
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 0 WHERE id = \"".$checkserverid."\";"); 
 		}
 			
+		$listcountok = false;
 		if(is_numeric($returncurl)) {
+			$listcountok = true;
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET apiok = 1 WHERE id = \"".$checkserverid."\";");
-			$mysql->query("UPDATE "._TABLE_SERVER_." SET weblacklisted = 0 WHERE id = \"".$checkserverid."\";"); 
-			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 0 WHERE id = \"".$checkserverid."\";"); 
+			$mysql->query("UPDATE "._TABLE_SERVER_." SET weblacklisted = 0 WHERE id = \"".$checkserverid."\";");
+			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 0 WHERE id = \"".$checkserverid."\";");
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET domains = ".$returncurl." WHERE id = \"".$checkserverid."\";");
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET emptydomains = 1 WHERE id = \"".$checkserverid."\";");
-			if($returncurl > 0) { 
+			if($returncurl > 0) {
 				$mysql->query("UPDATE "._TABLE_SERVER_." SET emptydomains = 0 WHERE id = \"".$checkserverid."\";");
 			}
 		} else {
 			$mysql->query("UPDATE "._TABLE_SERVER_." SET apiok = 0 WHERE id = \"".$checkserverid."\";");
-			$mysql->query("UPDATE "._TABLE_SERVER_." SET weblacklisted = 0 WHERE id = \"".$checkserverid."\";"); 
-			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 0 WHERE id = \"".$checkserverid."\";"); 
-		}	
-		
-		$apipath		=	$apipathroot."/_api/status_compress.php";
-		$returncurl =   dnshttp_api_getcontent($mysql, $apipath, dnshttp_server_get($mysql, $checkserverid)["api_token"]);		
-		
+			$mysql->query("UPDATE "._TABLE_SERVER_." SET weblacklisted = 0 WHERE id = \"".$checkserverid."\";");
+			$mysql->query("UPDATE "._TABLE_SERVER_." SET tokenbadlastreq = 0 WHERE id = \"".$checkserverid."\";");
+		}
 
-		if(trim($returncurl ?? '') == "online") { 
-			$mysql->query("UPDATE "._TABLE_SERVER_." SET apiok = 2 WHERE id = \"".$checkserverid."\";");
-		}		
-		
+		// Only upgrade to "Compressed" status if the authenticated probe above succeeded,
+		// status_compress.php answers without a token so it must not overrule a failed check.
+		if($listcountok) {
+			$apipath		=	$apipathroot."/_api/status_compress.php";
+			$returncurl =   dnshttp_api_getcontent($mysql, $apipath, $checkserverrow["api_token"], "", $sslinsecurenow);
+
+			if(trim($returncurl ?? '') == "online") {
+				$mysql->query("UPDATE "._TABLE_SERVER_." SET apiok = 2 WHERE id = \"".$checkserverid."\";");
+			}
+		}
 	}
 	
-	function dnshttp_bind_domain_name_exists($mysql, $domain_name) { if(trim($domain_name ?? '') != "") { 
+	// Lookup for the sync write of locally fetched (file/file2/folder) domains. User created
+	// domains are excluded, they own their row and same-named entries are handled as conflicts.
+	function dnshttp_bind_domain_name_exists($mysql, $domain_name) { if(trim($domain_name ?? '') != "") {
 		$bind[0]["value"] = strtolower(trim($domain_name ?? ''));
 		$bind[0]["type"] = "s";
-		$x = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE TRIM(LOWER(domain)) = ?", false, $bind);
-		if (is_array($x)) { return $x["id"]; } } return false; }	
+		$x = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE TRIM(LOWER(domain)) = ? AND domain_type <> 'user'", false, $bind);
+		if (is_array($x)) { return $x["id"]; } } return false; }
 		
 	function dnshttp_bind_get($mysql, $id) { if(is_numeric($id)) { return $mysql->select("SELECT * FROM "._TABLE_DOMAIN_BIND_." WHERE id = \"".$id."\"", false); } return false; }	
 	
@@ -149,8 +209,8 @@
 		$x = $mysql->select("SELECT * FROM "._TABLE_USER_." WHERE id = '$userid'", false);
 		while (is_array($x)) { return $x["user_name"]; } } return false; }	
 		
-	function dnshttp_api_token_generate($len = 128, $comb = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')  
-		{$pass = array(); $combLen = strlen($comb) - 1; for ($i = 0; $i < $len; $i++) { $n = mt_rand(0, $combLen); $pass[] = $comb[$n]; } return implode($pass);}			
+	function dnshttp_api_token_generate($len = 128, $comb = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
+		{$pass = array(); $combLen = strlen($comb) - 1; for ($i = 0; $i < $len; $i++) { $n = random_int(0, $combLen); $pass[] = $comb[$n]; } return implode($pass);}		
 	
 	function dnshttp_server_api_token_check($mysql, $token) { 
 		return api_token_check($mysql, $token);
@@ -163,32 +223,39 @@
 		$res = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE TRIM(api_token) = ?", false, $bind);
 		if(is_array($res)) { return true;}  else { return false; }}
 		
-	function dnshttp_api_getcontent($mysql, $url, $token = "", $domain = "") { return api_request($mysql, $url, $token, $domain); }
-	
-	function api_request($mysql, $url, $token = "", $domain = "") {
+	function dnshttp_api_getcontent($mysql, $url, $token = "", $domain = "", $sslinsecure = 1) { return api_request($mysql, $url, $token, $domain, $sslinsecure); }
+
+	function api_request($mysql, $url, $token = "", $domain = "", $sslinsecure = 1) {
+		  // Legacy rows without the ssl_insecure field keep the previous behaviour (no verification)
+		  if($sslinsecure === null || $sslinsecure === '') { $sslinsecure = 1; }
 		  $fields = array(
 			'token'=>urlencode($token),
 			'domain'=>urlencode(trim($domain)),
-			'server'=>@urlencode(trim($server)) );			
+			'server'=>"" );
 		  $fields_string = "";
 		  //url-ify the data for the POST
 		  foreach($fields as $key=>$value) { @$fields_string .= $key.'='.$value.'&'; }
-		  rtrim($fields_string,'&');
+		  $fields_string = rtrim($fields_string,'&');
 		  // Initialize curl
 		  $ch = curl_init();
 		  //set the url, number of POST vars, POST data
 		  curl_setopt($ch,CURLOPT_URL,$url);
 		  if(is_string($token)) {curl_setopt($ch,CURLOPT_POST,count($fields));}
 		  if(is_string($token)) {curl_setopt($ch,CURLOPT_POSTFIELDS,$fields_string);}
-		  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10); 
+		  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 		  curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 		  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-		  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);				
+		  if($sslinsecure) {
+			  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+			  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		  } else {
+			  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+			  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+		  }
 		  //execute post
 		  $result = curl_exec($ch);
 		  return $result;
-	}	
+	}
 
 	function dnshttp_isValidDomain(string $domain): bool {
 		// Handle IDN (ö, ü, etc.)
@@ -201,7 +268,7 @@
 	
 	function dnshttp_conflicts_helper($srv) {
 		$string = "";
-		if($newarray = unserialize($srv) ) {
+		if($newarray = unserialize($srv, ['allowed_classes'=>false]) ) {
 			foreach($newarray as $key => $value) {
 				if(isset($value["domain_type"])) { $asd = $value["domain_type"]; } else { $asd = "Slave"; }
 				if(isset($value["fk_server"])) {if($value["fk_server"] > 0) {  $asasd = " | Server-ID ".$value["fk_server"]; } else { $asasd = ""; } } else { $asasd = ""; }
@@ -233,7 +300,7 @@
 			if(php_sapi_name() === 'cli'){ $use_real_line_breaks = true; }
 			$finaltext = $text;
 			if($use_real_line_breaks != false) { echo $finaltext; }
-			while(strpos($finaltext, "\r\n") != false) { $finaltext = str_replace("\r\n", "<br />", $finaltext); }
+			$finaltext = str_replace("\r\n", "<br />", $finaltext);
 			if($use_real_line_breaks != true) { echo $finaltext; }
 			if(substr($finaltext, 0, 2) == "OK") { $finaltext = " <font color='lime'>".$finaltext."</font>"; }
 			elseif(substr($finaltext, 0, 8) == "FINISHED") { $finaltext = "<font color='yellow'>".$finaltext."</font>"; }
@@ -246,7 +313,7 @@
 		#######################################################################################################################################
 		// Initialize Starting Message
 		logging_add("INFO: Starting Replication Cronjob at: ");
-		logging_add("".date("Y-m-D H:i:s")."!\r\n");
+		logging_add("".date("Y-m-d H:i:s")."!\r\n");
 		#######################################################################################################################################
 		// List of Slave Server IPs	
 		$localslaveservers = ""; $array = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE server_type = 2 OR server_type = 3", true);
@@ -267,8 +334,11 @@
 			}
 		}	
 		logging_add("INFO: Master Server IPs: "); logging_add("$localmasterservers\r\n");
+		// getHostByName() returns the hostname unchanged when it cannot resolve. An unvalidated
+		// value lands inside "allow-transfer { ... };" and makes bind reject the entire config.
 		$localIP = @getHostByName(php_uname('n'));
-		$localmasterservers .= " ".@$localIP.";";
+		if(filter_var((string)$localIP, FILTER_VALIDATE_IP) !== false) { $localmasterservers .= " ".$localIP.";"; }
+			else { logging_add("WARN: Local IP could not be resolved, not added to Master Server IPs!\r\n"); }
 		logging_add("INFO: Added Local IP to Master Server IPs: "); logging_add("$localmasterservers\r\n");
 		#######################################################################################################################################
 		// List of All Server IPs
@@ -280,15 +350,17 @@
 			}
 		}	
 		logging_add("INFO: Master Server IPs: "); logging_add("$allserverlist\r\n");
+		// Same as above - an unresolvable hostname must never reach the generated named.conf.
 		$localIP = @getHostByName(php_uname('n'));
-		$allserverlist .= " ".@$localIP.";";
+		if(filter_var((string)$localIP, FILTER_VALIDATE_IP) !== false) { $allserverlist .= " ".$localIP.";"; }
+			else { logging_add("WARN: Local IP could not be resolved, not added to Server IP list!\r\n"); }
 		logging_add("INFO: Added Local IP to Master Server IPs: "); logging_add("$allserverlist\r\n");
 		####################################################################################################################################### 
 		// Recreate DNS Config File Structure if not Exists
 		#--------------------------------------------------------------------------------------------------------------------------------------
 		try { 
 		if(!@file_exists(_CRON_BIND_FILE_CONFIG_DNSHTTP_)) {
-			if(@mkdir(_CRON_BIND_FILE_CONFIG_DNSHTTP_, "0"._CRON_BIND_LIB_CODE_, true)) {
+			if(@mkdir(_CRON_BIND_FILE_CONFIG_DNSHTTP_, octdec("0"._CRON_BIND_LIB_CODE_), true)) {
 				 logging_add("OK: Configuration Folder created: "._CRON_BIND_FILE_CONFIG_DNSHTTP_."\r\n"); 
 			} else {  logging_add("ERROR: Configuration Folder creation failed [may a permission problem]: "._CRON_BIND_FILE_CONFIG_DNSHTTP_."\r\n");  }
 		} else {  logging_add("OK: Configuration Folder exists: "._CRON_BIND_FILE_CONFIG_DNSHTTP_."\r\n");  }		
@@ -342,7 +414,7 @@
 		} else {  logging_add("OK: Bind Main Config Include File does exist: "._CRON_BIND_CONFNAME_."\r\n");  }	 
 		#--------------------------------------------------------------------------------------------------------------------------------------
 		if(!@file_exists(_CRON_BIND_LIB_)) {
-			if(@mkdir(_CRON_BIND_LIB_, "0"._CRON_BIND_LIB_CODE_, true)) {
+			if(@mkdir(_CRON_BIND_LIB_, octdec("0"._CRON_BIND_LIB_CODE_), true)) {
 				 logging_add("OK: Zone File Folder created: "._CRON_BIND_LIB_."\r\n"); 
 			} else {  logging_add("ERROR: Zone File Folder creation failed: "._CRON_BIND_LIB_."\r\n");  }
 		} else {  logging_add("OK: Zone File Folder does exist: "._CRON_BIND_LIB_."\r\n");  }		
@@ -545,6 +617,22 @@
 		##################################################################################################################
 		// Writing/Update all Local Fetched Master Domains to Database	
 		logging_add("START: Writing/Update all Local Fetched Domains to Database\r\n");
+		// The name lookup below ignores domain_type, so when the same zone is declared by more than
+		// one source (both named.conf files, or a file plus the fetch folder) every entry lands on
+		// the SAME row and the last one silently wins - one of the declarations is dropped with no
+		// warning anywhere. Which source should win is a configuration decision, so the behaviour is
+		// left alone, but it is no longer invisible.
+		if(is_array($domain_array)) {
+			$seen_local_domains = array();
+			foreach($domain_array AS $dupkey => $dupvalue) {
+				$dupname = strtolower(trim($dupvalue["domain"]));
+				if(isset($seen_local_domains[$dupname])) {
+					logging_add("WARN: Domain '".$dupname."' is declared by more than one source ('".$seen_local_domains[$dupname]."' and '".$dupvalue["type"]."'). Only one zone file can win - check your configuration!\r\n");
+				}
+				$seen_local_domains[$dupname] = $dupvalue["type"];
+			}
+			unset($seen_local_domains);
+		}
 		if(is_array($domain_array)) {
 			foreach($domain_array AS $key => $value) {	
 				if($x = dnshttp_bind_domain_name_exists($mysql, $value["domain"])) {	
@@ -552,7 +640,7 @@
 					logging_add("OK: Updated Domain: '".$value["domain"]."' | Type: '".$value["type"]."' | Zone-File: '".$value["path"]."' \r\n");
 					if(file_exists($value["path"])) { 
 						if(file_exists(_CRON_BIND_FILE_TEMP_)) { @unlink(_CRON_BIND_FILE_TEMP_); } 
-						@shell_exec(_BIND_COMPILEZONE_COMMAND_." -f raw -F text -o "._CRON_BIND_FILE_TEMP_." ".strtolower($value["domain"])." ".$value["path"]."  ");
+						@shell_exec(_BIND_COMPILEZONE_COMMAND_." -f raw -F text -o ".escapeshellarg(_CRON_BIND_FILE_TEMP_)." ".escapeshellarg(strtolower($value["domain"]))." ".escapeshellarg($value["path"])."  ");
 						if(file_exists(_CRON_BIND_FILE_TEMP_)) { $pathnow = _CRON_BIND_FILE_TEMP_; } else { $pathnow = $value["path"]; }
 						if($content = file_get_contents($pathnow)) {
 						} else { $content = "error"; logging_add("-- ");logging_add("WARN: Zone File Opening Error for: '".$value["domain"]."' \r\n"); } 
@@ -569,7 +657,7 @@
 					logging_add("OK: Added Domain: '".$value["domain"]."' | Type: '".$value["type"]."' | Zone-File: '".$value["path"]."' \r\n");
 					if(file_exists($value["path"])) { 
 						if(file_exists(_CRON_BIND_FILE_TEMP_)) { @unlink(_CRON_BIND_FILE_TEMP_); } 
-						@shell_exec(_BIND_COMPILEZONE_COMMAND_." -f raw -F text -o "._CRON_BIND_FILE_TEMP_." ".strtolower($value["domain"])." ".$value["path"]."  ");
+						@shell_exec(_BIND_COMPILEZONE_COMMAND_." -f raw -F text -o ".escapeshellarg(_CRON_BIND_FILE_TEMP_)." ".escapeshellarg(strtolower($value["domain"]))." ".escapeshellarg($value["path"])."  ");
 						if(file_exists(_CRON_BIND_FILE_TEMP_)) { $pathnow = _CRON_BIND_FILE_TEMP_; } else { $pathnow = $value["path"]; }
 						if($content = file_get_contents($pathnow)) { 
 						} else { $content = "error"; logging_add("-- ");logging_add("WARN: Zone File Opening Error for: '".$value["domain"]."' \r\n"); } 
@@ -583,7 +671,25 @@
 					$bind[3]["type"] = "s";
 					$bind[3]["value"] = $content;					
 					$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_."(domain, zone_path, domain_type, last_update, content, preferred) VALUES(?, ?, ?, CURRENT_TIMESTAMP(), ?, 1);", $bind);unset($bind);
-					$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0  WHERE LOWER(TRIM(domain)) = '".trim(strtolower($value["domain"]))."'");
+					// This row is created with preferred = 1, so every other entry for the same name
+					// has to be un-preferred. Clearing only the slave table left a second preferred
+					// row behind whenever the name already existed as a USER domain - the exists()
+					// lookup above skips domain_type 'user' on purpose, so it does not see one. Two
+					// preferred rows make the writers emit two "zone" stanzas for the same name and
+					// bind then refuses the whole generated config.
+					// Re-read the id instead of trusting insert_id: on a failed insert that property
+					// still holds the id from an earlier row in this same loop, and excluding the
+					// wrong id here would un-prefer a legitimately preferred entry.
+					$newlocalid = dnshttp_bind_domain_name_exists($mysql, $value["domain"]);
+					$bindlocalpref = array();
+					$bindlocalpref[0]["value"] = trim(strtolower($value["domain"]));
+					$bindlocalpref[0]["type"]  = "s";
+					// Bound, not interpolated - this name comes out of a parsed named.conf line or a
+					// file name, so a quote in it used to break the statement.
+					$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0 WHERE LOWER(TRIM(domain)) = ?", $bindlocalpref);
+					if($newlocalid !== false AND is_numeric($newlocalid)) {
+						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET preferred = 0 WHERE LOWER(TRIM(domain)) = ? AND id <> ".$newlocalid."", $bindlocalpref);
+					}
 				}
 			}	
 		}
@@ -600,17 +706,18 @@
 		$servers = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE (server_type = 1 OR server_type = 3) AND enabled = 1", true);
 		$error_servers = array();
 		if(is_array($servers)) {	
-			foreach($servers as $key => $value) {	
-				server_check_and_set($mysql, $value["id"]);
+			foreach($servers as $key => $value) {
+				$current_server_id = $value["id"];
+				server_check_and_set($mysql, $current_server_id);
 				logging_add("START: Connecting to Server:  ".$value["api_path"]."\r\n");
-				$value = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE (server_type = 1 OR server_type = 3) AND enabled = 1 AND id = '".$value["id"]."' ", false);
-				if(!is_array($value)) { 
-					logging_add("ERROR: Unknown Slave Server Response, please check connection!\r\n"); array_push($error_servers, $value["id"]);
+				$value = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE (server_type = 1 OR server_type = 3) AND enabled = 1 AND id = '".$current_server_id."' ", false);
+				if(!is_array($value)) {
+					logging_add("ERROR: Unknown Slave Server Response, please check connection!\r\n"); array_push($error_servers, $current_server_id);
 					continue;
 				}
 				$output = "";
 				$apipath	=	$value["api_path"]."/_api/list.php";
-				$returncurl =   dnshttp_api_getcontent($mysql, $apipath, $value["api_token"]);	
+				$returncurl =   dnshttp_api_getcontent($mysql, $apipath, $value["api_token"], "", ($value["ssl_insecure"] ?? 1));
 				
 				if($value["apiok"] == 0) 	{ 
 					logging_add("ERROR: Unready Slave Server Response, please check connection!\r\n"); array_push($error_servers, $value["id"]);
@@ -622,13 +729,27 @@
 					$returncurl = dnshttp_decompress($returncurl);
 				}
 				
-				$newarray = @unserialize($returncurl);
+				$newarray = @unserialize($returncurl, ['allowed_classes'=>false]);
 				if(is_array($newarray)) {
 					$all_domains = array();
 					foreach($newarray as $x => $y) {
-						$bind[0]["value"] = strtolower(trim($y));
-						$bind[0]["type"] = "s";	
-						array_push($all_domains,strtolower(trim($y)) ); // Current Temp All API Server Domains
+						$y = strtolower(trim((string)($y ?? '')));
+						// SECURITY + IDN: normalize international names to punycode (ASCII) BEFORE validating,
+						// otherwise valid names like müller.de get corrupted/dropped. The resulting ASCII form
+						// blocks command injection (shell_exec), path traversal and named.conf injection.
+						$ascii = ($y === '.') ? '.' : idn_to_ascii($y, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+						if($ascii === false || $ascii === '' || strlen($ascii) > 253
+							|| strpos($ascii, '..') !== false
+							|| $ascii !== preg_replace('/[^a-z0-9.-]/', '', $ascii)
+							|| !dnshttp_isValidDomain($ascii)) {
+							logging_add("WARN: Rejected invalid remote domain from server-id ".$value["id"].": ".htmlspecialchars((string)$y)."\r\n");
+							continue;
+						}
+						$y = $ascii; // store the punycode/ASCII form
+						$bind[0]["value"] = $y;
+						$bind[0]["type"] = "s";
+						array_push($all_domains, $y); // Current Temp All API Server Domains
+
 						$tmp = $mysql->select("SELECT id FROM "._TABLE_DOMAIN_API_." WHERE fk_server = ".$value["id"]." AND LOWER(TRIM(domain)) = ?", false, $bind);
 						if(is_array($tmp)) {
 							$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET last_update = CURRENT_TIMESTAMP() WHERE id = '".$tmp["id"]."' AND fk_server = ".$value["id"].";");	
@@ -648,16 +769,27 @@
 									if(trim(strtolower($y)) == trim(strtolower($valuex["domain"]))) { $deleteable = false; }
 								}
 							}								
-							if($deleteable) { 
-								logging_add("OK: Removed Expired Slave Domain: $y\r\n");					
-								$mysql->query("DELETE FROM "._TABLE_DOMAIN_API_." WHERE id = '".$valuex["id"]."' WHERE fk_server = '".$value["id"]."'");
+							if($deleteable) {
+								logging_add("OK: Removed Expired Slave Domain: ".$valuex["domain"]."\r\n");
+								$mysql->query("DELETE FROM "._TABLE_DOMAIN_API_." WHERE id = '".$valuex["id"]."' AND fk_server = '".$value["id"]."'");
 							}
 						}
 					}
 					
 				} else { logging_add("ERROR: Bad Slave Server Response, please check connection!\r\n"); array_push($error_servers, $value["id"]); }
 			} 
-		} else { $mysql->query("DELETE FROM "._TABLE_DOMAIN_API_."");logging_add("OK: There are no Slave Servers, all Remote Domains Cleared!\r\n"); }
+		} else {
+			// select() returns false both for "no rows" and for "query failed". Wiping every
+			// replicated domain on a transient database error would take all slave zones out of
+			// service, so only clear when the empty result is positively confirmed by a COUNT.
+			$srvcount = $mysql->select("SELECT COUNT(*) AS cnt FROM "._TABLE_SERVER_." WHERE (server_type = 1 OR server_type = 3) AND enabled = 1", false);
+			if(is_array($srvcount) AND (int)$srvcount["cnt"] === 0) {
+				$mysql->query("DELETE FROM "._TABLE_DOMAIN_API_."");
+				logging_add("OK: There are no Slave Servers, all Remote Domains Cleared!\r\n");
+			} else {
+				logging_add("ERROR: Master Server list could not be read, replicated domains left untouched!\r\n");
+			}
+		}
 		logging_add("FINISHED: LAST OPERATION\r\n");	
 		logging_add("........................................................................................................................................\r\n");
 		##################################################################################################################
@@ -682,12 +814,13 @@
 		if(is_array($domains)) {
 			foreach($domains as $key => $value) {
 				$serverdata = 	dnshttp_server_get($mysql, $value["fk_server"]);
-				if(!$serverdata) 	{ 
+				$domain = $value["domain"];
+				if(!$serverdata) 	{
 					logging_add("SKIPPED: Server Not Found : $domain\r\n");
 					continue;
-				}		
+				}
 				$apipath	=	$serverdata["api_path"]."/_api/content.php";
-				$returncurl =   dnshttp_api_getcontent($mysql, $apipath, $serverdata["api_token"], $value["domain"]);
+				$returncurl =   dnshttp_api_getcontent($mysql, $apipath, $serverdata["api_token"], $value["domain"], ($serverdata["ssl_insecure"] ?? 1));
 
 				if($serverdata["enabled"] != "1") 	{ 
 					logging_add("SKIPPED: Server Disabled : $domain\r\n");
@@ -827,55 +960,81 @@
 		$conf_buildstring = $file_pre_noper."";
 		$safeString = (new DateTimeImmutable())->format('Y-m-d H:i:s');
 		logging_add("START: Writing Slave Zones\r\n");
-		$mysql->select("UPDATE "._TABLE_DOMAIN_API_." SET zonecheck = 2, oldzonefallback = 2, zonecheck_failmessage = 'none', zonecheck_message = 'none', registered = 2 "); // Reset Domains State
+		$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET zonecheck = 2, oldzonefallback = 2, zonecheck_failmessage = 'none', zonecheck_message = 'none', registered = 2 "); // Reset Domains State
 		$domains = $mysql->select("SELECT domain, content, id, fk_server, okonce FROM "._TABLE_DOMAIN_API_." WHERE ( conflict = 0 OR (conflict = 1 AND preferred = 1) ) ORDER BY id DESC", true);
 		$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET registered = 0 WHERE ( conflict = 1 AND preferred = 0) ");
 		if(is_array($domains)) {	
 			$conf_buildstring = "";	
-			foreach($domains as $key => $value) {	
+			foreach($domains as $key => $value) {
+				// Same defensive normalisation the master writer below does. Ingest validates
+				// remote names already, but rows written by an older version have not been, and
+				// this name is about to become a file path and a shell argument.
+				$rawslave = strtolower(trim($value["domain"]));
+				$safeslavedomain = ($rawslave === '.') ? '.' : idn_to_ascii($rawslave, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+				if($safeslavedomain === false) { $safeslavedomain = ''; }
+				if($safeslavedomain === '' || strlen($safeslavedomain) > 253 || strpos($safeslavedomain, '..') !== false
+					|| $safeslavedomain !== preg_replace('/[^a-z0-9.-]/', '', $safeslavedomain)) {
+					logging_add("ERROR: Skipped slave domain with invalid name: ".htmlspecialchars($rawslave)."\r\n");
+					$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET registered = 0 WHERE id = '".$value["id"]."'");
+					continue;
+				}
 				$relay = @dnshttp_server_get($mysql, $value["fk_server"]);
 				if(!is_array($relay)) { logging_add("ERROR: Domain Relay not exist, skipped for domain ".$value["domain"]."!\r\n"); $mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET registered = 0 WHERE id = '".$value["id"]."'"); continue; }
-				$filenamecleared = _CRON_BIND_LIB_."/".strtolower(trim($value["domain"]))._CRON_BIND_LIB_ENDING_.".slave";
-				$filenamecleared = str_replace("//", "/", $filenamecleared );	
+				// Determine a valid master IP for the zone stanza (IPv4 preferred, IPv6 fallback),
+				// an empty/invalid "masters { ; }" entry would break the whole generated bind config!
+				$relaymasterip = "";
+				if(filter_var(trim($relay["ip"] ?? ''), FILTER_VALIDATE_IP) !== false) { $relaymasterip = trim($relay["ip"]); }
+				elseif(filter_var(trim($relay["ip6"] ?? ''), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) { $relaymasterip = trim($relay["ip6"]); }
+				if($relaymasterip == "") { logging_add("ERROR: Domain Relay has no valid IP, skipped for domain ".$value["domain"]."!\r\n"); $mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET registered = 0 WHERE id = '".$value["id"]."'"); continue; }
+				$filenamecleared = _CRON_BIND_LIB_."/".$safeslavedomain._CRON_BIND_LIB_ENDING_.".slave";
+				$filenamecleared = str_replace("//", "/", $filenamecleared );
+				$temppathslave = _CRON_BIND_FILE_TEMP_.$safeslavedomain;
 				$newzoneok = false;
+				// The zone file is rebuilt from the database on every run, so it never becomes a
+				// second source of truth and a hand-edited or half-written file cannot survive.
 				@unlink($filenamecleared);
-				if($value["okonce"]) { 
-					if(file_exists(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])))) { @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"]))); }
-				
-					@file_put_contents(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), $value["content"]);
-					@chown(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_USER_);
-					@chgrp(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_GROUP_);
-					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), "0"._CRON_BIND_LIB_CODE_);	 	
-					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));
+				if($value["okonce"]) {
+					if(file_exists($temppathslave)) { @unlink($temppathslave); }
+
+					@file_put_contents($temppathslave, $value["content"]);
+					@chown($temppathslave, _CRON_BIND_LIB_USER_);
+					@chgrp($temppathslave, _CRON_BIND_LIB_GROUP_);
+					@chmod($temppathslave, octdec("0"._CRON_BIND_LIB_CODE_));
+					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".escapeshellarg($safeslavedomain)." ".escapeshellarg($temppathslave));
 					if(strpos(strtolower($cout), ": loaded serial") > -1) { 
 						$newzoneok = true;
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET oldzonefallback = 0 WHERE id = '".$value["id"]."'");
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET zonecheck_failmessage = 'none' WHERE id = '".$value["id"]."'"); 
 					} else { 
 						$newzoneok = false;
+						// Reset first: the conflict loop above can leave $bind holding two elements,
+						// and binding two parameters to this one-placeholder statement fails, so the
+						// diagnostic message was silently never stored.
+						$bind = array();
 						$bind[0]["value"] = $cout;
-						$bind[0]["type"] = "s";	
+						$bind[0]["type"] = "s";
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET zonecheck_failmessage = ? WHERE id = '".$value["id"]."'", $bind);
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET oldzonefallback = 1 WHERE id = '".$value["id"]."'");
-					} @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));
+					} @unlink($temppathslave);
 				}
-				if($newzoneok == true) { 
-					if(file_exists($filenamecleared)) { @unlink($filenamecleared); } 
+				if($newzoneok == true) {
+					if(file_exists($filenamecleared)) { @unlink($filenamecleared); }
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
-				} 
-				if($newzoneok != true AND !file_exists($filenamecleared)) { 
+					@chmod($filenamecleared, octdec("0"._CRON_BIND_LIB_CODE_));
+				}
+				if($newzoneok != true AND !file_exists($filenamecleared)) {
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
-				} 
-				
-				$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." ".$filenamecleared);
+					@chmod($filenamecleared, octdec("0"._CRON_BIND_LIB_CODE_));
+				}
+
+				$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".escapeshellarg($safeslavedomain)." ".escapeshellarg($filenamecleared));
+				$bind = array(); // see above - stale elements from an earlier loop break this bind
 				$bind[0]["value"] = $cout;
-				$bind[0]["type"] = "s";	
+				$bind[0]["type"] = "s";
 				$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET zonecheck_message = ? WHERE id = '".$value["id"]."'", $bind);
 				$isnowregister = false;
 				if(strpos(strtolower($cout), ": loaded serial") > -1) {
@@ -896,10 +1055,13 @@
 						$bindyd[0]["value"] = strtolower(trim($value["domain"]));
 						$bindyd[1]["value"] = $value["content"];
 						$mysql->query("INSERT INTO "._TABLE_DOMAIN_REG_."(domain, content, time_data_removal) VALUES(?, ?, '".$safeString."')", $bindyd);
-					}				
-					
+					}
+
 					//if(!REMOVED_CONSTANT) {
-						$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype slave;\r\n\tmasterfile-format text;\r\n\tmasters { ".trim($relay["ip"])."; };\r\n\tallow-transfer { ".$allserverlist." };\r\n\tfile \"".$filenamecleared."\";\r\n};\r\n";	
+						// Use the one already validated name - recomputing it here silently STRIPPED
+						// bad characters where the check at the top of the loop REJECTS them, which
+						// meant the stanza and the file path could be derived differently.
+						$conf_buildstring .= "\r\n\r\nzone \"".$safeslavedomain."\" {\r\n\ttype slave;\r\n\tmasterfile-format text;\r\n\tmasters { ".$relaymasterip."; };\r\n\tallow-transfer { ".$allserverlist." };\r\n\tfile \"".$filenamecleared."\";\r\n};\r\n";
 					//} else {
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
@@ -918,48 +1080,63 @@
 		} 
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		logging_add("START: Writing Master Zones\r\n");
-		$mysql->select("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 2, oldzonefallback = 2, zonecheck_failmessage = 'none', zonecheck_message = 'none', registered = 2 "); // Reset Domains State
-		$domains = $mysql->select("SELECT id, domain, content, okonce FROM "._TABLE_DOMAIN_BIND_." WHERE ( conflict = 0 OR (conflict = 1 AND preferred = 1) ) ORDER BY id DESC", true);
+		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 2, oldzonefallback = 2, zonecheck_failmessage = 'none', zonecheck_message = 'none', registered = 2 "); // Reset Domains State
+		$domains = $mysql->select("SELECT id, domain, content, okonce, set_no_replicate FROM "._TABLE_DOMAIN_BIND_." WHERE ( conflict = 0 OR (conflict = 1 AND preferred = 1) ) ORDER BY id DESC", true);
 		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET registered = 0 WHERE ( conflict = 1 AND preferred = 0) ");
 		if(is_array($domains)) {
 			foreach($domains as $key => $value) {
-				$filenamecleared = _CRON_BIND_LIB_."/".strtolower(trim($value["domain"]))._CRON_BIND_LIB_ENDING_.".master";
-				$filenamecleared = str_replace("//", "/", $filenamecleared );		
+				// SECURITY (#10) + IDN: normalize the locally-sourced master domain to punycode (ASCII)
+				// before it is used in file paths, shell commands or named.conf. Converting first keeps
+				// international domains (müller.de -> xn--mller-kva.de) intact instead of corrupting them.
+				$raw = strtolower(trim($value["domain"]));
+				$safedomain = ($raw === '.') ? '.' : idn_to_ascii($raw, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+				if($safedomain === false) { $safedomain = ''; }
+				if($safedomain === '' || strlen($safedomain) > 253 || strpos($safedomain, '..') !== false
+					|| $safedomain !== preg_replace('/[^a-z0-9.-]/', '', $safedomain)) {
+					logging_add("ERROR: Skipped domain with invalid name: ".htmlspecialchars($raw)."\r\n");
+					continue;
+				}
+				$temppath = _CRON_BIND_FILE_TEMP_.$safedomain;
+				$filenamecleared = _CRON_BIND_LIB_."/".$safedomain._CRON_BIND_LIB_ENDING_.".master";
+				$filenamecleared = str_replace("//", "/", $filenamecleared );
+				// Rebuilt from the database every run - see the slave writer above.
 				@unlink($filenamecleared);
 				$newzoneok = false;
-				if($value["okonce"]) { 
-					if(file_exists(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])))) { @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"]))); } 
-					@file_put_contents(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), $value["content"]);
-					@chown(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_USER_);
-					@chgrp(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), _CRON_BIND_LIB_GROUP_);
-					@chmod(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])), "0"._CRON_BIND_LIB_CODE_);				
-					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." "._CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));		
-					if(strpos(strtolower($cout), ": loaded serial") > -1) { 
+				if($value["okonce"]) {
+					if(file_exists($temppath)) { @unlink($temppath); }
+					@file_put_contents($temppath, $value["content"]);
+					@chown($temppath, _CRON_BIND_LIB_USER_);
+					@chgrp($temppath, _CRON_BIND_LIB_GROUP_);
+					@chmod($temppath, octdec("0"._CRON_BIND_LIB_CODE_));
+					$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".escapeshellarg($safedomain)." ".escapeshellarg($temppath));
+					if(strpos(strtolower($cout), ": loaded serial") > -1) {
 						$newzoneok = true;
 						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET oldzonefallback = 0 WHERE id = '".$value["id"]."'");
-						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck_failmessage = 'none' WHERE id = '".$value["id"]."'"); 
-					} else { 
+						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck_failmessage = 'none' WHERE id = '".$value["id"]."'");
+					} else {
 						$newzoneok = false;
+						$bind = array(); // see the slave writer above - reset before binding
 						$bind[0]["value"] = $cout;
-						$bind[0]["type"] = "s";	
+						$bind[0]["type"] = "s";
 						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck_failmessage = ? WHERE id = '".$value["id"]."'", $bind);
 						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET oldzonefallback = 1 WHERE id = '".$value["id"]."'");
-					} @unlink(_CRON_BIND_FILE_TEMP_. trim(strtolower($value["domain"])));
+					} @unlink($temppath);
 				}
-				if($newzoneok == true) { 
-					if(file_exists($filenamecleared)) { @unlink($filenamecleared); } 
+				if($newzoneok == true) {
+					if(file_exists($filenamecleared)) { @unlink($filenamecleared); }
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
-				} 
-				if($newzoneok != true AND !file_exists($filenamecleared)) { 
+					@chmod($filenamecleared, octdec("0"._CRON_BIND_LIB_CODE_));
+				}
+				if($newzoneok != true AND !file_exists($filenamecleared)) {
 					@file_put_contents($filenamecleared, $value["content"]);
 					@chown($filenamecleared, _CRON_BIND_LIB_USER_);
 					@chgrp($filenamecleared, _CRON_BIND_LIB_GROUP_);
-					@chmod($filenamecleared, "0"._CRON_BIND_LIB_CODE_);			
-				} 
-				$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".strtolower(trim($value["domain"]))." ".$filenamecleared);
+					@chmod($filenamecleared, octdec("0"._CRON_BIND_LIB_CODE_));
+				}
+				$cout = @shell_exec(_BIND_CHECKZONE_COMMAND_." ".escapeshellarg($safedomain)." ".escapeshellarg($filenamecleared));
+				$bind = array(); // see the slave writer above - reset before binding
 				$bind[0]["value"] = $cout;
 				$bind[0]["type"] = "s";
 				$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck_message = ? WHERE id = '".$value["id"]."'", $bind);
@@ -968,31 +1145,41 @@
 				if(strpos(strtolower($cout), ": loaded serial") > -1) {
 					$isnowregister = true;				
 					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 1, okonce = 1, registered = 1 WHERE id = '".$value["id"]."'");
-					
-					$bindyd = array();
-					$bindyd[0]["value"] = strtolower(trim($value["domain"]));
-					$checkregistertable = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_REG_." WHERE LOWER(TRIM(domain)) = ?", false, $bindyd);
-					if(is_array($checkregistertable)) {
-						$bindyd = array();
-						$bindyd[0]["value"] = $value["content"];
-						$bindyd[1]["value"] = strtolower(trim($value["domain"]));
-						$mysql->query("UPDATE "._TABLE_DOMAIN_REG_." SET content = ?, time_data_removal = '".$safeString."' WHERE LOWER(TRIM(domain)) = ?", $bindyd);
-					} else {
+
+					// The registration table is what _api/list.php and _api/content.php hand out, so
+					// it must only ever hold domains that are cleared for replication. A domain with
+					// set_no_replicate stays active in bind locally but is never published: skipping
+					// it here keeps its row out, and the cleanup further down then drops any row it
+					// still has, so flagging a domain unpublishes it within this same run.
+					if(empty($value["set_no_replicate"])) {
 						$bindyd = array();
 						$bindyd[0]["value"] = strtolower(trim($value["domain"]));
-						$bindyd[1]["value"] = $value["content"];
-						$mysql->query("INSERT INTO "._TABLE_DOMAIN_REG_."(domain, content, time_data_removal) VALUES(?, ?, '".$safeString."')", $bindyd);
+						$checkregistertable = $mysql->select("SELECT * FROM "._TABLE_DOMAIN_REG_." WHERE LOWER(TRIM(domain)) = ?", false, $bindyd);
+						if(is_array($checkregistertable)) {
+							$bindyd = array();
+							$bindyd[0]["value"] = $value["content"];
+							$bindyd[1]["value"] = strtolower(trim($value["domain"]));
+							$mysql->query("UPDATE "._TABLE_DOMAIN_REG_." SET content = ?, time_data_removal = '".$safeString."' WHERE LOWER(TRIM(domain)) = ?", $bindyd);
+						} else {
+							$bindyd = array();
+							$bindyd[0]["value"] = strtolower(trim($value["domain"]));
+							$bindyd[1]["value"] = $value["content"];
+							$mysql->query("INSERT INTO "._TABLE_DOMAIN_REG_."(domain, content, time_data_removal) VALUES(?, ?, '".$safeString."')", $bindyd);
+						}
+					} else {
+						logging_add("INFO: Not published for replication (set_no_replicate): ".$safedomain."\r\n");
 					}
-					
+
 					//if(!REMOVED_CONSTANT) {
 						//$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype slave;\r\n\tmasterfile-format text;\r\n\tmasters { ".trim($relay["ip"])."; };\r\n\tallow-transfer { ".$localmasterservers." };\r\n\tfile \"".$filenamecleared."\";\r\n};\r\n";	
 					//} else {
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
 					$nowwritte = true;
-					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
 				} else {
 					$isnowregister = false;		
+					// See the slave writer above - okonce must survive a failed check.
 					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 0, okonce = 0, registered = 0 WHERE id = '".$value["id"]."'");
 				}
 				if($isnowregister AND $newzoneok) {
@@ -1004,7 +1191,7 @@
 				}
 				
 				if(!$nowwritte AND @file_exists(@$filenamecleared) AND _CRON_BIND_FILE_REWRITE_) {
-					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}				
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
 				}
 			}
 		}

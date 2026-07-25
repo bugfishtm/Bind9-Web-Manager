@@ -31,16 +31,15 @@
 		if (session_status() !== PHP_SESSION_ACTIVE) {@session_start();}
 		if(@$_SESSION[$precookie ."x_cookieBanner"] == true) { return false; }
 		$set = false;
-			if(@$_POST["x_cookieBanner"] == "submit") { $_SESSION[$precookie ."x_cookieBanner"] = true; Header("Location: ./?site=".@$_GET["site"]."&section=".@$_GET["section"]."&id=".@$_GET["id"].""); }
-			if(@$_GET["x_cookieBanner"] == "submit")  { $_SESSION[$precookie ."x_cookieBanner"] = true; Header("Location: ./?site=".@$_GET["site"]."&section=".@$_GET["section"]."&id=".@$_GET["id"].""); }
-			if($set AND $redirect) { Header("Location: ./?site=".@$_GET["site"]."&section=".@$_GET["section"]."&id=".@$_GET["id"].""); exit(); }}
+			if(@$_POST["x_cookieBanner"] == "submit") { $_SESSION[$precookie ."x_cookieBanner"] = true; $set = true; }
+			if(@$_GET["x_cookieBanner"] == "submit")  { $_SESSION[$precookie ."x_cookieBanner"] = true; $set = true; }
+			if($set AND $redirect) { Header("Location: ".@$_SERVER['REQUEST_URI']); exit(); }}
 			
 
 	########################################################################
 	// Show Cookie Banner if not Approved
 	########################################################################
-	function x_cookieBanner($precookie = "", $use_post = false, $text = false, $url_cookies = "", $redirect_url = "", $button_text = "I Agree") { 
-		$redirect_url = "./?site=".@$_GET["site"]."&section=".@$_GET["section"]."&id=".@$_GET["id"]."";
+	function x_cookieBanner($precookie = "", $use_post = false, $text = false, $url_cookies = "", $redirect_url = false, $button_text = "I Agree") { 
 		if (session_status() !== PHP_SESSION_ACTIVE) {@session_start();}
 		if(@$_GET["x_cookieBanner"] == "submit")  { $_SESSION[$precookie ."x_cookieBanner"] = true; }
 		if(@$_SESSION[$precookie ."x_cookieBanner"] == true) { return false; }

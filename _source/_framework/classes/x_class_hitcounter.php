@@ -146,7 +146,7 @@
 				// Count Switches	
 				$ishittedarray = false;
 				$current_switches_ar	=	@$_SESSION[$this->precookie."x_class_hitcounter_s"];
-				$current_switches_ar = @unserialize($current_switches_ar);
+				$current_switches_ar = @unserialize($current_switches_ar ?? '', ['allowed_classes' => false]);
 				if(!is_array($current_switches_ar)) { $current_switches_ar = array(); }
 				foreach($current_switches_ar as $key => $value) { if($value == $this->urlmd5) { $ishittedarray = true; } }
 				if(!$ishittedarray AND !$isarrival) {

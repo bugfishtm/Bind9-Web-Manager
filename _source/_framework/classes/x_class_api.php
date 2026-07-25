@@ -106,9 +106,10 @@
 			$bind = [
 				['type' => 's', 'value' => $api_key],
 				['type' => 's', 'value' => $api_reference],
+				['type' => 's', 'value' => $section],
 			];
 			$res = $this->mysql->select(
-				"SELECT * FROM `{$this->table}` WHERE api_key = ? AND reference = ? AND status = 'active' LIMIT 1",
+				"SELECT * FROM `{$this->table}` WHERE api_key = ? AND reference = ? AND section = ? AND status = 'active' LIMIT 1",
 				false,
 				$bind
 			);

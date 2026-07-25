@@ -33,7 +33,7 @@
 		General Site Variables
 	*************************************************************************/
 	define('_GITHUB_',   			"https://github.com/bugfishtm/"); 										# URL to Documentation
-	define("_VERSION_", 			'4.1.2');																# Current Actual Code Version
+	define("_VERSION_", 			'4.1.3');																# Current Actual Code Version
 	
 	/*************************************************************************
 		Docker Define Var for installations
@@ -108,7 +108,7 @@
 	/*************************************************************************
 		Restore Logs Folder and Redirectors in Data Folder
 	*************************************************************************/	
-	if (!is_dir(_MAIN_PATH_.'/_data/_logs')) mkdir('folder', 0770, true);
+	if (!is_dir(_MAIN_PATH_.'/_data/_logs')) mkdir(_MAIN_PATH_.'/_data/_logs', 0770, true);
 	if(!file_exists(_MAIN_PATH_."/_data/index.php")) {
 		copy(_MAIN_PATH_."/_default/default_redirector.php", _MAIN_PATH_."/_data/index.php");
 	}
@@ -166,6 +166,8 @@
 	mysqli_report(MYSQLI_REPORT_OFF);
 	$mysql->query("ALTER TABLE "._TABLE_LOG_." ADD COLUMN ref VARCHAR(255); ");
 	$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN serial_c VARCHAR(24) DEFAULT NULL; ");
+	$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN set_no_replicate int(1) DEFAULT 0 COMMENT '1 - No Replication to Slaves | 0 - Replicate to Slaves (default)'; ");
+	$mysql->query("ALTER TABLE "._TABLE_SERVER_." ADD COLUMN ssl_insecure tinyint(1) DEFAULT 1 COMMENT '1 - Allow invalid/self-signed SSL Certificates | 0 - Require valid SSL'; ");
 	mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 	
 	/*************************************************************************
@@ -202,8 +204,9 @@
 			  `domains` int(10) DEFAULT 1 COMMENT 'Number of Domains this Server is serving!',
 			  `weblacklisted` tinyint(1) NULL DEFAULT 2 COMMENT '0 - Not Blacklisted | 1 if last Request resulted in we are blacklisted on the other site | 2 - Waiting for Cron',
 			  `emptydomains` tinyint(1) NULL DEFAULT 2 COMMENT '0 - Not Empty Domain Table | 1 if last Request resulted in empty Domains | 2 - Waiting for Cron',
-			  `tokenbadlastreq` tinyint(1) NULL DEFAULT 2 COMMENT '0 - Token seems ok | 1 if last Request resulted in back Token | 2 - Waiting for Cron',		  
-			  PRIMARY KEY (`id`), UNIQUE KEY `api_path` (`api_path`) )"); $mysql->free_all();}	
+			  `tokenbadlastreq` tinyint(1) NULL DEFAULT 2 COMMENT '0 - Token seems ok | 1 if last Request resulted in back Token | 2 - Waiting for Cron',
+			  `ssl_insecure` tinyint(1) NULL DEFAULT 1 COMMENT '1 - Allow invalid/self-signed SSL Certificates | 0 - Require valid SSL',
+			  PRIMARY KEY (`id`), UNIQUE KEY `api_path` (`api_path`) )"); $mysql->free_all();}
 			  
 		/*********************************************************************
 			External Domains Table

@@ -45,7 +45,7 @@
 				$b[1]["type"]	=	"s"; $b[1]["value"]	=	$this->section;
 				$ar = $this->mysql->select("SELECT * FROM `".$this->tablename."` WHERE ref = ? AND section = ?", false, $b);
 				if(is_array($ar)) {
-					$newar	= unserialize($ar["content"]);
+					$newar	= unserialize($ar["content"] ?? '', ['allowed_classes' => false]);
 					if(is_array($newar)) { $this->permissions = $newar; } else {$this->permissions =  array();}
 				} $this->permissions =  array(); } 
 

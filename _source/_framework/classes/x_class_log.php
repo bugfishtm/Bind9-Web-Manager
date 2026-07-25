@@ -37,7 +37,7 @@
 		######################################################
 		private function create_table() {
 			return $this->mysql->query("CREATE TABLE IF NOT EXISTS `".$this->table."` (
-												  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique ID to Identify',
+												  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Unique ID to Identify',
 												  `type` int(10) DEFAULT '0' COMMENT '0 - Unspecified | 1 - Error | 2 - Warning | 3 - Notification',
 												  `message` text COMMENT 'Message Text',
 												  `ref` text COMMENT 'Message Reference',

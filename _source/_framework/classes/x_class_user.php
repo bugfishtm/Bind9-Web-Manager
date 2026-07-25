@@ -74,6 +74,8 @@ class x_class_user {
 		public function multi_login($bool = false){$this->multi_login=$bool;} 
 	private $login_recover_drop=false;  // Delete Reset Keys after Success Login?
 		public function login_recover_drop($bool = false){$this->login_recover_drop=$bool;}
+	private $login_as_min_rank=false;   // Optional minimum rank the acting user must have to use login_as()
+		public function login_as_min_rank($int = false){$this->login_as_min_rank=$int;}
 	private $login_field = "user_mail"; 
 		public function login_field_user() { $this->login_field = "user_name"; $this->user_unique = true; } // Set User Name as Login Field Reference
 		public function login_field_mail() { $this->login_field = "user_mail"; $this->mail_unique = true; } // Set User Mail as Login Field Reference
@@ -188,13 +190,13 @@ class x_class_user {
 	private $passfilter = false; private $passfilter_signs = 0; private $passfilter_capital = 0; 
 	private $passfilter_small = 0; private $passfilter_special = 0; private $passfilter_number = 0;
 	public function passfilter($signs = 6, $capitals = 0, $small = 0, $special = 0, $number = 0) {$this->passfilter_signs = $signs;$this->passfilter_capital = $capitals;$this->passfilter_small = $small;$this->passfilter_special = $special;$this->passfilter_number = $number;}
-	public function passfilter_check($passclear) { $isvalid = true;
-		if($this->passfilter_signs > 0) { if(@strlen(@$passclear) < $this->passfilter_signs) { $isvalid = false; } }
-		if($this->passfilter_capital > 0) { if(preg_match('/[A-Z]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_capital) { $isvalid = false; } } else { $isvalid = false; } }
-		if($this->passfilter_small > 0) { if(preg_match('/[a-z]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_small) {  $isvalid = false; } } else { $isvalid = false; } }
-		if($this->passfilter_special > 0) { if(preg_match('/[\'^£$%&*()}{@#~?><>,|=_+-]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_special) {  $isvalid = false; } } else { $isvalid = false; } }
-		if($this->passfilter_number > 0) { if(preg_match('/[0-9]/', $passclear, $matches)){ if(count($matches) > $this->passfilter_number) {  $isvalid = false; } } else { $isvalid = false; } }
-		return $isvalid;}	
+	public function passfilter_check($passclear) { $isvalid = true; $passclear = $passclear ?? '';
+		if($this->passfilter_signs > 0) { if(strlen($passclear) < $this->passfilter_signs) { $isvalid = false; } }
+		if($this->passfilter_capital > 0) { if(preg_match_all('/[A-Z]/', $passclear) < $this->passfilter_capital) { $isvalid = false; } }
+		if($this->passfilter_small > 0) { if(preg_match_all('/[a-z]/', $passclear) < $this->passfilter_small) { $isvalid = false; } }
+		if($this->passfilter_special > 0) { if(preg_match_all('/[\'^£$%&*()}{@#~?><>,|=_+-]/', $passclear) < $this->passfilter_special) { $isvalid = false; } }
+		if($this->passfilter_number > 0) { if(preg_match_all('/[0-9]/', $passclear) < $this->passfilter_number) { $isvalid = false; } }
+		return $isvalid;}
 	
 	/* 	.___        __                             .__   
 		|   | _____/  |_  ___________  ____ _____  |  |  
@@ -203,7 +205,16 @@ class x_class_user {
 		|___|___|  /__|  \___  >__|  |___|  (____  /____/
 				 \/          \/           \/     \/      Private Functions only used internaly in this class*/
 	## Cookies Functions
-	private function cookie_set($id, $key){if($this->cookies_use){ setcookie($this->cookies."session_userid", $id, time() + $this->cookies_days * 24 * 60 * 60);setcookie($this->cookies."session_key", $key, time() + $this->cookies_days * 24 * 60 * 60);} return true;}
+	private function cookie_set($id, $key){if($this->cookies_use){
+		$opts = array(
+			'expires'  => time() + $this->cookies_days * 24 * 60 * 60,
+			'path'     => '/',
+			'secure'   => (!empty($_SERVER['HTTPS']) AND strtolower($_SERVER['HTTPS']) !== 'off'),
+			'httponly' => true,
+			'samesite' => 'Lax'
+		);
+		setcookie($this->cookies."session_userid", $id, $opts);
+		setcookie($this->cookies."session_key", $key, $opts);} return true;}
 	private function cookie_unset(){if($this->cookies_use){unset($_COOKIE[$this->cookies.'session_key']);@setcookie($this->cookies.'session_key', '', time() - 3600, '/');unset($_COOKIE[$this->cookies.'session_userid']);@setcookie($this->cookies.'session_userid', '', time() - 3600, '/');} return true;}	
 	private function cookie_restore(){if($this->cookies_use){if(@is_numeric($_COOKIE[$this->cookies."session_userid"]) OR @isset($_COOKIE[$this->cookies."session_key"])){if(@$this->session_token_valid(@$_COOKIE[$this->sessions."session_userid"], @$_COOKIE[$this->sessions."session_key"])){@$_SESSION[$this->sessions."x_users_stay"] = true;@$_SESSION[$this->sessions."x_users_key"] = @$_COOKIE[$this->sessions."session_key"];@$_SESSION[$this->sessions."x_users_id"] = @$_COOKIE[$this->sessions."session_userid"];@$_SESSION[$this->sessions."x_users_ip"] = @$_SERVER["REMOTE_ADDR"];$this->session_restore();return true;}else{$this->cookie_unset();return false;}}return false;}return true;}			
 	## Check Time Interval Function	
@@ -348,7 +359,7 @@ class x_class_user {
 		|  |_> > __ \_\___ \ \___ \/ /_/  >  ___/|   |  \
 		|   __(____  /____  >____  >___  / \___  >___|  /
 		|__|       \/     \/     \/_____/      \/     \/ 	Password generation functions */
-	public function password_gen($len = 12, $comb = "abcde12345"){$pass = array(); $combLen = strlen($comb) - 1; for ($i = 0; $i < $len; $i++) { $n = mt_rand(0, $combLen); $pass[] = $comb[$n]; } return implode($pass);}			
+	public function password_gen($len = 12, $comb = "abcde12345"){$pass = array(); $combLen = strlen($comb) - 1; for ($i = 0; $i < $len; $i++) { $n = random_int(0, $combLen); $pass[] = $comb[$n]; } return implode($pass);}			
 	public function password_crypt($var, $hash = PASSWORD_BCRYPT) { return password_hash($var,$hash); }
 	public function password_check($cleartext, $crypted) { return password_verify($cleartext,$crypted); }
 
@@ -462,7 +473,7 @@ class x_class_user {
 		if(!$this->mysql->table_exists($table_sessions)) { $this->create_table(); $this->mysql->free_all();  }}
 	private function create_table($initial = false, $initialpass = "changeme", $initialrank = 0) {
 		$this->mysql->query("CREATE TABLE IF NOT EXISTS `".$this->dt_users."` (
-								  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+								  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
 								  `user_name` varchar(512) DEFAULT 'undefined' COMMENT 'Users Name for Login if Ref',
 								  `user_mail` varchar(512) NULL COMMENT 'Users Mail for Login if Ref',
 								  `user_shadow` varchar(512) DEFAULT NULL COMMENT 'Temporary Stored Mail if User Requests a Change this will be the new Mail',
@@ -507,7 +518,7 @@ class x_class_user {
 								  `modify_date` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Modification Date',
 								  PRIMARY KEY (`id`));");
 		$this->mysql->query("CREATE TABLE IF NOT EXISTS `".$this->dt_keys."` (
-								`id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique Session ID',
+								`id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Unique Session ID',
 								`fk_user` int(10) NOT NULL COMMENT 'Related User ID',
 								`key_type` tinyint(1) NULL DEFAULT '0' COMMENT ' 1 - activate 2 - session 3 - recover 4 - mailchange',
 								`creation` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date for max Session Days',
@@ -574,7 +585,9 @@ class x_class_user {
 				if(@$f["user_blocked"] == 1) { $this->login_request_code = 4; return 4; } 
 				if(@$f["block_auto"] == 1) { $this->login_request_code = 6; return 6; } 
 				// Exit if User not Confirmed
-				if(@$f["user_confirmed"] != 1) { $this->login_request_code = 5; return 5; } 
+				if(@$f["user_confirmed"] != 1) { $this->login_request_code = 5; return 5; }
+				// Prevent session fixation: issue a fresh session id for the now authenticated session
+				if(session_status() === PHP_SESSION_ACTIVE) { @session_regenerate_id(true); }
 				// Generate Session Key Unique for this Users Session
 				$newtoken	=	$this->session_gen(32);
 				while($this->session_token_valid($f["id"], $newtoken)) {$newtoken =	$this->session_gen(64);}
@@ -633,6 +646,13 @@ class x_class_user {
 		if(is_numeric($_SESSION[$this->sessions."x_users_login_shadow"])) { return false; }
 		// Does the user exist?
 		if(!$this->exists($id)) { return false; }
+		// Privilege guard: load the target user for rank comparison
+		$target = $this->get($id);
+		if(!is_array($target)) { return false; }
+		// If a minimum rank is configured, the acting user must meet it
+		if($this->login_as_min_rank !== false) {
+			if(!is_numeric($this->user_rank) OR $this->user_rank < $this->login_as_min_rank) { return false; }
+		}
 		// Loggin as the other User
 		$_SESSION[$this->sessions."x_users_login_shadow"] = $id;}
 		
@@ -797,7 +817,7 @@ class x_class_user {
 	public function get_extra($id = "undefined_framework_var") {
 		if(!$this->int_opid($id)){ return false; } else { $id = $this->int_opid($id);} 
 		if(is_numeric($id)) {$ar = $this->mysql->select("SELECT * FROM `".$this->dt_users."` WHERE id = '".$id."'");
-		if(is_array($ar)) {return unserialize($ar["extradata"]);} return false;} 
+		if(is_array($ar)) {return unserialize($ar["extradata"] ?? '', ['allowed_classes' => false]);} return false;}
 		return false;}
 	public function set_extra($id = "undefined_framework_var", $array = false) { 
 		if(!$array) { return false;} 
@@ -811,9 +831,9 @@ class x_class_user {
 		if(is_numeric($id)){$r = $this->mysql->query("SELECT * FROM `".$this->dt_users."` WHERE id = '".$id."'");
 		if($x = $this->mysql->fetch_array($r)){if($x["user_confirmed"] == 1){return true;}}}
 		return false;}		
-	public function confirm_user($id = "undefined_framework_var"){ 
-		if(!$this->int_opid($id)){ return false; } else { $id = $this->int_opid($id);} 
-		if(is_numeric($id) AND is_numeric($new)){return $this->mysql->query("UPDATE `".$this->dt_users."` SET user_confirmed = 1 WHERE id = '".$id."'");}
+	public function confirm_user($id = "undefined_framework_var"){
+		if(!$this->int_opid($id)){ return false; } else { $id = $this->int_opid($id);}
+		if(is_numeric($id)){return $this->mysql->query("UPDATE `".$this->dt_users."` SET user_confirmed = 1 WHERE id = '".$id."'");}
 		return false;}
 	## Add a User
 	public function add_user($nameref, $mail, $password = false, $rank = false, $activated = false){ return $this->addUser($nameref, $mail, $password, $rank, $activated);}
@@ -1143,13 +1163,13 @@ class x_class_user {
 	public function display_login($spawn_register_button = array("url" => "", "label" => "Register Now"), $spawn_cookie_checkbox = "Stay Logged In?", $spawn_reset_button = array("url" => "", "label" => "Reset Account"), $login_button_label = "Login", $label = array("ref_placeholder" => "Please enter your E-Mail", "ref_label" => "E-Mail", "pass_label" => "Password", "pass_placeholder" => "Please enter your password!"), $captcha = array("url" => "captcha.jpg", "code" => "243fsdfsfds")) {	
 		$this->display_return_code = false;
 		if (isset($_POST["x_class_user_submit_login"])) {
-			if (@$_SESSION["x_class_user_csrf_login"] == @$_POST["x_class_user_csrf"] AND trim(@$_POST["x_class_user_csrf"] ?? '') != "" AND isset($_POST["x_class_user_csrf"])) {
+			if (is_string(@$_SESSION["x_class_user_csrf_login"]) AND is_string(@$_POST["x_class_user_csrf"]) AND trim($_POST["x_class_user_csrf"] ?? '') != "" AND hash_equals(@$_SESSION["x_class_user_csrf_login"], @$_POST["x_class_user_csrf"])) {
 				if(!is_array($captcha) OR (is_array($captcha) AND $captcha["code"] == @$_POST["x_class_user_captcha"] AND is_numeric($captcha["code"]))) {
 					$result = $this->login_request(@$_POST["x_class_user_ref"], @$_POST["x_class_user_pass"], @$_POST["x_class_user_submit_login_stay"]);
 					$this->display_return_code = $result;		
 				} else { $this->display_return_code = "captcha_error"; }
 			} else { $this->display_return_code = "csrf_error"; }
-		} $csrf = mt_rand(10000,999999); $_SESSION["x_class_user_csrf_login"] = $csrf; ?>
+		} $csrf = bin2hex(random_bytes(32)); $_SESSION["x_class_user_csrf_login"] = $csrf; ?>
 		<div class="x_class_user" id="x_class_user_login">
 			<div class="x_class_user_inner">
 				<form method="post">

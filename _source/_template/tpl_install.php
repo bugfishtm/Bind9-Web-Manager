@@ -252,18 +252,34 @@
 	$phpVersionOk  = version_compare($phpVersion, '8.2.0', '>=');
 	$configExists  = file_exists(CONFIG_FILE);
 	
+	// Convert php.ini shorthand values (128M, 1G, -1 = unlimited) to megabytes.
+	function ini_to_megabytes(string $val): int {
+		$val = trim($val);
+		if ($val === '' ) { return 0; }
+		if ((int)$val <= 0 && is_numeric($val)) { return PHP_INT_MAX; } // -1/0 = unlimited
+		$unit = strtolower(substr($val, -1));
+		$num  = (float)$val;
+		switch ($unit) {
+			case 'g': return (int)($num * 1024);
+			case 'm': return (int)$num;
+			case 'k': return (int)max(1, $num / 1024);
+			default:  return (int)max(1, $num / 1048576); // plain bytes
+		}
+	}
+
 	$reqFail = false;
-	$mem = intval(ini_get('memory_limit'));
+	$mem = ini_to_megabytes((string)ini_get('memory_limit'));
 	if($mem >= 256) {  }
 	elseif($mem >= 128) {  }
 	else { $reqFail = true; }
 
 	$exe = intval(ini_get('max_execution_time'));
+	if($exe <= 0) { $exe = PHP_INT_MAX; } // 0 = unlimited
 	if($exe >= 600) { }
 	elseif($exe >= 180) { }
 	else {  $reqFail = true; }
 
-	$post = intval(ini_get('post_max_size'));
+	$post = ini_to_megabytes((string)ini_get('post_max_size'));
 	if($post >= 256) { }
 	elseif($post >= 128) {  }
 	else { $reqFail = true; }

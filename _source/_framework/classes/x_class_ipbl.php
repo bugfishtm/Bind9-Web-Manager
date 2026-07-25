@@ -40,7 +40,7 @@
 		######################################################
 		private function create_table() {
 			return $this->mysql->query("CREATE TABLE IF NOT EXISTS `".$this->table."` (
-												  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique ID to Identify',
+												  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Unique ID to Identify',
 												  `fail` int(10) DEFAULT '1' COMMENT 'Address Failures Counter',
 												  `ip_adr` varchar(256) NOT NULL COMMENT 'Related IP Address for Failure Counter',
 												  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation Date | Will be Auto Set',
@@ -115,15 +115,15 @@
 		######################################################
 		// Get Counter for IP
 		######################################################	
-		public function ip_counter($ip) {
+		public function ip_counter($ip = false) {
 			$b[0]["type"]	=	"s";
-			$b[0]["value"]	=	trim(strtolower($this->ip ?? '') ?? ''); ;
-			if(!$ip) { $r = @$this->mysql->select("SELECT * FROM `".$this->table."` WHERE ip_adr = ? AND fail > ".$this->max.";", false, $b); }
-			else { $r = @$this->mysql->select("SELECT * FROM `".$this->table."` WHERE ip_adr = ? AND fail > ".$this->max.";", false, $b); }
-			if(is_array($r)) {	
-				return $r["fail"]; 
+			if(!$ip) { $b[0]["value"] = trim(strtolower($this->ip ?? '') ?? ''); }
+			else { $b[0]["value"] = trim(strtolower($ip ?? '') ?? ''); }
+			$r = @$this->mysql->select("SELECT * FROM `".$this->table."` WHERE ip_adr = ? AND fail > ".$this->max.";", false, $b);
+			if(is_array($r)) {
+				return $r["fail"];
 			}
-			return 0;}		
+			return 0;}
 		
 		######################################################
 		// Raise Counter for Current IP

@@ -186,9 +186,9 @@
               <!-- /.col -->
             </div>
 			<p class="login-box-msg" style="margin-bottom: 0px; padding-bottom: 0px; font-size: 14px !important;">
-				<?php if(_IMPRESSUM_ AND strlen(_IMPRESSUM_ ?? '' > 5)) { ?><a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_IMPRESSUM_ ?? ''); ?>">Impressum</a> | <?php } ?>
-				<?php if(_IMPRESSUM_ AND strlen(_HELP_ ?? '' > 5)) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_HELP_ ?? ''); ?>">Help</a> | <?php } ?>
-				<?php if(_IMPRESSUM_ AND strlen(_GITHUB_ ?? '' > 5)) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_GITHUB_ ?? ''); ?>">Github</a><?php } ?><br />
+				<?php if(_IMPRESSUM_ AND strlen(trim(_IMPRESSUM_ ?? '')) > 5) { ?><a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_IMPRESSUM_ ?? ''); ?>">Impressum</a> | <?php } ?>
+				<?php if(_HELP_ AND strlen(trim(_HELP_ ?? '')) > 5) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_HELP_ ?? ''); ?>">Help</a> | <?php } ?>
+				<?php if(_GITHUB_ AND strlen(trim(_GITHUB_ ?? '')) > 5) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_GITHUB_ ?? ''); ?>">Github</a><?php } ?><br />
 				<?php echo _FOOTER_; ?>
 			</p>
             <!--end::Row-->

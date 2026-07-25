@@ -33,7 +33,7 @@
 						   \/    \/          \/     \/		Create Table for Logging*/
 		private function create_table() {
 			return $this->query("CREATE TABLE IF NOT EXISTS `".$this->logging_table."` (
-								  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Indentificator',
+								  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'Indentificator',
 								  `url` varchar(256) DEFAULT NULL COMMENT 'Related URL',
 								  `init` text NULL COMMENT 'Init Data if There is some',
 								  `exception` text NULL COMMENT 'Error Exception Text',
@@ -327,7 +327,7 @@
 			return $this->update("UPDATE ".$table." SET ".$increasefield." = ".$increasefield." + ".$increasevalue." WHERE ".$nameidfield." = '".$id."'");}
 		public function row_element_decrease($table, $nameidfield, $id, $decreasefield, $decreasevalue = 1){
 			if(!is_numeric($id) OR !is_numeric($decreasevalue)) { return false; }
-			return $this->update("UPDATE ".$table." SET ".$increasefield." = ".$decreasefield." + ".$decreasevalue." WHERE ".$nameidfield." = '".$id."'"); }
+			return $this->update("UPDATE ".$table." SET ".$decreasefield." = ".$decreasefield." - ".$decreasevalue." WHERE ".$nameidfield." = '".$id."'"); }
 		public function row_get($table, $id, $row = "id") { 
 			$bindar[0]["value"] = $id;
 			$bindar[0]["type"]  = "s";
@@ -538,8 +538,7 @@
 					if(!$firstrun) {$build_second .= ", ";}$build_first .= $key;
 					if($value == "?") {$build_second .= $value;} else {$build_second .= "'".$value."'";}$firstrun = false;}
 					$newquery = 'INSERT INTO `'.$table.'`('.$build_first.') VALUES('.$build_second.');';
-					error_log($newquery);
-					if ($stmt =  $this->handler(@$this->mysqlcon->prepare($newquery), false, "insert#prepare: ".$table, false)) { 
+					if ($stmt =  $this->handler(@$this->mysqlcon->prepare($newquery), false, "insert#prepare: ".$table, false)) {
 						$before_prepare	=	"";
 						$params	=	array(); 
 						foreach ($bindarray as $key => $value) {

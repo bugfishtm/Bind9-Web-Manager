@@ -67,9 +67,9 @@
 			if(@strpos($tmpcode, "&") > -1)			{$tmpcode = @substr($tmpcode, 0, 	@strpos($tmpcode, "&"));} 
 			if(@strpos($tmpcode, "https://") > -1)	{$tmpcode = @substr($tmpcode, 		@strpos($tmpcode, "https://"));} 
 			if(@strpos($tmpcode, "http://") > -1)	{$tmpcode = @substr($tmpcode, 		@strpos($tmpcode, "http://"));} 
-			if(@strpos($tmpcode, "www.") > -1)		{$tmpcode = @substr($tmpcode, 		@strpos($tmpcode, "www."));} 
-			$return = @urldecode(trim($tmpcode ?? '') ?? '');
-		}	
+			if(@strpos($tmpcode, "www.") > -1)		{$tmpcode = @substr($tmpcode, 		@strpos($tmpcode, "www."));}
+			return @urldecode(trim($tmpcode ?? '') ?? '');
+		}
 
 		######################################################
 		// Get current saved Referers in Array

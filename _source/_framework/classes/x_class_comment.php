@@ -84,8 +84,13 @@
 			// CHeck if Vote is Done For Current Object
 			foreach($this->vote_arr AS $key => $value) {
 				if($value == $this->module.$this->target) { $this->vote_done = true; }
-			}			
-			
+			}
+
+			// Generate a CSRF token for the vote form if none present
+			if(!isset($_SESSION[$this->pre."x_class_comment_csrf"]) OR !is_string($_SESSION[$this->pre."x_class_comment_csrf"])) {
+				$_SESSION[$this->pre."x_class_comment_csrf"] = bin2hex(random_bytes(32));
+			}
+
 			// Create Table if not Exists
 			if(!$this->mysqlobj->table_exists($table)) { $this->create_table(); $this->mysqlobj->free_all();  }
 		}
@@ -93,10 +98,10 @@
 		// Show Vote Box
 		function vote_show() { ?>
 			<div class="x_comment_vote">
-				<form method="get"><input type="hidden" name="x_comment_vote" value="vote">Currently <?php echo $this->upvote; ?> Upvotes!</font>
-					<?php if(!$this->vote_done) { ?><input type="submit" value="Upvote!"><?php } else { ?><font class="x_comment_vote_done">You already have given an upvote for this item!</font><?php } ?></form> 
-			</div> <?php 
-		}			
+				<form method="post"><input type="hidden" name="x_comment_vote" value="vote"><input type="hidden" name="x_comment_vote_csrf" value="<?php echo htmlspecialchars($_SESSION[$this->pre."x_class_comment_csrf"] ?? '', ENT_QUOTES); ?>">Currently <?php echo (int)$this->upvote; ?> Upvotes!</font>
+					<?php if(!$this->vote_done) { ?><input type="submit" value="Upvote!"><?php } else { ?><font class="x_comment_vote_done">You already have given an upvote for this item!</font><?php } ?></form>
+			</div> <?php
+		}
 		
 		// Comment Form
 		function form_show($captchaurl) { ?>			
@@ -136,7 +141,7 @@
 				 if($hide_confirmed AND $r["status"] == 1) { continue; }
 				 if($hide_unconfirmed AND $r["status"] == 0) { continue; }
 				 array_push($array, $r);
-				echo '<div class="x_comment_comments_post"><div class="x_comment_comments_title">'.$r["name"].' - '.$r["creation"].'</div><div class="x_comment_comments_text">'.$r["text"].'</div></div>';
+				echo '<div class="x_comment_comments_post"><div class="x_comment_comments_title">'.htmlspecialchars($r["name"] ?? '').' - '.$r["creation"].'</div><div class="x_comment_comments_text">'.htmlspecialchars($r["text"] ?? '').'</div></div>';
 			}
 			echo "</div>";
 			return $array;
@@ -196,24 +201,25 @@
 			
 			// Endorse Counter Update
 			$q	= @$this->mysqlobj->query( 'SELECT * FROM `'.$this->table .'` WHERE status = 3 AND target = ? AND targetid = ? AND section = ? ', $bind);
-			if(mysqli_num_rows($q) <= 0) {
+			if(mysqli_num_rows($q) > 0) {
 				if($r 	= @mysqli_fetch_array($q) ) {
 					$this->upvote = $r["upvotes"];
 				} else { $this->upvote = 0; }
-			} else { $this->upvote = 0; } 
+			} else { $this->upvote = 0; }
 
 			// Comment Counter Update
 			$q	= @$this->mysqlobj->query( 'SELECT * FROM `'.$this->table .'` WHERE target = ? AND targetid = ? AND section = ? ', $bind);
-			if(mysqli_num_rows($q) <= 0) {	
-				$this->comment = mysqli_num_rows($q);
-			} else { $this->comment = 0; } 
-			
-			
+			$this->comment = @mysqli_num_rows($q);
+
+
 			// New Vote
 			if(!$this->vote_done) {
-				if(@$_GET["x_comment_vote"]  == "vote") {
-					array_push($_SESSION[$this->pre."x_class_comment"], $this->module.$this->target);
-					array_push($this->vote_arr, $this->module.$this->target);
+				if(@$_POST["x_comment_vote"] == "vote"
+					AND is_string(@$_POST["x_comment_vote_csrf"])
+					AND is_string(@$_SESSION[$this->pre."x_class_comment_csrf"])
+					AND hash_equals($_SESSION[$this->pre."x_class_comment_csrf"], $_POST["x_comment_vote_csrf"])) {
+					$this->vote_arr[] = $this->module.$this->target;
+					$_SESSION[$this->pre."x_class_comment"] = serialize($this->vote_arr);
 					$this->vote_done = true;
 					$this->init_res = 2;
 					@$this->mysqlobj->update( "UPDATE `".$this->table ."` SET upvotes = upvotes + 1 WHERE target = ? AND targetid = ? AND status = 3  AND section = ? ", $bind);
@@ -223,7 +229,7 @@
 			if(isset($_POST["x_comment_submit"])) {
 				if (trim(@$_POST["x_comment_name"] ?? '') != "" AND trim(@$_POST["x_comment_text"] ?? '') != "" AND isset($_POST["x_comment_text"]) AND isset($_POST["x_comment_name"])){
 					if (trim(strtolower(@$_POST["x_comment_name"] ?? '') ?? '') == $this->sys_name){$_POST["x_comment_name"] = "Guest_".trim(strtolower(@$_POST["x_comment_name"] ?? '') ?? ''); }
-					if (@$captcha_code_if_delivered == @$_POST["x_comment_captcha"] AND @$captcha_code_if_delivered != false){
+					if (@$captcha_code_if_delivered !== false AND @$captcha_code_if_delivered != "" AND hash_equals((string)$captcha_code_if_delivered, (string)@$_POST["x_comment_captcha"])){
 						$bind[0]["value"] = $_POST["x_comment_name"];
 						$bind[0]["type"] = "s";
 						$bind[1]["value"] = $_POST["x_comment_text"];

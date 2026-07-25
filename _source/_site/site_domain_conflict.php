@@ -60,7 +60,7 @@
 					} else { 
 						echo '<div class="callout callout-success mb-3" role="alert">';
 						echo 'Conflicted Domain: <b>'.htmlspecialchars(@$curissuer["domain"] ?? '').'</b><br /><br /><b>Conflicts</b>:<br /> '.@dnshttp_conflicts_helper($curissuer["servers"]).'<br /><b>Solved with</b>: ';	
-						echo $curissuer["solved"]; 
+						echo htmlspecialchars($curissuer["solved"] ?? '');
 					}
 					echo '</div>';	
 				}

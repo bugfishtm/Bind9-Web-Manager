@@ -151,8 +151,7 @@
 		if(is_array($res)) { 
 			$lastRun = new DateTime($res['creation']); // adjust column name
 			$now = new DateTime();
-			$diff = $now->diff($lastRun);
-			$minutesAgo = ($diff->h * 60) + $diff->i;
+			$minutesAgo = (int) floor(($now->getTimestamp() - $lastRun->getTimestamp()) / 60);
 			if ($minutesAgo > 180) {
 				?><div class="callout callout-danger mb-3">The cronjob has not executed in the last 3 hours. Please verify the cronjob configuration on your server as outlined in the Bind9 Web Manager documentation.</div><?php
 			} else {

@@ -68,8 +68,8 @@
 			$rres = @$this->variable_msqlcon->select("SELECT * FROM `".$this->variable_table."` ".$section, true, $b);
 			if(is_array($rres)) {
 				foreach($rres AS $key => $value) {	
-					if(!defined($value[$this->db_r_c_title])) { 
-						$data = @unserialize($value["".$this->db_r_c_value.""]);
+					if(!defined($value[$this->db_r_c_title])) {
+						$data = @unserialize($value["".$this->db_r_c_value.""], ['allowed_classes' => false]);
 						if ($data !== false AND $unserialize_arrays) {
 							$value["".$this->db_r_c_value.""] = $data;
 						} 
@@ -190,8 +190,8 @@
 
 		// Form new CSRF
 		public function form_start($precookie = "") {
-			$_SESSION[$precookie."x_class_var"] = mt_rand(10000000, 90000000);
-			if(!is_numeric(@$_SESSION[$precookie."x_class_var_csrf"])) { $_SESSION[$precookie."x_class_var_csrf"] = mt_rand(10000000, 90000000); }
+			$_SESSION[$precookie."x_class_var"] = bin2hex(random_bytes(32));
+			if(!is_string(@$_SESSION[$precookie."x_class_var_csrf"])) { $_SESSION[$precookie."x_class_var_csrf"] = bin2hex(random_bytes(32)); }
 		}
 		public function form_end($precookie = "") {
 			$_SESSION[$precookie."x_class_var_csrf"] = $_SESSION[$precookie."x_class_var"];
@@ -201,12 +201,12 @@
 		public function form($varname, $type = "int", $selectarray = array(), $precookie = "", $button_class="btn btn-warning waves-effect waves-light", $itemclass = "form-control", $editbuttonname = "Edit") {	
 			$outputform = 0;
 			if(!$this->exists($varname)) { return "error-var-not-found";}
-			if(!isset($_SESSION[$precookie."x_class_var"])) {$_SESSION[$precookie."x_class_var"] = mt_rand(10000000, 90000000); }
+			if(!isset($_SESSION[$precookie."x_class_var"])) {$_SESSION[$precookie."x_class_var"] = bin2hex(random_bytes(32)); }
 			$tmp_var = $this->get_full($varname);
 			$varnamenew = $precookie."x_class_var_submit_".$tmp_var[$this->db_r_c_id];
 			$varnamenews = $precookie."x_class_var_submit_val".$tmp_var[$this->db_r_c_id];
 			if(isset($_POST[$varnamenew])) {
-				if($_POST[$precookie."x_class_var_csrf"] == $_SESSION[$precookie."x_class_var_csrf"]) {
+				if(is_string(@$_POST[$precookie."x_class_var_csrf"]) AND is_string(@$_SESSION[$precookie."x_class_var_csrf"]) AND $_SESSION[$precookie."x_class_var_csrf"] !== "" AND hash_equals($_SESSION[$precookie."x_class_var_csrf"], $_POST[$precookie."x_class_var_csrf"])) {
 					$finalvalue = false;
 					switch($type) {
 						case "int": $finalvalue = @$_POST[$varnamenews]; break;	

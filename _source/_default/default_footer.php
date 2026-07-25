@@ -37,9 +37,9 @@
       <!--begin::Footer-->
       <footer class="app-footer" style="background: #121212; color: white;">
         <!--begin::To the end-->
-				<?php if(_IMPRESSUM_ AND strlen(_IMPRESSUM_ ?? '' > 5)) { ?><a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_IMPRESSUM_ ?? ''); ?>">Impressum</a> | <?php } ?>
-				<?php if(_IMPRESSUM_ AND strlen(_HELP_ ?? '' > 5)) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_HELP_ ?? ''); ?>">Help</a> | <?php } ?>
-				<?php if(_IMPRESSUM_ AND strlen(_GITHUB_ ?? '' > 5)) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_GITHUB_ ?? ''); ?>">Github</a> | <?php } ?>
+				<?php if(_IMPRESSUM_ AND strlen(trim(_IMPRESSUM_ ?? '')) > 5) { ?><a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_IMPRESSUM_ ?? ''); ?>">Impressum</a> | <?php } ?>
+				<?php if(_HELP_ AND strlen(trim(_HELP_ ?? '')) > 5) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_HELP_ ?? ''); ?>">Help</a> | <?php } ?>
+				<?php if(_GITHUB_ AND strlen(trim(_GITHUB_ ?? '')) > 5) { ?> <a id="imp_text_link" rel="noopener" target="_blank" class="text-black" href="<?php echo htmlentities(_GITHUB_ ?? ''); ?>">Github</a> | <?php } ?>
 				 <?php echo _FOOTER_; ?>
         <!--end::Copyright-->
       </footer>
