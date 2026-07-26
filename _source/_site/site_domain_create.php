@@ -81,13 +81,16 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$new_domain."\"";
 			$bind = array();
 			$bind[0]["value"] = $new_domain;
 			$bind[1]["value"] = $new_content;
-			$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_." (domain, domain_type, content, fk_user, set_no_replicate, serial_c) 
+			$bind[2]["type"] = "i";
+			$bind[2]["value"] = dnshttp_dnssec_default_zone_value();
+			$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_." (domain, domain_type, content, fk_user, set_no_replicate, serial_c, set_dnssec) 
 														VALUES (?
 														, 'user'
 														, ?
 														, '".$user->user_id."'
 														, '".$disablerep."'
 														, '".$newsoa."'
+														, ?
 													);", $bind);
 													
 			// Confirm the row really landed before telling the user it did.
@@ -104,6 +107,7 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$new_domain."\"";
 			} else {
 				x_eventBoxPrep("Domain has been created, please start adding records to the domain!", "ok", _COOKIES_);
 			}
+			dnshttp_trigger_sync();
 			Header("Location: ./?site=domain_list&bind_id=".$checkserverid."");
 			exit();
 

@@ -152,13 +152,16 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
 			$bind = array();
 			$bind[0]["value"] = $domain_name;
 			$bind[1]["value"] = $new_content;
-			$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_." (domain, domain_type, content, fk_user, set_no_replicate, serial_c) 
+			$bind[2]["type"] = "i";
+			$bind[2]["value"] = dnshttp_dnssec_default_zone_value();
+			$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_." (domain, domain_type, content, fk_user, set_no_replicate, serial_c, set_dnssec) 
 														VALUES (?
 														, 'user'
 														, ?
 														, '".$userid."'
 														, '".$disablerep."'
 														, '".$newsoa."'
+														, ?
 													);", $bind);
 													
 													
@@ -169,6 +172,7 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
 
 			# Still 200 - the domain was created. The message reports that it starts in conflict so a
 			# caller does not have to wait for the next cronjob to find out the name is not live yet.
+			dnshttp_trigger_sync();
 			echo helper_api_response(null, "OK", 200);
 			exit();
 
@@ -200,6 +204,7 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
 			$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ? WHERE id = ".$update_identifier." AND fk_user = '".$userid."'", $bindcc);
 		}
 
+		dnshttp_trigger_sync();
 		echo helper_api_response(null, "OK", 200);
 		exit();
 	
@@ -225,6 +230,7 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
 		}
 		
 		$mysql->query("DELETE FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".$delete_identifier." AND fk_user = ".$userid."");
+		dnshttp_trigger_sync();
 		echo helper_api_response(null, "OK", 200);
 		exit();
 		

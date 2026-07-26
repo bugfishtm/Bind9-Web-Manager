@@ -147,19 +147,11 @@
     <div class="callout callout-info mb-3">On this page you can view debugging information and logging entries for cronjobs and general system activity. You can clear the log table when it becomes too large, and export entries for complete offline review.</div>
 
 	<?php
-		$res = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE ref = 'cron_sync' ORDER BY id DESC LIMIT 1", false); 
-		if(is_array($res)) { 
-			$lastRun = new DateTime($res['creation']); // adjust column name
-			$now = new DateTime();
-			$minutesAgo = (int) floor(($now->getTimestamp() - $lastRun->getTimestamp()) / 60);
-			if ($minutesAgo > 180) {
-				?><div class="callout callout-danger mb-3">The cronjob has not executed in the last 3 hours. Please verify the cronjob configuration on your server as outlined in the Bind9 Web Manager documentation.</div><?php
-			} else {
-				?><div class="callout callout-success mb-3">The cronjob seems to be fine.</div><?php
-			}
-			
-		} else {
+		$minutesAgo = dnshttp_cron_last_sync_age_minutes($mysql);
+		if($minutesAgo === null OR $minutesAgo > 180) {
 			?><div class="callout callout-danger mb-3">The cronjob has not executed in the last 3 hours. Please verify the cronjob configuration on your server as outlined in the Bind9 Web Manager documentation.</div> <?php
+		} else {
+			?><div class="callout callout-success mb-3">The cronjob seems to be fine.</div><?php
 		}
 	?>
 

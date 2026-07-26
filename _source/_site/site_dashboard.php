@@ -39,19 +39,11 @@
 	
 	<?php if($permsobj->hasPerm($user->user_id, "system") OR $permsobj->hasPerm($user->user_id, "domain_admin") OR $permsobj->hasPerm($user->user_id, "servers") OR $user->user_rank == 0) { ?>
 	<?php
-		$res = $mysql->select("SELECT * FROM "._TABLE_LOG_." WHERE ref = 'cron_sync' ORDER BY id DESC LIMIT 1", false); 
-		if(is_array($res)) { 
-			$lastRun = new DateTime($res['creation']); // adjust column name
-			$now = new DateTime();
-			$minutesAgo = (int) floor(($now->getTimestamp() - $lastRun->getTimestamp()) / 60);
-			if ($minutesAgo > 180) {
-				?><div class="callout callout-danger mb-3">The cronjob has not executed in the last 3 hours. Please verify the cronjob configuration on your server as outlined in the Bind9 Web Manager documentation.</div><?php
-			} else {
-				?><div class="callout callout-success mb-3">The cronjob seems to be fine.</div><?php
-			}
-			
-		} else {
+		$minutesAgo = dnshttp_cron_last_sync_age_minutes($mysql);
+		if($minutesAgo === null OR $minutesAgo > 180) {
 			?><div class="callout callout-danger mb-3">The cronjob has not executed in the last 3 hours. Please verify the cronjob configuration on your server as outlined in the Bind9 Web Manager documentation.</div> <?php
+		} else {
+			?><div class="callout callout-success mb-3">The cronjob seems to be fine.</div><?php
 		}
 	?>
 	<?php } ?>

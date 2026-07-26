@@ -51,6 +51,7 @@
 	*************************************************************************/
 	elseif(is_numeric(@$_GET["api_id"]) OR is_numeric(@$_GET["bind_id"])) { 
 	
+		$active_bind_entry = false;
 		
 		/*************************************************************************
 			Check for Permission and Load Generic Data
@@ -78,6 +79,17 @@
 			}
 			if($current_user["fk_user"] > 0) { define("_SUB_PAGE_TITLE_", htmlspecialchars($current_user["domain"] ?? '')." / User Domain"); }
 			else { define("_SUB_PAGE_TITLE_", htmlspecialchars($current_user["domain"] ?? '')." / Master Domain"); }
+			$binddup = array();
+			$binddup[0]["type"] = "s";
+			$binddup[0]["value"] = strtolower(trim($current_user["domain"] ?? ''));
+			$active_bind_entry = $mysql->select(
+				"SELECT id, domain_type, zone_path, fk_user, preferred
+				 FROM "._TABLE_DOMAIN_BIND_."
+				 WHERE LOWER(TRIM(domain)) = ? AND (conflict = 0 OR (conflict = 1 AND preferred = 1))
+				 ORDER BY preferred DESC, id DESC LIMIT 1",
+				false,
+				$binddup
+			);
 			$_GET["api_id"] = "";			
 		}
 	
@@ -93,6 +105,7 @@
 			if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) {
 				if ($csrf->check(@$_GET['csrf'])) {
 					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET set_no_replicate = 0 WHERE id = ".$_GET["bind_id"]."");
+					dnshttp_trigger_sync();
 					x_eventBoxPrep("This domain will now replicate to other servers.", "ok", _COOKIES_);
 					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."");
 					exit();
@@ -103,12 +116,37 @@
 			if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) {
 				if ($csrf->check(@$_GET['csrf'])) {
 					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET set_no_replicate = 1 WHERE id = ".$_GET["bind_id"]."");
+					dnshttp_trigger_sync();
 					x_eventBoxPrep("This domain will stop replicating to other servers.", "ok", _COOKIES_);
 					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."");
 					exit();
 				} else  { x_eventBoxPrep("CSRF Error - The form has expired or reloaded in a new browsers tab, please try again!", "error", _COOKIES_); }
 			} else  { x_eventBoxPrep("You need the domain administrator permission to stop and start domain replications.", "error", _COOKIES_); }
 		}		
+
+		if(@$_GET["op"] == "dnssec_on") {
+			if(is_numeric($_GET["bind_id"])) {
+				if ($csrf->check(@$_GET['csrf'])) {
+					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET set_dnssec = 1 WHERE id = ".$_GET["bind_id"]."");
+					dnshttp_trigger_sync();
+					x_eventBoxPrep("DNSSEC is enabled for this domain.", "ok", _COOKIES_);
+					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."");
+					exit();
+				} else  { x_eventBoxPrep("CSRF Error - The form has expired or reloaded in a new browsers tab, please try again!", "error", _COOKIES_); }
+			}
+		}
+
+		if(@$_GET["op"] == "dnssec_off") {
+			if(is_numeric($_GET["bind_id"])) {
+				if ($csrf->check(@$_GET['csrf'])) {
+					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET set_dnssec = 0 WHERE id = ".$_GET["bind_id"]."");
+					dnshttp_trigger_sync();
+					x_eventBoxPrep("DNSSEC is disabled for this domain.", "ok", _COOKIES_);
+					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."");
+					exit();
+				} else  { x_eventBoxPrep("CSRF Error - The form has expired or reloaded in a new browsers tab, please try again!", "error", _COOKIES_); }
+			}
+		}
 	
 		/*************************************************************************
 			Prefer / Unprefer  on Domain
@@ -138,6 +176,7 @@
 						$mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0 WHERE LOWER(TRIM(domain)) = ?", $bindpref);
 					}
 
+					dnshttp_trigger_sync();
 					x_eventBoxPrep("This domain will now replicate to other servers.", "ok", _COOKIES_);
 					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."&api_id=".$_GET["api_id"]."");
 					exit();
@@ -151,6 +190,7 @@
 					if(is_numeric($_GET["api_id"])) { $mysql->query("UPDATE "._TABLE_DOMAIN_API_." SET preferred = 0 WHERE id = ".$_GET["api_id"].""); }
 					if(is_numeric($_GET["bind_id"])) { $mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET preferred = 0 WHERE id = ".$_GET["bind_id"].""); }
 					
+					dnshttp_trigger_sync();
 					x_eventBoxPrep("This domain will stop replicating to other servers.", "ok", _COOKIES_);
 					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."&api_id=".$_GET["api_id"]."");
 					exit();
@@ -165,7 +205,7 @@
 			if ($csrf->check(@$_GET['csrf'])) {
 				
 				if(is_numeric($_GET["bind_id"])) { $mysql->query("DELETE FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".$_GET["bind_id"].""); }
-				
+				dnshttp_trigger_sync();
 				x_eventBoxPrep("The domain and its data has been deleted.", "ok", _COOKIES_);
 				Header("Location: ./?site=domain_list");
 				exit();
@@ -202,6 +242,7 @@
 						} else {
 							$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET content = ? WHERE id = ".$_GET["bind_id"]."", $bindcc);
 						}
+						dnshttp_trigger_sync();
 						x_eventBoxPrep("The domain has successfully been changed.", "ok", _COOKIES_);
 					} else {
 						// Reached with an api_id, where nothing was ever written. Reporting success
@@ -555,6 +596,14 @@
 				function dnshttp_userui_rep() {
 					window.location.href = "./?site=domain_list&op=rep&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>";
 				}
+
+				function dnshttp_userui_dnssec_on() {
+					window.location.href = "./?site=domain_list&op=dnssec_on&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>";
+				}
+
+				function dnshttp_userui_dnssec_off() {
+					window.location.href = "./?site=domain_list&op=dnssec_off&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>";
+				}
 				
 				function dnshttp_userui_del() {
 					window.location.href = "./?site=domain_list&op=del&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>";
@@ -635,6 +684,42 @@
 			  </div>
 			</div>			
 
+			<div class="modal" id="cpage_dnssec_on_item_modal" tabindex="-1">
+			  <div class="modal-dialog">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title">Enable DNSSEC</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+					<p>Do you want to enable DNSSEC for this zone? The zone will be signed on the next sync run.</p>
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-warning" onClick="dnshttp_userui_dnssec_on()">Enable DNSSEC</button>
+				  </div>
+				</div>
+			  </div>
+			</div>
+
+			<div class="modal" id="cpage_dnssec_off_item_modal" tabindex="-1">
+			  <div class="modal-dialog">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title">Disable DNSSEC</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+					<p>Do you want to disable DNSSEC for this zone? The unsigned zone file will be served on the next sync run.</p>
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-danger" onClick="dnshttp_userui_dnssec_off()">Disable DNSSEC</button>
+				  </div>
+				</div>
+			  </div>
+			</div>
+
 			<div class="modal" id="cpage_del_item_modal" tabindex="-1">
 			  <div class="modal-dialog">
 				<div class="modal-content">
@@ -680,14 +765,13 @@
 					<h5 class="modal-title">Domain Record Change<br /><small>Serial <?php echo htmlspecialchars($current_user["serial_c"] ?? ''); ?>/<?php echo incrementSOASerial($current_user["serial_c"] ?? ''); ?> </small></h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick="dnshttp_userui_changerecord_close()"></button>
 				  </div>
-				  <div class="modal-body" id="dns-zone-editor"  data-zone="<?php
+				  <div class="modal-body" id="dns-zone-editor"></div>
+				  <textarea id="dns-zone-editor-data" style="display:none;"><?php
 						$c_serial_raw = trim($current_user["serial_c"] ?? '');
-						$c_zone_attr = htmlentities($current_user["content"] ?? '');
-						if($c_serial_raw !== '') { $c_zone_attr = preg_replace('/\b'.preg_quote($c_serial_raw, '/').'\b/', incrementSOASerial($c_serial_raw), $c_zone_attr, 1); }
-						echo $c_zone_attr;
-				  ?>">
-					
-				  </div>
+						$c_zone_text = (string)($current_user["content"] ?? '');
+						if($c_serial_raw !== '') { $c_zone_text = preg_replace('/\b'.preg_quote($c_serial_raw, '/').'\b/', incrementSOASerial($c_serial_raw), $c_zone_text, 1); }
+						echo htmlspecialchars($c_zone_text, ENT_QUOTES);
+				  ?></textarea>
 				  <div class="modal-footer">
 					<button type="button" class="btn btn-secondary" onClick="dnshttp_userui_changerecord_close()">Close</button>
 					<button type="button" class="btn btn-warning" onClick="dnshttp_userui_changerecord_save()">Save</button>
@@ -727,10 +811,17 @@
 				  if (!val) return 3600;
 				  const s = String(val).trim();
 				  if (/^\d+$/.test(s)) return parseInt(s, 10);
-				  const m = s.match(/^(\d+)([smhdw])/i);
-				  if (m) {
-					const u = { s:1, m:60, h:3600, d:86400, w:604800 };
-					return parseInt(m[1], 10) * (u[m[2].toLowerCase()] || 1);
+				  const unit = { s:1, m:60, h:3600, d:86400, w:604800 };
+				  const chunks = s.match(/\d+[smhdw]?/ig);
+				  if (chunks && chunks.join('').toLowerCase() === s.toLowerCase()) {
+					let ttl = 0;
+					for (const chunk of chunks) {
+					  const m = chunk.match(/^(\d+)([smhdw]?)$/i);
+					  if (!m) return 3600;
+					  const mult = m[2] ? (unit[m[2].toLowerCase()] || 1) : 1;
+					  ttl += parseInt(m[1], 10) * mult;
+					}
+					return ttl;
 				  }
 				  return 3600;
 				}
@@ -740,6 +831,10 @@
 				  if (secs % 3600  === 0 && secs >= 3600)  return (secs/3600)  + 'h';
 				  if (secs % 60    === 0 && secs >= 60)    return (secs/60)    + 'm';
 				  return String(secs);
+				}
+
+				function isTTLToken(token) {
+				  return /^(\d+[smhdw]?)+$/i.test(String(token || '').trim());
 				}
 				 
 				/* ── Parser ──────────────────────────────────────────────────────────────── */
@@ -776,11 +871,11 @@
 					  lastName = name;
 					}
 				 
-					let ttl = defaultTTL, cls = 'IN';
+					let ttl = defaultTTL, cls = 'IN', ttlExplicit = false;
 				 
-					if (i < tokens.length && /^\d+$/.test(tokens[i])) ttl = parseTTL(tokens[i++]);
+					if (i < tokens.length && isTTLToken(tokens[i])) { ttl = parseTTL(tokens[i++]); ttlExplicit = true; }
 					if (i < tokens.length && /^(IN|CH|HS)$/i.test(tokens[i])) cls = tokens[i++].toUpperCase();
-					if (i < tokens.length && /^\d+$/.test(tokens[i])) ttl = parseTTL(tokens[i++]);
+					if (i < tokens.length && isTTLToken(tokens[i])) { ttl = parseTTL(tokens[i++]); ttlExplicit = true; }
 				 
 					const type = tokens[i++]?.toUpperCase();
 					/* Keep every record type, not only the ones the dropdown offers. Dropping
@@ -790,7 +885,7 @@
 					if (!type || !/^[A-Z][A-Z0-9-]*$/.test(type)) continue;
 				 
 					const rdata = tokens.slice(i).join(' ');
-					zone.records.push({ id: uid(), name, ttl, class: cls, type, rdata });
+					zone.records.push({ id: uid(), name, ttl, ttlExplicit, class: cls, type, rdata });
 				  }
 				  return zone;
 				}
@@ -802,7 +897,9 @@
 				  lines.push('$TTL ' + formatTTL(zone.ttl));
 				  lines.push('');
 				  for (const r of zone.records) {
-					lines.push([r.name, r.ttl, r.class, r.type, r.rdata].join('\t'));
+					const ttlToken = r.ttlExplicit ? String(r.ttl) : '';
+					const parts = [r.name, ttlToken, r.class, r.type, r.rdata].filter(p => String(p).trim() !== '');
+					lines.push(parts.join('\t'));
 				  }
 				  return lines.join('\n');
 				}
@@ -810,6 +907,7 @@
 				/* ── State ───────────────────────────────────────────────────────────────── */
 				let zone = { origin: 'example.com.', ttl: 3600, records: [] };
 				let newRec = { name: '', ttl: '', type: 'A', rdata: '' };
+				let ttlFilter = '';
 				 
 				/* ── Styles ──────────────────────────────────────────────────────────────── */
 				function injectStyles() {
@@ -898,12 +996,16 @@
 				function render() {
 				  const container = document.getElementById('dns-zone-editor');
 				  if (!container) return;
+				  const activeTtlFilter = String(ttlFilter || '').trim();
+				  const filteredRecords = activeTtlFilter
+					? zone.records.filter(r => String(r.ttl) === activeTtlFilter)
+					: zone.records;
 				 
-				  const rows = zone.records.map(r => {
+				  const rows = filteredRecords.map(r => {
 					const col = typeColor(r.type);
 					return `<tr data-id="${r.id}">
 					  <td><input class="dze-inp" data-field="name" value="${esc(r.name)}" placeholder="@" spellcheck="false"></td>
-					  <td><input class="dze-inp" data-field="ttl" value="${formatTTL(r.ttl)}" placeholder="${formatTTL(zone.ttl)}" style="width:70px" spellcheck="false"></td>
+					  <td><input class="dze-inp" data-field="ttl" value="${r.ttlExplicit ? formatTTL(r.ttl) : ''}" placeholder="${formatTTL(zone.ttl)}" style="width:70px" spellcheck="false"></td>
 					  <td>
 						<select class="dze-type-sel" data-field="type" style="color:${col}">
 						  ${typeOptions(r.type)}
@@ -911,16 +1013,19 @@
 					  </td>
 					  <td><input class="dze-inp dze-inp-wide" data-field="rdata" value="${esc(r.rdata)}" placeholder="${RDATA_HINTS[r.type]||''}" spellcheck="false"></td>
 					  <td>
-						<button class="dze-btn dze-btn-ghost dze-btn-danger" data-action="delete" data-id="${r.id}" title="Record löschen" aria-label="Record löschen">
+						<button class="dze-btn dze-btn-ghost dze-btn-danger" data-action="delete" data-id="${r.id}" title="Delete record" aria-label="Delete record">
 						  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
 						</button>
 					  </td>
 					</tr>`;
 				  }).join('');
 				 
-				  const emptyMsg = zone.records.length === 0
-					? `<tr><td colspan="5" class="dze-empty">Keine Records. Füge unten einen hinzu.</td></tr>`
-					: '';
+				  let emptyMsg = '';
+				  if (zone.records.length === 0) {
+					emptyMsg = `<tr><td colspan="5" class="dze-empty">No records found. Add one below.</td></tr>`;
+				  } else if (filteredRecords.length === 0) {
+					emptyMsg = `<tr><td colspan="5" class="dze-empty">No records match the selected TTL filter.</td></tr>`;
+				  }
 				 
 				  const newTtlHint = formatTTL(zone.ttl);
 				 
@@ -941,11 +1046,18 @@
 						  <input class="dze-ttl-inp" id="dze-default-ttl" value="${formatTTL(zone.ttl)}" placeholder="3600" aria-label="Standard TTL">
 						</div>
 						<span class="dze-count">${zone.records.length} Record${zone.records.length !== 1 ? 's' : ''}</span>
+						<div class="dze-ttl-wrap">
+						  <span class="dze-label">Filter TTL</span>
+						  <input class="dze-ttl-inp" id="dze-ttl-filter" value="${esc(ttlFilter)}" placeholder="all" aria-label="Filter by TTL">
+						</div>
 					  </div>
 					  <div class="dze-actions">
-						<button class="dze-btn dze-btn-sec" data-action="copy-zone" title="Zone-Datei kopieren">
+						<button class="dze-btn dze-btn-sec" data-action="clear-ttl-filter" title="Show all records">
+						  Show all
+						</button>
+						<button class="dze-btn dze-btn-sec" data-action="copy-zone" title="Copy zone file">
 						  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-						  Zone kopieren
+						  Copy zone
 						</button>
 					  </div>
 					</div>
@@ -955,8 +1067,8 @@
 						  <tr>
 							<th>Name</th>
 							<th>TTL</th>
-							<th>Typ</th>
-							<th>Daten (RDATA)</th>
+							<th>Type</th>
+							<th>Data (RDATA)</th>
 							<th></th>
 						  </tr>
 						</thead>
@@ -965,14 +1077,14 @@
 						</tbody>
 					  </table>
 					</div>
-					<div class="dze-add-row" role="group" aria-label="Neuen Record hinzufügen">
-					  <input class="dze-add-inp" id="dze-new-name"  value="${esc(newRec.name)}"  placeholder="Name (z.B. www oder @)" spellcheck="false" aria-label="Name">
+					<div class="dze-add-row" role="group" aria-label="Add new record">
+					  <input class="dze-add-inp" id="dze-new-name"  value="${esc(newRec.name)}"  placeholder="Name (for example www or @)" spellcheck="false" aria-label="Name">
 					  <input class="dze-add-inp" id="dze-new-ttl"   value="${esc(newRec.ttl)}"   placeholder="${newTtlHint}" spellcheck="false" aria-label="TTL">
-					  <select style="color: black !important;" class="dze-add-sel" id="dze-new-type"  aria-label="Record-Typ">${typeOptions(newRec.type)}</select>
+					  <select style="color: black !important;" class="dze-add-sel" id="dze-new-type"  aria-label="Record type">${typeOptions(newRec.type)}</select>
 					  <input class="dze-add-inp" id="dze-new-rdata" value="${esc(newRec.rdata)}" placeholder="${RDATA_HINTS[newRec.type]||''}" spellcheck="false" id="dze-new-rdata" aria-label="RDATA">
 					  <button class="dze-btn dze-btn-pri" data-action="add-record">
 						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-						Hinzufügen
+						Add
 					  </button>
 					</div>
 				  </div>
@@ -1004,6 +1116,20 @@
 					container.querySelector('.dze-count').textContent =
 					  zone.records.length + ' Record' + (zone.records.length !== 1 ? 's' : '');
 				  });
+
+				  const ttlFilterInput = container.querySelector('#dze-ttl-filter');
+				  ttlFilterInput.addEventListener('change', e => {
+					const typed = String(e.target.value || '').trim();
+					if (!typed) {
+					  ttlFilter = '';
+					  e.target.value = '';
+					  render();
+					  return;
+					}
+					ttlFilter = String(parseTTL(typed));
+					e.target.value = formatTTL(parseTTL(typed));
+					render();
+				  });
 				 
 				  /* Inline record edits */
 				  container.querySelector('#dze-tbody').addEventListener('change', e => {
@@ -1014,8 +1140,15 @@
 					const rec = zone.records.find(r => r.id === id);
 					if (!rec || !field) return;
 					if (field === 'ttl') {
+					  if (!String(e.target.value || '').trim()) {
+						rec.ttlExplicit = false;
+						rec.ttl = zone.ttl;
+						e.target.value = '';
+						return;
+					  }
 					  const v = parseTTL(e.target.value);
 					  rec.ttl = v > 0 ? v : zone.ttl;
+					  rec.ttlExplicit = true;
 					  e.target.value = formatTTL(rec.ttl);
 					} else if (field === 'type') {
 					  rec.type = e.target.value;
@@ -1051,13 +1184,14 @@
 					  const type  = container.querySelector('#dze-new-type').value;
 					  const rdata = container.querySelector('#dze-new-rdata').value.trim();
 					  if (!name || !rdata) {
-						toast('Name und Daten (RDATA) sind Pflichtfelder.');
+						toast('Name and data (RDATA) are required.');
 						return;
 					  }
 					  zone.records.push({
 						id: uid(),
 						name,
 						ttl: ttlRaw ? parseTTL(ttlRaw) : zone.ttl,
+						ttlExplicit: !!ttlRaw,
 						class: 'IN',
 						type,
 						rdata,
@@ -1066,17 +1200,22 @@
 					  render();
 					}
 				 
+					if (action === 'clear-ttl-filter') {
+					  ttlFilter = '';
+					  render();
+					}
+				 
 					if (action === 'copy-zone') {
 					  const text = exportZone(zone);
 					  if (navigator.clipboard) {
-						navigator.clipboard.writeText(text).then(() => toast('Zone-Datei kopiert!'));
+						navigator.clipboard.writeText(text).then(() => toast('Zone file copied!'));
 					  } else {
 						const ta = document.createElement('textarea');
 						ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
 						document.body.appendChild(ta); ta.select();
 						document.execCommand('copy');
 						document.body.removeChild(ta);
-						toast('Zone-Datei kopiert!');
+						toast('Zone file copied!');
 					  }
 					}
 				  });
@@ -1088,7 +1227,8 @@
 				  const container = document.getElementById('dns-zone-editor');
 				  if (!container) { console.warn('[dns-zone-editor] #dns-zone-editor not found'); return; }
 				 
-				  const raw = container.dataset.zone
+				  const zoneSource = document.getElementById('dns-zone-editor-data');
+				  const raw = (zoneSource ? zoneSource.value : '')
 					|| window.dnsZoneData
 					|| '';
 				 
@@ -1100,7 +1240,7 @@
 					getZoneData: () => exportZone(zone),
 					getRecords:  () => zone.records.map(r => ({ ...r })),
 					setZoneData: (text) => { zone = parseZone(text); render(); },
-					addRecord:   (rec) => { zone.records.push({ id: uid(), class:'IN', ttl: zone.ttl, ...rec }); render(); },
+					addRecord:   (rec) => { zone.records.push({ id: uid(), class:'IN', ttl: zone.ttl, ttlExplicit: false, ...rec }); render(); },
 				  };
 				}
 				 
@@ -1119,7 +1259,20 @@
 		<div class="callout callout-info mb-3" role="alert">Here you can find details about the domain '<b><?php echo htmlspecialchars($current_user["domain"] ?? ''); ?></b>' with identification number #<?php echo @$_GET[$c_domain_id_r]; ?>.</div>
 		<?php if(@$current_user["registered"] == 1) { ?> <div class="callout callout-success mb-3" role="alert">This domain is currently registered and active for queries. </div> <?php } ?>
 		<?php if(@$current_user["conflict"] == 1 AND @$current_user["preferred"] != 1) { ?> <div class="callout callout-warning mb-3" role="alert">This domain is in conflict with other duplicated domain names. </div> <?php } ?>
+		<?php if($c_domain_id_r == "bind_id" AND is_array($active_bind_entry) AND (int)($active_bind_entry["id"] ?? 0) !== (int)($current_user["id"] ?? 0)) { ?>
+			<div class="callout callout-warning mb-3" role="alert">
+				You are inspecting a duplicate zone entry (ID #<?php echo (int)($current_user["id"] ?? 0); ?>). The currently served entry is ID #<?php echo (int)($active_bind_entry["id"] ?? 0); ?><?php if(!empty($active_bind_entry["zone_path"])) { echo " (".htmlspecialchars((string)$active_bind_entry["zone_path"]).")"; } ?>.
+				Use the Duplications table below and open the served entry if you want to view or edit the live zone records.
+			</div>
+		<?php } ?>
 		<?php if(@$current_user["set_no_replicate"] == 1) { ?> <div class="callout callout-danger mb-3" role="alert">This domain has external replication disabled and will not be duplicated to other requesting master servers. </div> <?php } ?>
+		<?php if($c_domain_id_r != "api_id" AND dnshttp_dnssec_globally_enabled()) { ?>
+			<?php if(dnshttp_dnssec_zone_enabled($current_user)) { ?>
+				<div class="callout callout-success mb-3" role="alert">DNSSEC is enabled for this domain and signed zone output is used when signing succeeds.</div>
+			<?php } else { ?>
+				<div class="callout callout-warning mb-3" role="alert">DNSSEC is disabled for this domain and the unsigned zone file is served.</div>
+			<?php } ?>
+		<?php } ?>
 		<?php if(@$current_user["oldzonefallback"] == 1) { ?> <div class="callout callout-danger mb-3" role="alert">This domains zone data has errors, please fix the domains zone data. Currently the server is using the last working zone data configuration for this server. </div> <?php } ?>
 		<?php if(@$current_user["zonecheck"] == 0) { ?> <div class="callout callout-warning mb-3" role="alert">The DNS zone may has errors, or not yet been reinitialized by the background worker (can take up to 2 hours). </div> <?php } ?>
 			  		
@@ -1194,6 +1347,24 @@
 								  <br clear="">
 								  <br clear="">
 								  <?php } ?>
+
+								  <?php if($c_domain_id_r != "api_id") { ?>
+									<?php $zone_dnssec_active = dnshttp_dnssec_zone_enabled($current_user); ?>
+									You can enable or disable DNSSEC signing per zone.<br />
+									<?php if(!dnshttp_dnssec_globally_enabled()) { ?>
+										<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_on_item_modal" disabled>Enable DNSSEC</button>
+										<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_off_item_modal" disabled>Disable DNSSEC</button>
+										<small style="display:block;margin-top:6px;">DNSSEC is globally disabled in configuration.</small>
+									<?php } elseif($zone_dnssec_active) { ?>
+										<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_on_item_modal" disabled>Enable DNSSEC</button>
+										<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_off_item_modal">Disable DNSSEC</button>
+									<?php } else { ?>
+										<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_on_item_modal">Enable DNSSEC</button>
+										<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_off_item_modal" disabled>Disable DNSSEC</button>
+									<?php } ?>
+								  <br clear="">
+								  <br clear="">
+								  <?php } ?>
 								  
 									You can disable prefer a domain to solve a conflict if a conflict is existant.<br />
 							
@@ -1209,7 +1380,7 @@
 								  
 									View and change (if possible) the current domains record data, you can not change the data on some domain types.<br />
 									<button type="button" class="btn btn-dark" onClick="dnshttp_userui_viewrecord()">View Records</button>
-									  <?php if(@$current_user["fk_user"] > 0) { ?>
+									  <?php if(@$current_user["fk_user"] > 0 OR $permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 										<button type="button" class="btn btn-warning" onClick="dnshttp_userui_changerecord()">Change Records</button>
 									  <?php } ?>
 									  

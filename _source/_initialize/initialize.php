@@ -167,7 +167,13 @@
 	$mysql->query("ALTER TABLE "._TABLE_LOG_." ADD COLUMN ref VARCHAR(255); ");
 	$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN serial_c VARCHAR(24) DEFAULT NULL; ");
 	$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN set_no_replicate int(1) DEFAULT 0 COMMENT '1 - No Replication to Slaves | 0 - Replicate to Slaves (default)'; ");
+	$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN set_dnssec tinyint(1) DEFAULT NULL COMMENT '1 - Sign and serve signed zone | 0 - Serve unsigned zone | NULL - inherit global DNSSEC setting'; ");
 	$mysql->query("ALTER TABLE "._TABLE_SERVER_." ADD COLUMN ssl_insecure tinyint(1) DEFAULT 1 COMMENT '1 - Allow invalid/self-signed SSL Certificates | 0 - Require valid SSL'; ");
+	if(defined('_DNSSEC_ENABLED_') AND _DNSSEC_ENABLED_) {
+		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET set_dnssec = 1 WHERE set_dnssec IS NULL;");
+	} else {
+		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET set_dnssec = 0 WHERE set_dnssec IS NULL;");
+	}
 	mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 	
 	/*************************************************************************
@@ -252,6 +258,7 @@
 			  `okonce` int DEFAULT 0 COMMENT '1 if has ever been a valid zone | 0 is never been a valid zone',
 			  `oldzonefallback` int DEFAULT 0 COMMENT '1 new zone invalid, falling back to old | 0 new zone ok',
 			  `set_no_replicate` int(1) DEFAULT 0 COMMENT '1 - No Replication to Slaves | 0 - Replicate to Slaves (default)',
+			  `set_dnssec` tinyint(1) DEFAULT NULL COMMENT '1 - Sign and serve signed zone | 0 - Serve unsigned zone | NULL - inherit global DNSSEC setting',
 			  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Domain Entry Date | Auto Set',
 			  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Domain Update Date | Auto Set',		  
 			PRIMARY KEY (`id`)); ALTER TABLE `"._TABLE_DOMAIN_BIND_."` ADD UNIQUE `unique_index_binddomain`(`domain`, `domain_type`);"); $mysql->free_all();}		

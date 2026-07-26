@@ -116,6 +116,10 @@ class x_class_user {
 	## Sessions Setup
 	private $sessions = "x_users"; private $sessions_days = 7; 
 		public function sessions_days($int = 7){$this->sessions_days = $int;} // Set Max Session Use Days	
+	private $session_touch_interval_sec = 300; // Throttle DB writes in session_restore()
+		public function session_touch_interval($sec = 300){
+			if(is_numeric($sec) AND (int)$sec >= 0) { $this->session_touch_interval_sec = (int)$sec; }
+		}
 	## Cookie Setup		
 	private $cookies = true;private $cookies_use = false; // Allow Cookies Use in General
 		public function cookies_use($bool = true){$this->cookies_use = $bool;$this->cookies = $this->sessions;} 
@@ -292,10 +296,20 @@ class x_class_user {
 				if($cr["user_blocked"] == 1) { $this->object_user_unset(); $this->cookie_unset(); return false; }
 				if($cr["user_disabled"] == 1) { $this->object_user_unset(); $this->cookie_unset(); return false; }
 				if($cr["user_confirmed"] != 1) { $this->object_user_unset(); $this->cookie_unset(); return false; }				
-				$bind[0]["value"] = @$_SESSION[$this->sessions."x_users_key"];
-				$bind[0]["type"] = "s";
-				$this->mysql->query("UPDATE `".$this->dt_keys."` SET refresh_date = CURRENT_TIMESTAMP() WHERE fk_user = '".$cr["id"]."' AND session_key = ? AND is_active = 1 AND key_type = '".$this->key_session."'", $bind); 				
-				$this->mysql->query("UPDATE `".$this->dt_users."` SET last_activity = CURRENT_TIMESTAMP() WHERE id = '".$cr["id"]."'"); 				
+				$touchKey = $this->sessions."x_users_touch_ts";
+				$now = time();
+				$lastTouch = @$_SESSION[$touchKey];
+				$shouldTouch = true;
+				if($this->session_touch_interval_sec > 0 AND is_numeric($lastTouch)) {
+					$shouldTouch = (($now - (int)$lastTouch) >= $this->session_touch_interval_sec);
+				}
+				if($shouldTouch) {
+					$bind[0]["value"] = @$_SESSION[$this->sessions."x_users_key"];
+					$bind[0]["type"] = "s";
+					$this->mysql->query("UPDATE `".$this->dt_keys."` SET refresh_date = CURRENT_TIMESTAMP() WHERE fk_user = '".$cr["id"]."' AND session_key = ? AND is_active = 1 AND key_type = '".$this->key_session."'", $bind); 				
+					$this->mysql->query("UPDATE `".$this->dt_users."` SET last_activity = CURRENT_TIMESTAMP() WHERE id = '".$cr["id"]."'");
+					$_SESSION[$touchKey] = $now;
+				}
 				$this->object_user_set($cr["id"]);
 				return true;
 			} else {
@@ -314,6 +328,7 @@ class x_class_user {
 		unset($_SESSION[$this->sessions."x_users_ip"]);
 		unset($_SESSION[$this->sessions."x_users_key"]);
 		unset($_SESSION[$this->sessions."x_users_id"]);
+		unset($_SESSION[$this->sessions."x_users_touch_ts"]);
 		unset($_SESSION[$this->sessions."x_users_stay"]);
 		unset($_SESSION[$this->sessions."x_users_login_shadow"]);
 		$this->user_rank = false; $this->rank = false;

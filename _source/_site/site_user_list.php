@@ -717,6 +717,7 @@
 					$mysql->query("DELETE FROM "._TABLE_DOMAIN_BIND_." WHERE fk_user = \"".$_GET["deleteid"]."\";");
 					$mysql->query("DELETE FROM "._TABLE_USER_SESSION_." WHERE fk_user = \"".$_GET["deleteid"]."\";");
 					$mysql->query("DELETE FROM "._TABLE_USER_." WHERE id = \"".$_GET["deleteid"]."\";");
+					dnshttp_trigger_sync();
 					x_eventBoxPrep("The user and all user related domain and zone information has been removed.", "ok", _COOKIES_);
 					Header("Location: ./?site=".@$_GET["site"].""); exit();
 				} else {

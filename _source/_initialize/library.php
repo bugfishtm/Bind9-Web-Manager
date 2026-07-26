@@ -88,18 +88,269 @@
 
 	// Zone text submitted by a user. $INCLUDE is removed because it makes bind read arbitrary local
 	// files on this server when the zone is written out - that is the whole reason this exists.
+	// DNSSEC key includes (K*.key) are explicitly allowed and preserved.
 	// $GENERATE is deliberately left alone: it is a legitimate bind feature with no file access, and
 	// removing it would take a capability away from anyone writing zone data through the API.
 	// Note the record editor in the web UI does not round-trip $GENERATE, so a zone using it should
 	// be maintained through the API rather than opened and saved in the editor.
 	function dnshttp_zone_input_clean($zone) {
-		return preg_replace('/^[ \t]*\$INCLUDE\b[^\r\n]*/im', '; $INCLUDE removed - not permitted in user zone data', (string)$zone);
+		return preg_replace_callback('/^[ \t]*\$INCLUDE\b[^\r\n]*/im', function($m){
+			$line = (string)$m[0];
+			if(preg_match('/^\s*\$INCLUDE\s+("?)([^"\s;]+)\1/i', $line, $inc)) {
+				$target = basename((string)$inc[2]);
+				if(preg_match('/^K[a-z0-9._-]+\.key$/i', $target)) {
+					return $line;
+				}
+			}
+			return '; $INCLUDE removed - not permitted in user zone data';
+		}, (string)$zone);
 	}
 
 	// Read the current SOA serial out of raw zone text (same match as the bump above).
 	function dnshttp_zone_get_serial(string $zone) {
 		if(preg_match(_DNSHTTP_SOA_SERIAL_REGEX_, $zone, $m)) { return $m[2]; }
 		return false;
+	}
+
+	// Strip a .signed suffix so we always work with the unsigned zone file path.
+	function dnshttp_zone_unsigned_path(string $path): string {
+		return preg_replace('/\.signed$/i', '', str_replace('//', '/', $path));
+	}
+
+	function dnshttp_zone_signed_path(string $path): string {
+		return dnshttp_zone_unsigned_path($path).'.signed';
+	}
+
+	// Resolve the on-disk master zone path: imported zones keep their named.conf path,
+	// user-created zones default to _CRON_BIND_LIB_/{domain}.
+	function dnshttp_master_zone_file_path(array $domain_row, string $safedomain): string {
+		if(!empty($domain_row['zone_path'])) {
+			return dnshttp_zone_unsigned_path((string)$domain_row['zone_path']);
+		}
+		$suffix = _CRON_BIND_LIB_ENDING_ !== '' ? _CRON_BIND_LIB_ENDING_.'.master' : '';
+		return rtrim(_CRON_BIND_LIB_, '/\\').'/'.$safedomain.$suffix;
+	}
+
+	function dnshttp_dnssec_globally_enabled(): bool {
+		return (defined('_DNSSEC_ENABLED_') AND _DNSSEC_ENABLED_);
+	}
+
+	function dnshttp_dnssec_zone_enabled(array $domain_row): bool {
+		if(!dnshttp_dnssec_globally_enabled()) { return false; }
+		if(array_key_exists('set_dnssec', $domain_row) AND $domain_row['set_dnssec'] !== null AND $domain_row['set_dnssec'] !== '') {
+			return ((int)$domain_row['set_dnssec'] === 1);
+		}
+		// Backward compatibility: pre-toggle rows inherit global DNSSEC behavior.
+		return true;
+	}
+
+	function dnshttp_dnssec_default_zone_value(): int {
+		return dnshttp_dnssec_globally_enabled() ? 1 : 0;
+	}
+
+	function dnshttp_bind_zone_serve_path(string $unsigned_path, bool $zone_dnssec_enabled = true): string {
+		if(dnshttp_dnssec_globally_enabled() AND $zone_dnssec_enabled) {
+			$signed_path = dnshttp_zone_signed_path($unsigned_path);
+			if(file_exists($signed_path)) {
+				return $signed_path;
+			}
+		}
+		return $unsigned_path;
+	}
+
+	function dnshttp_dnssec_key_glob(string $zone_name, string $zone_dir): array {
+		$matches = glob(rtrim($zone_dir, '/\\').'/K'.$zone_name.'.*');
+		return is_array($matches) ? $matches : array();
+	}
+
+	function dnshttp_dnssec_count_keys(string $zone_name, string $zone_dir): array {
+		$key_count = 0;
+		$priv_count = 0;
+		foreach(dnshttp_dnssec_key_glob($zone_name, $zone_dir) as $file) {
+			if(substr($file, -8) === '.private') { $priv_count++; }
+			elseif(substr($file, -4) === '.key') { $key_count++; }
+		}
+		return array('key' => $key_count, 'private' => $priv_count);
+	}
+
+	function dnshttp_dnssec_shell_command(string $constant_name, string $fallback): string {
+		if(defined($constant_name)) {
+			$configured = trim((string)constant($constant_name));
+			if($configured !== '') { return escapeshellcmd($configured); }
+		}
+		return escapeshellcmd($fallback);
+	}
+
+	function dnshttp_dnssec_cleanup_old_keys(string $zone_name, string $zone_dir): array {
+		$deleted_key = 0;
+		$deleted_private = 0;
+		foreach(dnshttp_dnssec_key_glob($zone_name, $zone_dir) as $file) {
+			if(substr($file, -8) !== '.private' AND substr($file, -4) !== '.key') { continue; }
+			if(!@is_file($file)) { continue; }
+			if(!@unlink($file)) { continue; }
+			if(substr($file, -8) === '.private') { $deleted_private++; }
+			elseif(substr($file, -4) === '.key') { $deleted_key++; }
+		}
+		return array('key' => $deleted_key, 'private' => $deleted_private);
+	}
+
+	function dnshttp_dnssec_rotate_keys(string $zone_name, string $zone_dir): bool {
+		dnshttp_dnssec_cleanup_old_keys($zone_name, $zone_dir);
+
+		$keygen = dnshttp_dnssec_shell_command('_BIND_DNSSEC_KEYGEN_COMMAND_', 'dnssec-keygen');
+		$zone_arg = escapeshellarg($zone_name);
+		$cwd = getcwd();
+		if(!@chdir($zone_dir)) { return false; }
+
+		@shell_exec($keygen.' -a ECDSAP256SHA256 -b 256 -n ZONE '.$zone_arg.' 2>&1');
+		@shell_exec($keygen.' -a ECDSAP256SHA256 -b 256 -n ZONE -f KSK '.$zone_arg.' 2>&1');
+
+		if($cwd !== false) { @chdir($cwd); }
+		$counts = dnshttp_dnssec_count_keys($zone_name, $zone_dir);
+		return ($counts['key'] >= 2 AND $counts['private'] >= 2);
+	}
+
+	function dnshttp_dnssec_append_key_includes(string $zone_file, string $zone_name, string $zone_dir): void {
+		$content = (string)@file_get_contents($zone_file);
+		// Replace only DNSSEC key includes; keep the rest of the zone as-is.
+		$content = preg_replace('/^[ \t]*\$INCLUDE\s+("?)[^"\r\n]*\/?K[a-z0-9._-]+\.key\1[^\r\n]*\r?\n?/im', '', $content);
+		$content = rtrim($content)."\n";
+		foreach(dnshttp_dnssec_key_glob($zone_name, $zone_dir) as $file) {
+			if(substr($file, -4) !== '.key') { continue; }
+			$content .= '$INCLUDE '.basename($file)."\n";
+		}
+		@file_put_contents($zone_file, $content);
+	}
+
+	function dnshttp_dnssec_repair_marker_path(): string {
+		if(defined('_MAIN_PATH_')) {
+			return rtrim(_MAIN_PATH_, '/\\').'/_data/.dnssec_include_repair_v1.done';
+		}
+		return dirname(__FILE__).'/../_data/.dnssec_include_repair_v1.done';
+	}
+
+	function dnshttp_dnssec_repair_legacy_includes_for_zone(string $zone_name, string $zone_file): bool {
+		if(!@file_exists($zone_file)) { return false; }
+		$zone_dir = dirname($zone_file);
+		$key_files = array();
+		foreach(dnshttp_dnssec_key_glob($zone_name, $zone_dir) as $file) {
+			if(substr($file, -4) === '.key') { $key_files[] = $file; }
+		}
+		if(count($key_files) <= 0) { return false; }
+		sort($key_files, SORT_STRING);
+
+		$content = (string)@file_get_contents($zone_file);
+		$updated = preg_replace('/^[ \t]*;\s*\$INCLUDE removed - not permitted in user zone data[^\r\n]*\r?\n?/im', '', $content);
+		$updated = preg_replace('/^[ \t]*\$INCLUDE\s+("?)[^"\r\n]*\/?K[a-z0-9._-]+\.key\1[^\r\n]*\r?\n?/im', '', (string)$updated);
+		$updated = rtrim((string)$updated)."\n";
+		foreach($key_files as $file) {
+			$updated .= '$INCLUDE '.basename($file)."\n";
+		}
+		if($updated === $content) { return false; }
+		return (@file_put_contents($zone_file, $updated) !== false);
+	}
+
+	function dnshttp_dnssec_repair_legacy_includes_once($mysql): array {
+		$result = array('ran' => false, 'already_done' => false, 'scanned' => 0, 'repaired' => 0, 'marker_written' => false);
+		if(!dnshttp_dnssec_globally_enabled()) { return $result; }
+
+		$marker = dnshttp_dnssec_repair_marker_path();
+		if(@file_exists($marker)) {
+			$result['already_done'] = true;
+			return $result;
+		}
+
+		$result['ran'] = true;
+		$domains = $mysql->select("SELECT id, domain, zone_path, set_dnssec FROM "._TABLE_DOMAIN_BIND_." WHERE domain <> '.'", true);
+		if(is_array($domains)) {
+			foreach($domains as $row) {
+				if(!dnshttp_dnssec_zone_enabled($row)) { continue; }
+				$raw = strtolower(trim((string)($row['domain'] ?? '')));
+				$safedomain = ($raw === '.') ? '.' : idn_to_ascii($raw, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+				if($safedomain === false OR $safedomain === '') { continue; }
+				$zone_file = dnshttp_master_zone_file_path($row, $safedomain);
+				$result['scanned']++;
+				if(dnshttp_dnssec_repair_legacy_includes_for_zone($safedomain, $zone_file)) {
+					$result['repaired']++;
+				}
+			}
+		}
+
+		$marker_content = "completed=".date('c')."\nscanned=".$result['scanned']."\nrepaired=".$result['repaired']."\n";
+		$result['marker_written'] = (@file_put_contents($marker, $marker_content) !== false);
+		return $result;
+	}
+
+	function dnshttp_dnssec_sign_zone(string $zone_name, string $zone_file, string $zone_dir): ?string {
+		$salt = trim((string)@shell_exec('head -c 1000 /dev/urandom 2>/dev/null | sha1sum | cut -b1-16'));
+		if($salt === '') {
+			$salt = trim((string)@shell_exec('head -c 1000 /dev/random 2>/dev/null | sha1sum | cut -b1-16'));
+		}
+		$signed_path = dnshttp_zone_signed_path($zone_file);
+		$signzone = dnshttp_dnssec_shell_command('_BIND_DNSSEC_SIGNZONE_COMMAND_', 'dnssec-signzone');
+		$cmd = $signzone.' -A -3 '.escapeshellarg($salt)
+			.' -N INCREMENT -o '.escapeshellarg($zone_name)
+			.' -t '.escapeshellarg(basename($zone_file)).' 2>&1';
+		$cwd = getcwd();
+		if(!@chdir($zone_dir)) { return null; }
+		@shell_exec($cmd);
+		if($cwd !== false) { @chdir($cwd); }
+		return file_exists($signed_path) ? $signed_path : null;
+	}
+
+	function dnshttp_dnssec_update_conf_files(string $unsigned_path, string $signed_path): void {
+		$conf_files = array();
+		if(defined('_CRON_BIND_FILE_') AND _CRON_BIND_FILE_) { $conf_files[] = _CRON_BIND_FILE_; }
+		if(defined('_CRON_BIND_FILE_2_') AND _CRON_BIND_FILE_2_) { $conf_files[] = _CRON_BIND_FILE_2_; }
+		if(defined('_CRON_BIND_FILE_TABLE_')) { $conf_files[] = _CRON_BIND_FILE_TABLE_; }
+		if(defined('_CRON_BIND_CONFNAME_')) { $conf_files[] = _CRON_BIND_CONFNAME_; }
+
+		$from = 'file "'.$unsigned_path.'"';
+		$to = 'file "'.$signed_path.'"';
+		foreach(array_unique($conf_files) as $conf_file) {
+			if(!is_string($conf_file) OR !file_exists($conf_file)) { continue; }
+			$content = (string)@file_get_contents($conf_file);
+			if(strpos($content, $signed_path) !== false) { continue; }
+			if(strpos($content, $from) === false) { continue; }
+			@file_put_contents($conf_file, str_replace($from, $to, $content));
+		}
+	}
+
+	function dnshttp_dnssec_sign_master_zone(string $zone_name, string $zone_file): ?string {
+		if(!dnshttp_dnssec_globally_enabled()) { return null; }
+		$zone_dir = dirname($zone_file);
+		if(!dnshttp_dnssec_rotate_keys($zone_name, $zone_dir)) { return null; }
+		dnshttp_dnssec_append_key_includes($zone_file, $zone_name, $zone_dir);
+		$signed = dnshttp_dnssec_sign_zone($zone_name, $zone_file, $zone_dir);
+		if($signed) {
+			dnshttp_dnssec_update_conf_files($zone_file, $signed);
+		}
+		return $signed;
+	}
+
+	// Run the sync cron immediately after a zone edit (web UI / API).
+	function dnshttp_trigger_sync(): void {
+		if(php_sapi_name() === 'cli') { return; }
+		$script = rtrim(_MAIN_PATH_, '/\\').'/_cronjob/sync.php';
+		if(!file_exists($script)) { return; }
+		@shell_exec('php '.escapeshellarg($script).' 2>&1');
+	}
+
+	function dnshttp_cron_last_sync_age_minutes($mysql): ?int {
+		$row = $mysql->select(
+			"SELECT TIMESTAMPDIFF(MINUTE, creation, NOW()) AS minutes_ago
+			 FROM "._TABLE_LOG_."
+			 WHERE ref = 'cron_sync'
+			 ORDER BY id DESC
+			 LIMIT 1",
+			false
+		);
+		if(!is_array($row) || !isset($row['minutes_ago']) || !is_numeric($row['minutes_ago'])) {
+			return null;
+		}
+		$minutes = (int)$row['minutes_ago'];
+		if($minutes < 0) { return 0; }
+		return $minutes;
 	}
 
 	function dnshttp_decompress(string $compressed): string {
@@ -314,6 +565,15 @@
 		// Initialize Starting Message
 		logging_add("INFO: Starting Replication Cronjob at: ");
 		logging_add("".date("Y-m-d H:i:s")."!\r\n");
+		$dnssec_repair = dnshttp_dnssec_repair_legacy_includes_once($mysql);
+		if($dnssec_repair['already_done']) {
+			logging_add("INFO: DNSSEC include repair helper already completed previously.\r\n");
+		} elseif($dnssec_repair['ran']) {
+			logging_add("INFO: DNSSEC include repair helper scanned ".$dnssec_repair['scanned']." zone files and repaired ".$dnssec_repair['repaired'].".\r\n");
+			if(!$dnssec_repair['marker_written']) {
+				logging_add("WARN: DNSSEC include repair marker could not be written; helper may run again on next sync.\r\n");
+			}
+		}
 		#######################################################################################################################################
 		// List of Slave Server IPs	
 		$localslaveservers = ""; $array = $mysql->select("SELECT * FROM "._TABLE_SERVER_." WHERE server_type = 2 OR server_type = 3", true);
@@ -514,8 +774,8 @@
 						if(trim($domain) != "") {		
 							$realcontentfilename = basename($realpathnow);
 							$realcontentfilewithpath = $realpathnow;
-							$filenamecleared = str_replace("//", "/", $realpathnow );	
-							if(file_exists($realcontentfilewithpath)) {
+							$filenamecleared = dnshttp_zone_unsigned_path(str_replace("//", "/", $realpathnow));
+							if(file_exists($filenamecleared) OR file_exists($realcontentfilewithpath)) {
 								logging_add("OK: Added Local Domain: $domain\r\n");
 								array_push($domain_array, array('domain' => strtolower(trim($domain)), 'path' => $filenamecleared, 'type' => "file"));
 							} else { logging_add("ERROR: Content File not Found for: $domain\r\n"); }
@@ -586,8 +846,8 @@
 						if(trim($domain) != "") {				
 							$realcontentfilename = basename($realpathnow);
 							$realcontentfilewithpath = $realpathnow;
-							$filenamecleared = str_replace("//", "/", $realpathnow );
-							if(file_exists($realcontentfilewithpath)) {
+							$filenamecleared = dnshttp_zone_unsigned_path(str_replace("//", "/", $realpathnow));
+							if(file_exists($filenamecleared) OR file_exists($realcontentfilewithpath)) {
 								logging_add("OK: Added Local Domain: $domain\r\n");										
 									array_push($domain_array, array('domain' => strtolower(trim($domain)), 'path' => $filenamecleared, 'type' => "file2"));
 							} else { logging_add("ERROR: Content File not Found for: $domain\r\n");	 }
@@ -639,14 +899,16 @@
 					$content = "";
 					logging_add("OK: Updated Domain: '".$value["domain"]."' | Type: '".$value["type"]."' | Zone-File: '".$value["path"]."' \r\n");
 					if(file_exists($value["path"])) { 
+						$readpath = file_exists($value["path"]) ? $value["path"] : dnshttp_zone_signed_path($value["path"]);
 						if(file_exists(_CRON_BIND_FILE_TEMP_)) { @unlink(_CRON_BIND_FILE_TEMP_); } 
-						@shell_exec(_BIND_COMPILEZONE_COMMAND_." -f raw -F text -o ".escapeshellarg(_CRON_BIND_FILE_TEMP_)." ".escapeshellarg(strtolower($value["domain"]))." ".escapeshellarg($value["path"])."  ");
-						if(file_exists(_CRON_BIND_FILE_TEMP_)) { $pathnow = _CRON_BIND_FILE_TEMP_; } else { $pathnow = $value["path"]; }
+						@shell_exec(_BIND_COMPILEZONE_COMMAND_." -f raw -F text -o ".escapeshellarg(_CRON_BIND_FILE_TEMP_)." ".escapeshellarg(strtolower($value["domain"]))." ".escapeshellarg($readpath)."  ");
+						if(file_exists(_CRON_BIND_FILE_TEMP_)) { $pathnow = _CRON_BIND_FILE_TEMP_; } else { $pathnow = $readpath; }
 						if($content = file_get_contents($pathnow)) {
+							$content = dnshttp_zone_input_clean($content);
 						} else { $content = "error"; logging_add("-- ");logging_add("WARN: Zone File Opening Error for: '".$value["domain"]."' \r\n"); } 
 					} else { $content = "error"; logging_add("-- ");logging_add("WARN: Zone File Does not Exist for: '".$value["domain"]."' \r\n"); }
 					$bind[0]["type"] = "s";
-					$bind[0]["value"] = $value["path"];
+					$bind[0]["value"] = dnshttp_zone_unsigned_path($value["path"]);
 					$bind[1]["type"] = "s";
 					$bind[1]["value"] = $value["type"];
 					$bind[2]["type"] = "s";
@@ -669,8 +931,10 @@
 					$bind[2]["type"] = "s";
 					$bind[2]["value"] = $value["type"];	
 					$bind[3]["type"] = "s";
-					$bind[3]["value"] = $content;					
-					$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_."(domain, zone_path, domain_type, last_update, content, preferred) VALUES(?, ?, ?, CURRENT_TIMESTAMP(), ?, 1);", $bind);unset($bind);
+					$bind[3]["value"] = $content;
+					$bind[4]["type"] = "i";
+					$bind[4]["value"] = dnshttp_dnssec_default_zone_value();
+					$mysql->query("INSERT INTO "._TABLE_DOMAIN_BIND_."(domain, zone_path, domain_type, last_update, content, preferred, set_dnssec) VALUES(?, ?, ?, CURRENT_TIMESTAMP(), ?, 1, ?);", $bind);unset($bind);
 					// This row is created with preferred = 1, so every other entry for the same name
 					// has to be un-preferred. Clearing only the slave table left a second preferred
 					// row behind whenever the name already existed as a USER domain - the exists()
@@ -1081,7 +1345,7 @@
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		logging_add("START: Writing Master Zones\r\n");
 		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 2, oldzonefallback = 2, zonecheck_failmessage = 'none', zonecheck_message = 'none', registered = 2 "); // Reset Domains State
-		$domains = $mysql->select("SELECT id, domain, content, okonce, set_no_replicate FROM "._TABLE_DOMAIN_BIND_." WHERE ( conflict = 0 OR (conflict = 1 AND preferred = 1) ) ORDER BY id DESC", true);
+		$domains = $mysql->select("SELECT id, domain, content, okonce, set_no_replicate, zone_path, set_dnssec FROM "._TABLE_DOMAIN_BIND_." WHERE ( conflict = 0 OR (conflict = 1 AND preferred = 1) ) ORDER BY id DESC", true);
 		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET registered = 0 WHERE ( conflict = 1 AND preferred = 0) ");
 		if(is_array($domains)) {
 			foreach($domains as $key => $value) {
@@ -1097,8 +1361,7 @@
 					continue;
 				}
 				$temppath = _CRON_BIND_FILE_TEMP_.$safedomain;
-				$filenamecleared = _CRON_BIND_LIB_."/".$safedomain._CRON_BIND_LIB_ENDING_.".master";
-				$filenamecleared = str_replace("//", "/", $filenamecleared );
+				$filenamecleared = dnshttp_master_zone_file_path($value, $safedomain);
 				// Rebuilt from the database every run - see the slave writer above.
 				@unlink($filenamecleared);
 				$newzoneok = false;
@@ -1175,8 +1438,21 @@
 					//} else {
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
+					$servepath = $filenamecleared;
+					$zone_dnssec_enabled = dnshttp_dnssec_zone_enabled($value);
+					if(trim($value["domain"]) != "." AND $zone_dnssec_enabled) {
+						$signed_path = dnshttp_dnssec_sign_master_zone($safedomain, $filenamecleared);
+						if($signed_path) {
+							$servepath = $signed_path;
+						} else {
+							$servepath = dnshttp_bind_zone_serve_path($filenamecleared, $zone_dnssec_enabled);
+							if($zone_dnssec_enabled AND $servepath === $filenamecleared) {
+								logging_add("WARN: DNSSEC signing failed or is unavailable for ".$safedomain.", serving unsigned zone.\r\n");
+							}
+						}
+					}
 					$nowwritte = true;
-					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$servepath."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
 				} else {
 					$isnowregister = false;		
 					// See the slave writer above - okonce must survive a failed check.
@@ -1191,7 +1467,8 @@
 				}
 				
 				if(!$nowwritte AND @file_exists(@$filenamecleared) AND _CRON_BIND_FILE_REWRITE_) {
-					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
+					$servepath = dnshttp_bind_zone_serve_path($filenamecleared, dnshttp_dnssec_zone_enabled($value));
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$servepath."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
 				}
 			}
 		}
@@ -1297,7 +1574,7 @@
 		
 		// Restart Named Service
 		logging_add("OK: systemctl restart "._BIND_SERVICE_NAME_.";\r\n"); 
-		@shell_exec("supervisorctl restart bind9");
+		//@shell_exec("supervisorctl restart bind9");
 		@shell_exec("systemctl restart "._BIND_SERVICE_NAME_."; ");
 		if(_DNSHTTP_DOCKERIZED_) {
 			@shell_exec("service  "._BIND_SERVICE_NAME_." start");

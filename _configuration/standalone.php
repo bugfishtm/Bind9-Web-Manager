@@ -115,3 +115,4 @@
 	##########################################################################################################################################	
 	define("_DNSHTTP_LOGIN_BG_", "./_assets/_img/login_bg.jpg"); # You can overwrite the login background path to your own
 	define("_SERVER_HOSTNAME_", "your.server.fqdn"); # Your Servers Hostname without www and http/https
+	define("_DNSSEC_ENABLED_", true); # Enables the ability to have DNSSEC on zones
