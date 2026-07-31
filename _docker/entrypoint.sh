@@ -13,12 +13,6 @@ echo "┗━━━━━━━━━━━━━━━━━━━━━━━�
 echo "[DNSHTTP] Initialization: Executing entry point."
 
 ##
-## Create Symbolic Links to Keys
-##
-mkdir /var/www/html/_data/keys
-ln -s /var/www/html/_data/keys /etc/bind/dnshttp/keys
-
-##
 ## Update/Upgrade Handling
 ##
 if [ "$sf_ct_update_on_start" = "1" ]; then

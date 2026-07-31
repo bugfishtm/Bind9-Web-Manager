@@ -18,6 +18,7 @@ services:
       - dnshttp-ssl:/opt/sf_ssl
       - dnshttp-certbot:/etc/letsencrypt
       - dnshttp-data:/var/www/html/_data
+      - dnshttp-keys:/etc/bind/dnshttp/keys
       - dnshttp-mysql:/var/lib/mysql
     environment:
       TZ:                                       "${sf_timezone}"     
@@ -61,3 +62,4 @@ volumes:
   dnshttp-certbot:
   dnshttp-mysql:
   dnshttp-data:
+  dnshttp-keys:
