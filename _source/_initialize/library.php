@@ -282,8 +282,327 @@
  	}
 	
 	/*************************************************************************
+		DNSSEC Support
+	*************************************************************************/
+	// Placeholder that marks the spot inside a generated zone stanza where the DNSSEC options go.
+	// The stanzas are built while the domains are written, but whether the options may actually be
+	// emitted is only decided afterwards (see the named-checkconf fallback in the cronjob), so the
+	// decision is kept out of the loop and resolved on the finished string.
+	define("_DNSHTTP_DNSSEC_TOKEN_", "@@DNSHTTP-DNSSEC-ZONE-OPTIONS@@");
+
+	// Locate a bind utility that has no setting of its own. The neighbour of the configured
+	// named-compilezone is the first guess, but distributions split these tools over /usr/sbin and
+	// /usr/bin (the installer itself defaults to different directories for docker and bare metal),
+	// so the usual locations are tried after it. An installation that keeps them somewhere else
+	// entirely can still name each binary explicitly in settings.php.
+	function dnshttp_bind_tool_path($tool) {
+		$base = "";
+		if(defined("_BIND_COMPILEZONE_COMMAND_")) { $base = trim((string)_BIND_COMPILEZONE_COMMAND_); }
+		if($base === "" AND defined("_BIND_CHECKZONE_COMMAND_")) { $base = trim((string)_BIND_CHECKZONE_COMMAND_); }
+		$dirs = array();
+		if($base !== "") {
+			$dir = dirname($base);
+			if($dir !== "" AND $dir !== "." AND $dir !== "/") { array_push($dirs, $dir); }
+		}
+		array_push($dirs, "/usr/sbin", "/usr/bin", "/usr/local/sbin", "/usr/local/bin");
+		foreach($dirs as $dir) {
+			if(@is_file($dir."/".$tool)) { return $dir."/".$tool; }
+		}
+		return $dirs[0]."/".$tool;
+	}
+
+	// Installed bind version as "major.minor.patch", or false when it cannot be determined.
+	// Cached for a day in _data: this is asked on page views as well, and a shell_exec per request
+	// would be wasteful - the web SAPI may not even be permitted to run one.
+	function dnshttp_bind_version() {
+		static $cached = null;
+		if($cached !== null) { return $cached; }
+		// Kept under _data/_logs rather than _data: the root .htaccess blocks _default, _cronjob,
+		// _initialize, _template and _site plus settings.php by name, but NOT the rest of _data -
+		// while _data/_logs carries its own deny rule that initialize.php restores when missing.
+		// The bind version is exactly what the generated named.conf hides with 'version "None
+		// Available";', so it must not be readable over http.
+		$cachefile = _MAIN_PATH_."/_data/_logs/bind_version.cache";
+		$age = @is_file($cachefile) ? (time() - (int)@filemtime($cachefile)) : false;
+		if($age !== false) {
+			$c = trim((string)@file_get_contents($cachefile));
+			// A successful detection is stable and worth keeping for a day. A failed one is not:
+			// the web SAPI is often not allowed to run shell_exec while the cronjob is, and caching
+			// that failure for a day would hide the version the cronjob can read perfectly well.
+			if($c !== "" AND $c !== "unknown" AND $age < 86400) { $cached = $c; return $cached; }
+			if($c === "unknown" AND $age < 300) { $cached = false; return $cached; }
+		}
+		$raw = "";
+		if(function_exists("shell_exec") AND defined("_BIND_CHECKZONE_COMMAND_")) {
+			$raw = (string)@shell_exec(_BIND_CHECKZONE_COMMAND_." -v 2>&1");
+		}
+		$cached = false;
+		// "9.18.28-0ubuntu0.22.04.1-Ubuntu", "named-checkzone 9.11.3" and plain "9.20.4" all match.
+		if(preg_match('/(\d+)\.(\d+)(?:\.(\d+))?/', $raw, $m)) {
+			$cached = ((int)$m[1]).".".((int)$m[2]).".".((int)(isset($m[3]) ? $m[3] : 0));
+		}
+		@file_put_contents($cachefile, ($cached === false) ? "unknown" : $cached);
+		return $cached;
+	}
+
+	function dnshttp_bind_version_atleast($major, $minor) {
+		$v = dnshttp_bind_version();
+		if($v === false) { return false; }
+		$p = explode(".", $v);
+		$vmaj = (int)@$p[0]; $vmin = (int)@$p[1];
+		if($vmaj != $major) { return ($vmaj > $major); }
+		return ($vmin >= $minor);
+	}
+
+	// Which DNSSEC syntax the installed bind understands:
+	//   'policy' - dnssec-policy, bind 9.16 and newer
+	//   'legacy' - auto-dnssec maintain, bind 9.9 up to 9.18 (removed in 9.19/9.20)
+	//   false    - emit no DNSSEC configuration at all
+	// An unknown bind version deliberately yields false. Writing the wrong one of those two into a
+	// zone stanza is a configuration error, and named rejects the WHOLE generated file over it -
+	// that takes every zone on this server down, which is far worse than a zone staying unsigned.
+	// _BIND_DNSSEC_MODE_ pins the syntax explicitly for a setup where detection cannot work.
+	function dnshttp_dnssec_mode() {
+		if(!defined("_BIND_DNSSEC_") OR !_BIND_DNSSEC_) { return false; }
+		$mode = strtolower(trim((string)(defined("_BIND_DNSSEC_MODE_") ? _BIND_DNSSEC_MODE_ : "auto")));
+		if($mode === "policy" OR $mode === "legacy") { return $mode; }
+		if($mode !== "auto") { return false; }
+		if(dnshttp_bind_version() === false) { return false; }
+		if(dnshttp_bind_version_atleast(9, 16)) { return "policy"; }
+		if(dnshttp_bind_version_atleast(9, 9))  { return "legacy"; }
+		return false;
+	}
+
+	// Human readable reason why signing is unavailable - shown in the interface so an administrator
+	// does not have to guess why the switch does nothing.
+	function dnshttp_dnssec_unavailable_reason() {
+		if(!defined("_BIND_DNSSEC_") OR !_BIND_DNSSEC_) { return "DNSSEC is switched off for this instance (_BIND_DNSSEC_ in settings.php)."; }
+		$mode = strtolower(trim((string)(defined("_BIND_DNSSEC_MODE_") ? _BIND_DNSSEC_MODE_ : "auto")));
+		# 'off' is a documented value, so it gets its own answer rather than being reported as a typo.
+		if($mode === "off") { return "DNSSEC is switched off for this instance (_BIND_DNSSEC_MODE_ is 'off' in settings.php)."; }
+		if($mode !== "auto" AND $mode !== "policy" AND $mode !== "legacy") { return "_BIND_DNSSEC_MODE_ in settings.php is '".$mode."', which is not one of 'auto', 'policy', 'legacy' or 'off'."; }
+		if(dnshttp_bind_version() === false) { return "The installed bind version could not be determined by running '".(defined("_BIND_CHECKZONE_COMMAND_") ? _BIND_CHECKZONE_COMMAND_ : "named-checkzone")." -v'. Set _BIND_DNSSEC_MODE_ to 'policy' (bind 9.16+) or 'legacy' (bind up to 9.18) in settings.php to configure it by hand."; }
+		if(!dnshttp_bind_version_atleast(9, 9)) { return "Bind ".dnshttp_bind_version()." is too old for the supported DNSSEC configurations."; }
+		return "";
+	}
+
+	// Directory bind keeps the zone keys in. Created on demand, owned like the rest of the
+	// generated configuration so named can read and (with dnssec-policy) write it.
+	function dnshttp_dnssec_keydir($create = false) {
+		if(!defined("_BIND_DNSSEC_KEY_DIR_")) { return false; }
+		$dir = rtrim(str_replace("//", "/", (string)_BIND_DNSSEC_KEY_DIR_), "/");
+		if(trim($dir) === "") { return false; }
+		if($create AND !@is_dir($dir)) {
+			@mkdir($dir, octdec("0"._CRON_BIND_LIB_CODE_), true);
+			@chown($dir, _CRON_BIND_LIB_USER_);
+			@chgrp($dir, _CRON_BIND_LIB_GROUP_);
+			@chmod($dir, octdec("0"._CRON_BIND_LIB_CODE_));
+		}
+		return $dir;
+	}
+
+	// Key files present for a zone. $seponly limits the result to key signing keys (flag 257),
+	// which are the ones a DS record for the parent zone is built from.
+	function dnshttp_dnssec_key_files($zone, $seponly = false) {
+		$out = array();
+		$dir = dnshttp_dnssec_keydir(false);
+		if($dir === false OR !@is_dir($dir)) { return $out; }
+		// Callers hand in the already normalised ASCII name, so there are no glob metacharacters
+		// in here - but a name that did not go through that normalisation must not reach glob().
+		$zone = rtrim(strtolower(trim((string)$zone)), ".");
+		if($zone === "" OR $zone !== preg_replace('/[^a-z0-9.-]/', '', $zone)) { return $out; }
+		$files = @glob($dir."/K".$zone.".+*.key");
+		if(!is_array($files)) { return $out; }
+		foreach($files as $file) {
+			if($seponly) {
+				$content = (string)@file_get_contents($file);
+				// "<name>. IN DNSKEY <flags> <protocol> <algorithm> <key>" - 257 marks a secure
+				// entry point, 256 is a zone signing key and has no DS record of its own.
+				if(!preg_match('/\bDNSKEY\s+(\d+)\s+\d+\s+\d+/i', $content, $m)) { continue; }
+				if((int)$m[1] !== 257) { continue; }
+			}
+			array_push($out, $file);
+		}
+		return $out;
+	}
+
+	// Legacy mode only. With dnssec-policy bind creates and rolls its own keys and keeps state
+	// files next to them, so generating keys by hand there would fight with the policy.
+	// Returns true, or a message describing why no usable key material exists.
+	function dnshttp_dnssec_generate_keys($zone) {
+		$zone = rtrim(strtolower(trim((string)$zone)), ".");
+		if($zone === "" OR $zone !== preg_replace('/[^a-z0-9.-]/', '', $zone)) { return "Invalid zone name for key generation."; }
+		// Counted separately, because a run that was interrupted (or ran out of disk) between the
+		// two dnssec-keygen calls leaves half a pair behind. Treating "some key exists" as done
+		// would then accept a zone that has a signing key but no key signing key - it would sign,
+		// but there would never be anything to build a DS from and the zone could never be
+		// validated. Only the missing half is generated, so re-running does not pile up spares.
+		$keys_ksk = count(dnshttp_dnssec_key_files($zone, true));
+		$keys_zsk = count(dnshttp_dnssec_key_files($zone)) - $keys_ksk;
+		if($keys_ksk > 0 AND $keys_zsk > 0) { return true; }
+		$dir = dnshttp_dnssec_keydir(true);
+		if($dir === false) { return "No key directory is configured (_BIND_DNSSEC_KEY_DIR_)."; }
+		if(!@is_dir($dir)) { return "Key directory ".$dir." could not be created - check the permissions of the generated configuration folder."; }
+		if(!function_exists("shell_exec")) { return "shell_exec() is disabled, keys cannot be generated."; }
+		$alg    = defined("_BIND_DNSSEC_ALGORITHM_") ? trim((string)_BIND_DNSSEC_ALGORITHM_) : "ECDSAP256SHA256";
+		if($alg === "") { $alg = "ECDSAP256SHA256"; }
+		$keygen = defined("_BIND_DNSSEC_KEYGEN_COMMAND_") ? (string)_BIND_DNSSEC_KEYGEN_COMMAND_ : dnshttp_bind_tool_path("dnssec-keygen");
+		$msg = "";
+		if($keys_zsk <= 0) { $msg .= (string)@shell_exec($keygen." -a ".escapeshellarg($alg)." -n ZONE -K ".escapeshellarg($dir)." ".escapeshellarg($zone)." 2>&1"); }
+		if($keys_ksk <= 0) { $msg .= (string)@shell_exec($keygen." -a ".escapeshellarg($alg)." -f KSK -n ZONE -K ".escapeshellarg($dir)." ".escapeshellarg($zone)." 2>&1"); }
+		dnshttp_dnssec_fix_key_permissions($zone);
+		$keys_ksk = count(dnshttp_dnssec_key_files($zone, true));
+		$keys_zsk = count(dnshttp_dnssec_key_files($zone)) - $keys_ksk;
+		if($keys_ksk <= 0 OR $keys_zsk <= 0) {
+			return "Key generation failed using '".$keygen."' (key signing keys: ".$keys_ksk.", zone signing keys: ".$keys_zsk."): ".trim(preg_replace('/\s+/', ' ', $msg));
+		}
+		return true;
+	}
+
+	// named needs to read (and under dnssec-policy write) its own key files.
+	function dnshttp_dnssec_fix_key_permissions($zone = false) {
+		$dir = dnshttp_dnssec_keydir(false);
+		if($dir === false OR !@is_dir($dir)) { return; }
+		$pattern = ($zone === false) ? $dir."/K*" : $dir."/K".$zone.".+*";
+		$files = @glob($pattern);
+		if(!is_array($files)) { return; }
+		foreach($files as $file) {
+			@chown($file, _CRON_BIND_LIB_USER_);
+			@chgrp($file, _CRON_BIND_LIB_GROUP_);
+			// The private half of a key pair stays readable by its owner alone. dnssec-keygen
+			// creates it that way, but the recursive chmod in the cronjob widens everything under
+			// the generated configuration folder to the configured mode (0770 by default, so group
+			// readable) - this runs after that sweep and takes the private keys back out of it.
+			if(substr($file, -8) === ".private") { @chmod($file, 0600); }
+				else { @chmod($file, octdec("0"._CRON_BIND_LIB_CODE_)); }
+		}
+	}
+
+	// DS records for the parent zone / the registrar, built from the key signing keys on disk.
+	function dnshttp_dnssec_ds_records($zone) {
+		$keys = dnshttp_dnssec_key_files($zone, true);
+		if(count($keys) <= 0 OR !function_exists("shell_exec")) { return ""; }
+		$cmd = defined("_BIND_DNSSEC_DSFROMKEY_COMMAND_") ? (string)_BIND_DNSSEC_DSFROMKEY_COMMAND_ : dnshttp_bind_tool_path("dnssec-dsfromkey");
+		$out = array();
+		foreach($keys as $key) {
+			// -2 is SHA-256: understood by every supported bind, and SHA-1 (-1) no longer is.
+			$res = trim((string)@shell_exec($cmd." -2 ".escapeshellarg($key)." 2>&1"));
+			foreach(explode("\n", $res) as $line) {
+				$line = trim($line);
+				if($line === "" OR !preg_match('/\sDS\s+\d+\s+\d+\s+\d+\s+/i', $line)) { continue; }
+				if(!in_array($line, $out)) { array_push($out, $line); }
+			}
+		}
+		return implode("\r\n", $out);
+	}
+
+	// The public key records, for the registries that provision DNSSEC by key instead of by digest.
+	// DENIC (.de) is the one most people run into: it takes the DNSKEY and derives the DS itself.
+	// Same key signing keys the DS above is built from, handed over in the other accepted format.
+	function dnshttp_dnssec_dnskey_records($zone) {
+		$keys = dnshttp_dnssec_key_files($zone, true);
+		$out = array();
+		foreach($keys as $key) {
+			$content = (string)@file_get_contents($key);
+			foreach(preg_split('/\r\n|\r|\n/', $content) as $line) {
+				$line = trim($line);
+				// A generated key file opens with a block of ";" comments describing the key.
+				if($line === "" OR substr($line, 0, 1) === ";") { continue; }
+				if(!preg_match('/DNSKEY\s+\d+\s+\d+\s+\d+\s+\S/i', $line)) { continue; }
+				// Presentation format is allowed to break the base64 into whitespace separated
+				// chunks, but a registrar form wants it as one contiguous string.
+				$line = preg_replace_callback('/(DNSKEY\s+\d+\s+\d+\s+\d+\s+)(.*)$/i',
+					function($m) { return $m[1].preg_replace('/\s+/', '', $m[2]); }, $line);
+				if($line !== null AND !in_array($line, $out)) { array_push($out, $line); }
+			}
+		}
+		return implode("\r\n", $out);
+	}
+
+	// Split a DNSKEY record into the four fields a registrar form asks for, or false if the line
+	// is not one. Registrar panels almost never take the whole record, they want it field by field.
+	function dnshttp_dnssec_dnskey_parts($line) {
+		if(!preg_match('/DNSKEY\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)/i', (string)$line, $m)) { return false; }
+		return array("flags" => $m[1], "protocol" => $m[2], "algorithm" => $m[3], "key" => $m[4]);
+	}
+
+	// Registrar dropdowns list the algorithm by name rather than by its number.
+	function dnshttp_dnssec_algorithm_name($number) {
+		$names = array(
+			5  => "RSASHA1",		7  => "NSEC3RSASHA1",
+			8  => "RSASHA256",		10 => "RSASHA512",
+			12 => "ECCGOST",		13 => "ECDSAP256SHA256",
+			14 => "ECDSAP384SHA384",15 => "ED25519",
+			16 => "ED448",
+		);
+		$number = (int)$number;
+		return isset($names[$number]) ? $names[$number] : "Algorithm ".$number;
+	}
+
+	// The zone options that turn signing on, in the syntax the given mode uses.
+	function dnshttp_dnssec_zone_options($mode) {
+		$dir = dnshttp_dnssec_keydir(false);
+		$out = "";
+		if($mode === "policy") {
+			$policy = defined("_BIND_DNSSEC_POLICY_") ? trim((string)_BIND_DNSSEC_POLICY_) : "default";
+			if($policy === "") { $policy = "default"; }
+			// Written bare, the way the bind documentation and the built-in policy names ('default',
+			// 'insecure', 'none') expect. Only a name that is not a plain identifier gets quoted,
+			// because that one would not parse otherwise.
+			if(!preg_match('/^[A-Za-z0-9_-]+$/', $policy)) { $policy = "\"".dnshttp_conf_escape($policy)."\""; }
+			$out  = "\r\n\tdnssec-policy ".$policy.";";
+			// Stated explicitly on purpose: whether dnssec-policy implies inline-signing changed
+			// between bind releases, and an explicit "yes" is accepted by all of them.
+			$out .= "\r\n\tinline-signing yes;";
+		} elseif($mode === "legacy") {
+			$out  = "\r\n\tauto-dnssec maintain;";
+			$out .= "\r\n\tinline-signing yes;";
+		} else {
+			return "";
+		}
+		if($dir !== false) { $out .= "\r\n\tkey-directory \"".dnshttp_conf_escape($dir)."\";"; }
+		return $out;
+	}
+
+	// Paths land inside a quoted named.conf string, so a quote or backslash in one has to be
+	// escaped rather than ending the string early.
+	function dnshttp_conf_escape($value) {
+		return str_replace(array("\\", "\""), array("\\\\", "\\\""), (string)$value);
+	}
+
+	// Ask named-checkconf whether the generated configuration is acceptable.
+	// true = accepted, false = rejected, null = no usable named-checkconf, no opinion.
+	function dnshttp_bind_checkconf(&$output) {
+		$output = "";
+		$cmd = defined("_BIND_CHECKCONF_COMMAND_") ? trim((string)_BIND_CHECKCONF_COMMAND_) : dnshttp_bind_tool_path("named-checkconf");
+		if($cmd === "" OR !@is_file($cmd) OR !function_exists("shell_exec")) { return null; }
+		if(!defined("_CRON_BIND_CONFNAME_") OR !@is_file(_CRON_BIND_CONFNAME_)) { return null; }
+		// named-checkconf stays silent and exits 0 when it is happy, so any output is a complaint.
+		$output = trim((string)@shell_exec($cmd." ".escapeshellarg(_CRON_BIND_CONFNAME_)." 2>&1"));
+		return ($output === "");
+	}
+
+	// The DNSSEC columns are added by an ALTER in initialize.php, so they are present on every
+	// install that has been through it once. Naming a column that is somehow still missing fails
+	// the whole statement, and that would take the zone writing down with it - so ask first.
+	// Only a positive answer is remembered: a negative one is what initialize.php acts on by
+	// running the migration, and caching it would report the old state for the rest of that
+	// request. Logging is off for the probe so a pre-migration install does not fill the query
+	// log with the failure this function exists to expect.
+	function dnshttp_dnssec_schema($mysql) {
+		static $ok = false;
+		if($ok) { return true; }
+		$logstate = $mysql->log_status();
+		$mysql->log_disable();
+		$ok = ($mysql->query("SELECT dnssec, dnssec_mode, dnssec_ds, dnssec_dnskey, dnssec_status, dnssec_update FROM "._TABLE_DOMAIN_BIND_." LIMIT 1") !== false);
+		$mysql->free_all();
+		if($logstate) { $mysql->log_enable(); }
+		return $ok;
+	}
+
+	/*************************************************************************
 		Cronjob Execution
-	*************************************************************************/	
+	*************************************************************************/
 	$log_output = "";
 	function dnshttp_cron_sync($mysql, $log, $use_real_line_breaks = false) {
 		global $log_output;
@@ -355,7 +674,22 @@
 		if(filter_var((string)$localIP, FILTER_VALIDATE_IP) !== false) { $allserverlist .= " ".$localIP.";"; }
 			else { logging_add("WARN: Local IP could not be resolved, not added to Server IP list!\r\n"); }
 		logging_add("INFO: Added Local IP to Master Server IPs: "); logging_add("$allserverlist\r\n");
-		####################################################################################################################################### 
+		#######################################################################################################################################
+		// DNSSEC mode for this run. Resolved once, because it depends on the installed bind version
+		// and every signed zone in this run has to be written in the same syntax.
+		$dnssec_schema	= dnshttp_dnssec_schema($mysql);	# false on a database that predates the DNSSEC columns
+		$dnssec_mode	= dnshttp_dnssec_mode();			# 'policy' | 'legacy' | false
+		$dnssec_used	= false;							# set when at least one zone is signed in this run
+		$dnssec_failed	= array();							# zone ids whose key material could not be prepared
+		if(!$dnssec_schema) {
+			$dnssec_mode = false;
+			logging_add("WARN: The DNSSEC columns are missing from the domain table, signing is skipped for this run. Open the web interface once so the schema upgrade can run.\r\n");
+		} elseif($dnssec_mode === false) {
+			logging_add("INFO: DNSSEC signing is not active: "); logging_add(dnshttp_dnssec_unavailable_reason()."\r\n");
+		} else {
+			logging_add("INFO: DNSSEC mode is '".$dnssec_mode."' (bind ".(dnshttp_bind_version() === false ? "version unknown" : dnshttp_bind_version()).", key directory '".dnshttp_dnssec_keydir(false)."').\r\n");
+		}
+		#######################################################################################################################################
 		// Recreate DNS Config File Structure if not Exists
 		#--------------------------------------------------------------------------------------------------------------------------------------
 		try { 
@@ -1081,7 +1415,9 @@
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		logging_add("START: Writing Master Zones\r\n");
 		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET zonecheck = 2, oldzonefallback = 2, zonecheck_failmessage = 'none', zonecheck_message = 'none', registered = 2 "); // Reset Domains State
-		$domains = $mysql->select("SELECT id, domain, content, okonce, set_no_replicate FROM "._TABLE_DOMAIN_BIND_." WHERE ( conflict = 0 OR (conflict = 1 AND preferred = 1) ) ORDER BY id DESC", true);
+		// The DNSSEC column is only named when it exists - see dnshttp_dnssec_schema(). A missing
+		// column would fail this statement as a whole and leave every master zone unwritten.
+		$domains = $mysql->select("SELECT id, domain, content, okonce, set_no_replicate".($dnssec_schema ? ", dnssec" : "")." FROM "._TABLE_DOMAIN_BIND_." WHERE ( conflict = 0 OR (conflict = 1 AND preferred = 1) ) ORDER BY id DESC", true);
 		$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET registered = 0 WHERE ( conflict = 1 AND preferred = 0) ");
 		if(is_array($domains)) {
 			foreach($domains as $key => $value) {
@@ -1099,6 +1435,44 @@
 				$temppath = _CRON_BIND_FILE_TEMP_.$safedomain;
 				$filenamecleared = _CRON_BIND_LIB_."/".$safedomain._CRON_BIND_LIB_ENDING_.".master";
 				$filenamecleared = str_replace("//", "/", $filenamecleared );
+				// DNSSEC for this zone. The root hint zone is never signed here, and the raw zone
+				// file this loop rewrites stays the unsigned source: bind keeps the signed copy and
+				// its journal beside it (inline-signing), and neither is touched by this cronjob.
+				$dnssec_stanza = "";
+				if($dnssec_mode !== false AND !empty(@$value["dnssec"]) AND trim($value["domain"]) != ".") {
+					$dnssec_ready = true;
+					// BOTH modes need this directory to exist before named is pointed at it, and
+					// neither mode gets it for free: legacy writes the keys generated below into
+					// it, and dnssec-policy has bind create its own keys there when it loads the
+					// zone. named-checkconf does not verify that a key-directory exists, so a
+					// missing one is not caught by the verification further down - it just means
+					// bind can never write a key and the zone silently stays unsigned.
+					$dnssec_keydir_now = dnshttp_dnssec_keydir(true);
+					if($dnssec_keydir_now === false) {
+						$dnssec_ready = "No key directory is configured (_BIND_DNSSEC_KEY_DIR_ in settings.php).";
+					} elseif(!@is_dir($dnssec_keydir_now)) {
+						$dnssec_ready = "Key directory ".$dnssec_keydir_now." does not exist and could not be created - check the permissions of the generated configuration folder.";
+					} elseif($dnssec_mode === "legacy") {
+						// auto-dnssec maintain only maintains keys that already exist, so they are
+						// created here. dnssec-policy generates its own when it loads the zone.
+						$dnssec_ready = dnshttp_dnssec_generate_keys($safedomain);
+					}
+					if($dnssec_ready === true) {
+						$dnssec_used = true;
+						$dnssec_stanza = _DNSHTTP_DNSSEC_TOKEN_;
+						logging_add("OK: DNSSEC ('".$dnssec_mode."') enabled for zone: ".$safedomain."\r\n");
+					} else {
+						logging_add("ERROR: DNSSEC could not be enabled for zone ".$safedomain.": ".$dnssec_ready."\r\n");
+						// Remembered so the key readback further down leaves this row alone. It would
+						// otherwise overwrite this specific diagnostic with its own generic "no key
+						// found yet" message, which is true but says nothing about the actual cause.
+						array_push($dnssec_failed, $value["id"]);
+						$binddnssec = array();
+						$binddnssec[0]["value"] = "Key material could not be prepared: ".$dnssec_ready;
+						$binddnssec[0]["type"]  = "s";
+						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET dnssec_status = ?, dnssec_update = CURRENT_TIMESTAMP() WHERE id = '".$value["id"]."'", $binddnssec);
+					}
+				}
 				// Rebuilt from the database every run - see the slave writer above.
 				@unlink($filenamecleared);
 				$newzoneok = false;
@@ -1176,7 +1550,7 @@
 					//	$conf_buildstring .= "\r\n\r\nzone \"".trim($value["domain"])."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n};";
 					//}
 					$nowwritte = true;
-					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };".$dnssec_stanza."\r\n};";}
 				} else {
 					$isnowregister = false;		
 					// See the slave writer above - okonce must survive a failed check.
@@ -1191,16 +1565,20 @@
 				}
 				
 				if(!$nowwritte AND @file_exists(@$filenamecleared) AND _CRON_BIND_FILE_REWRITE_) {
-					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };\r\n};";}
+					if(trim($value["domain"]) != ".") { $conf_buildstring .= "\r\n\r\nzone \"".$safedomain."\" {\r\n\ttype master;\r\n\tfile \"".$filenamecleared."\";\r\n\tallow-transfer { ".$allserverlist." };\r\n\tallow-update { ".$allserverlist." };".$dnssec_stanza."\r\n};";}
 				}
 			}
 		}
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		if(file_exists(_CRON_BIND_FILE_TABLE_)) { @unlink(_CRON_BIND_FILE_TABLE_); }
-		if(file_exists(_CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master")) { 
-			$rnew = $conf_buildstring."\r\n\r\nzone \".\" {\r\n\ttype hint;\r\n\tfile \""._CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master\";\r\n};"; 
+		if(file_exists(_CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master")) {
+			$rnew = $conf_buildstring."\r\n\r\nzone \".\" {\r\n\ttype hint;\r\n\tfile \""._CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master\";\r\n};";
 		} else { $rnew = $conf_buildstring ;}
-		@file_put_contents(_CRON_BIND_FILE_TABLE_, $rnew);	
+		// Resolve the DNSSEC placeholder the zone stanzas were built with. This is what the signed
+		// zones asked for - it is dropped again further down if named-checkconf refuses it.
+		$dnssec_options			= ($dnssec_mode === false) ? "" : dnshttp_dnssec_zone_options($dnssec_mode);
+		$rewrite_file_written	= false;
+		@file_put_contents(_CRON_BIND_FILE_TABLE_, str_replace(_DNSHTTP_DNSSEC_TOKEN_, $dnssec_options, $rnew));
 		logging_add("OK: Trying to write Zone Table File: "._CRON_BIND_FILE_TABLE_."\r\n");
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		logging_add("........................................................................................................................................\r\n");
@@ -1223,7 +1601,8 @@
 					@unlink(_CRON_BIND_FILE_);
 					if(file_exists(_CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master")) { $rnew = $conf_buildstring."\r\n\r\nzone \".\" {\r\n\ttype hint;\r\n\tfile \""._CRON_BIND_LIB_."/."._CRON_BIND_LIB_ENDING_.".master\";\r\n};"; }
 					else { $rnew = $conf_buildstring ;}
-					@file_put_contents(_CRON_BIND_FILE_, $rnew);	
+					@file_put_contents(_CRON_BIND_FILE_, str_replace(_DNSHTTP_DNSSEC_TOKEN_, $dnssec_options, $rnew));
+					$rewrite_file_written = true;
 					logging_add("OK: Trying to write Zone Table File: "._CRON_BIND_FILE_."\r\n");
 				} else {
 					logging_add("ERROR: File has been changed, waiting for next cron to reload zone table: "._CRON_BIND_FILE_."\r\n");
@@ -1232,6 +1611,45 @@
 		}
 		logging_add("FINISHED: Last Operation finished!\r\n");
 		logging_add("........................................................................................................................................\r\n");
+		##################################################################################################################
+		// Verify the generated configuration before named is restarted onto it. A zone option this
+		// bind does not know is not a problem for that one zone - named refuses the whole file and
+		// every zone on this server stops resolving, so it is worth one check.
+		if($dnssec_used AND $dnssec_options !== "") {
+			logging_add("START: Verifying the generated configuration with named-checkconf\r\n");
+			$checkout = "";
+			$checkok  = dnshttp_bind_checkconf($checkout);
+			if($checkok === null) {
+				logging_add("WARN: named-checkconf ("._BIND_CHECKCONF_COMMAND_.") is not available, the DNSSEC configuration could not be verified before loading!\r\n");
+			} elseif($checkok === true) {
+				logging_add("OK: The generated configuration including DNSSEC has been accepted.\r\n");
+			} else {
+				logging_add("WARN: named-checkconf rejected the configuration: ".trim(preg_replace('/\s+/', ' ', $checkout))."\r\n");
+				// Write the same configuration without DNSSEC. If that one passes, the syntax does
+				// not fit this bind, and serving the zones unsigned beats not serving them at all.
+				@file_put_contents(_CRON_BIND_FILE_TABLE_, str_replace(_DNSHTTP_DNSSEC_TOKEN_, "", $rnew));
+				if($rewrite_file_written) { @file_put_contents(_CRON_BIND_FILE_, str_replace(_DNSHTTP_DNSSEC_TOKEN_, "", $rnew)); }
+				$checkout2 = "";
+				if(dnshttp_bind_checkconf($checkout2) === true) {
+					$dnssec_options = "";
+					logging_add("ERROR: This bind does not accept the '".$dnssec_mode."' DNSSEC syntax. All zones have been written UNSIGNED so they keep resolving. Set _BIND_DNSSEC_MODE_ in settings.php to the syntax your bind understands ('policy' for 9.16 and newer, 'legacy' up to 9.18).\r\n");
+					if($dnssec_schema) {
+						$binddnssec = array();
+						$binddnssec[0]["value"] = "Not applied: named-checkconf rejected the '".$dnssec_mode."' DNSSEC syntax on this server. ".trim(preg_replace('/\s+/', ' ', $checkout));
+						$binddnssec[0]["type"]  = "s";
+						$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET dnssec_status = ?, dnssec_mode = NULL, dnssec_update = CURRENT_TIMESTAMP() WHERE dnssec = 1", $binddnssec);
+					}
+				} else {
+					// Rejected with and without DNSSEC, so the cause lies elsewhere and removing
+					// the signing configuration would not fix anything - put it back.
+					@file_put_contents(_CRON_BIND_FILE_TABLE_, str_replace(_DNSHTTP_DNSSEC_TOKEN_, $dnssec_options, $rnew));
+					if($rewrite_file_written) { @file_put_contents(_CRON_BIND_FILE_, str_replace(_DNSHTTP_DNSSEC_TOKEN_, $dnssec_options, $rnew)); }
+					logging_add("WARN: The configuration is rejected with and without DNSSEC, so the cause is somewhere else and the DNSSEC configuration has been kept. Please check the message above.\r\n");
+				}
+			}
+			logging_add("FINISHED: Last Operation finished!\r\n");
+			logging_add("........................................................................................................................................\r\n");
+		}
 		##################################################################################################################
 		//  Executions
 		logging_add("START: Linux Command Executions \r\n");
@@ -1303,8 +1721,68 @@
 			@shell_exec("service  "._BIND_SERVICE_NAME_." start");
 			@shell_exec("service  "._BIND_SERVICE_NAME_." restart");
 		}
-		logging_add("FINISHED: LAST OPERATION\r\n"); 
+		logging_add("FINISHED: LAST OPERATION\r\n");
 		logging_add("........................................................................................................................................\r\n");
+		##################################################################################################################
+		// Read back the DNSSEC key material and build the DS records for the registrar.
+		// This runs after the restart on purpose: under dnssec-policy bind creates the keys itself
+		// when it loads the zone, so before that there is nothing on disk to read.
+		if($dnssec_schema) {
+			logging_add("START: Collecting DNSSEC key material\r\n");
+			$dnssec_domains = $mysql->select("SELECT id, domain FROM "._TABLE_DOMAIN_BIND_." WHERE dnssec = 1", true);
+			if(is_array($dnssec_domains) AND $dnssec_used AND $dnssec_options !== "") {
+				// Give the freshly restarted named a moment to write out the keys of a zone that
+				// was signed for the first time. Anything still missing is picked up next run.
+				@sleep(3);
+			}
+			if(is_array($dnssec_domains)) {
+				foreach($dnssec_domains as $key => $value) {
+					$rawdnssec  = strtolower(trim($value["domain"]));
+					$safednssec = ($rawdnssec === '.') ? '.' : idn_to_ascii($rawdnssec, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+					if($safednssec === false) { $safednssec = ''; }
+					if($safednssec === '' || strlen($safednssec) > 253 || strpos($safednssec, '..') !== false
+						|| $safednssec !== preg_replace('/[^a-z0-9.-]/', '', $safednssec)) {
+						logging_add("ERROR: Skipped DNSSEC key lookup for invalid domain name: ".htmlspecialchars($rawdnssec)."\r\n");
+						continue;
+					}
+					dnshttp_dnssec_fix_key_permissions($safednssec);
+					if(in_array($value["id"], $dnssec_failed)) {
+						// The writer above already recorded why this one has no usable key material.
+						logging_add("SKIPPED: DNSSEC key material was not prepared for: ".$safednssec."\r\n");
+						continue;
+					}
+					if($dnssec_mode === false OR $dnssec_options === "") {
+						// Signing is not being written at the moment, so whatever DS is on record
+						// says nothing about what this server actually serves. Left untouched.
+						logging_add("SKIPPED: DNSSEC is requested but not active for: ".$safednssec."\r\n");
+						continue;
+					}
+					$dsnow = dnshttp_dnssec_ds_records($safednssec);
+					// Both formats are stored, because which one is wanted depends on the registry
+					// rather than on anything this server can see: most take the DS digest, DENIC
+					// (.de) and a few others take the DNSKEY and derive the digest themselves.
+					$dnskeynow = dnshttp_dnssec_dnskey_records($safednssec);
+					$binddnssec = array();
+					$binddnssec[0]["value"] = $dsnow;
+					$binddnssec[0]["type"]  = "s";
+					$binddnssec[1]["value"] = $dnskeynow;
+					$binddnssec[1]["type"]  = "s";
+					if(trim($dsnow) === "" AND trim($dnskeynow) === "") {
+						$binddnssec[2]["value"] = "No key signing key found yet in ".dnshttp_dnssec_keydir(false).". With dnssec-policy bind creates it while loading the zone - if this message is still here after the next run, check the permissions of that directory and the named log.";
+					} else {
+						$binddnssec[2]["value"] = "Signed with '".$dnssec_mode."'. The zone is only validated once the parent zone publishes the key, so hand it to the registrar in whichever of the two formats below their form asks for.";
+					}
+					$binddnssec[2]["type"]  = "s";
+					$binddnssec[3]["value"] = $dnssec_mode;
+					$binddnssec[3]["type"]  = "s";
+					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET dnssec_ds = ?, dnssec_dnskey = ?, dnssec_status = ?, dnssec_mode = ?, dnssec_update = CURRENT_TIMESTAMP() WHERE id = '".$value["id"]."'", $binddnssec);
+					if(trim($dsnow) === "" AND trim($dnskeynow) === "") { logging_add("WARN: No DNSSEC key signing key found (yet) for: ".$safednssec."\r\n"); }
+						else { logging_add("OK: DS and DNSKEY record(s) read for: ".$safednssec."\r\n"); }
+				}
+			} else { logging_add("INFO: No domain has DNSSEC enabled.\r\n"); }
+			logging_add("FINISHED: LAST OPERATION\r\n");
+			logging_add("........................................................................................................................................\r\n");
+		}
 		// Logfile Message
 		logging_add("OK: Execution Done at ".date("Y-m-d H:m:i")."");
 		$log->info($log_output, "cron_sync");

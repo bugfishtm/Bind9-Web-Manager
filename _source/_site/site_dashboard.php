@@ -152,13 +152,29 @@
 						  </td>
 						</tr>
 						<tr class="align-middle">
+						  <td>Master Domains (DNSSEC signed)</td>
+						  <td>
+								<?php
+									// Local domains only - a replicated one inherits whatever its master signed
+									// and has no DNSSEC state of its own on this server.
+									if(!dnshttp_dnssec_schema($mysql)) { echo '<span class="badge text-bg-warning">Database not upgraded yet</span>'; }
+									else {
+										$count1 = $mysql->select("SELECT id FROM "._TABLE_DOMAIN_BIND_." WHERE dnssec = 1", true);
+										if(is_array($count1)) { $count1 = count($count1); } else { $count1 = 0; }
+										echo $count1;
+										if($count1 > 0 AND dnshttp_dnssec_mode() === false) { echo ' <span class="badge text-bg-danger" title="'.htmlspecialchars(dnshttp_dnssec_unavailable_reason() ?? '').'">Not being applied</span>'; }
+									}
+								?>
+						  </td>
+						</tr>
+						<tr class="align-middle">
 						  <td>Slave Domains (Total)</td>
 						  <td>
-								<?php		  
+								<?php
 									$count1 = $mysql->select("SELECT id FROM "._TABLE_DOMAIN_API_."", true);
-									if(is_array($count1)) { $count1 = count($count1); } else { $count1 = 0; }  
+									if(is_array($count1)) { $count1 = count($count1); } else { $count1 = 0; }
 									echo $count1;
-								?>			  
+								?>
 						  </td>
 						</tr>
 						<tr class="align-middle">

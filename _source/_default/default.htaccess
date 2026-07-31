@@ -12,7 +12,7 @@
 
 ###########################################
 ## Permissions
-	RewriteRule ^(_default|_cronjob|_initialize|_template|_site) - [F,L]
+	RewriteRule ^(_default|_cronjob|_initialize|_template|_site|_data) - [F,L]
 	<FilesMatch "settings\.php$">
 	  Require all denied
 	</FilesMatch>

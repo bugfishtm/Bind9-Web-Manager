@@ -228,6 +228,70 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$domain_name."\"";
 		echo helper_api_response(null, "OK", 200);
 		exit();
 		
+	} elseif($action == "user_domain_dnssec_status" OR $action == "user_domain_dnssec_enable" OR $action == "user_domain_dnssec_disable") {
+		# Added after the actions above, so an integration written against an older version keeps
+		# working unchanged - it simply never asks for these.
+		$domain_identifier 			= @$_POST["domain_identifier"] ?? (@$_GET["domain_identifier"] ?? '');
+		if(!is_numeric($domain_identifier)) {
+			 echo helper_api_response(null, "Missing Parameter 'domain_identifier', which shall contain the id of the domain.", 401); exit();
+		}
+
+		# An instance whose database predates DNSSEC has no columns to read or write. Saying so is
+		# better than failing the statement and reporting an unrelated error.
+		if(!dnshttp_dnssec_schema($mysql)) {
+			echo helper_api_response(null, "This instance has not been upgraded for DNSSEC yet. Open the web interface once so the database upgrade can run.", 501); exit();
+		}
+
+		$domain_row = $mysql->select("SELECT id, domain, dnssec, dnssec_mode, dnssec_ds, dnssec_dnskey, dnssec_status, dnssec_update FROM "._TABLE_DOMAIN_BIND_." WHERE id = ".$domain_identifier." AND fk_user = ".$userid."", false);
+		if(!$domain_row) {
+			 echo helper_api_response(null, "Domain with identifier provided by 'domain_identifier' has not been found.", 404); exit();
+		}
+
+		if($action == "user_domain_dnssec_enable") {
+			$dnssec_mode_now = dnshttp_dnssec_mode();
+			if($dnssec_mode_now === false) {
+				echo helper_api_response(null, "DNSSEC cannot be enabled on this server: ".dnshttp_dnssec_unavailable_reason(), 503); exit();
+			}
+			$bind = array();
+			$bind[0]["value"] = "Waiting for the background worker to generate the key material and write the signed configuration.";
+			$bind[0]["type"]  = "s";
+			$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET dnssec = 1, dnssec_status = ?, dnssec_update = CURRENT_TIMESTAMP() WHERE id = ".$domain_identifier." AND fk_user = ".$userid."", $bind);
+			$domain_row["dnssec"] = 1;
+			$domain_row["dnssec_status"] = $bind[0]["value"];
+		} elseif($action == "user_domain_dnssec_disable") {
+			# The keys are kept on purpose - see the same operation in the web interface. Remove the
+			# DS record at the registrar BEFORE this takes effect, or validating resolvers break.
+			$bind = array();
+			$bind[0]["value"] = "Signing switched off. The existing keys are kept - remove the DS record at the registrar of the parent zone FIRST, otherwise resolvers that validate will stop resolving this domain.";
+			$bind[0]["type"]  = "s";
+			$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET dnssec = 0, dnssec_status = ?, dnssec_update = CURRENT_TIMESTAMP() WHERE id = ".$domain_identifier." AND fk_user = ".$userid."", $bind);
+			$domain_row["dnssec"] = 0;
+			$domain_row["dnssec_status"] = $bind[0]["value"];
+		}
+
+		# The key material and the mode are written by the sync cronjob, so right after a change they
+		# still describe the previous state. 'pending' says which of the two the caller is looking at.
+		# 'ds' and 'dnskey' are the same key in the two formats a registry may ask for - a caller
+		# submits whichever its registrar wants, never both.
+		$dnskey_parts = array();
+		foreach(preg_split('/\r\n|\r|\n/', (string)$domain_row["dnssec_dnskey"]) as $dnskey_line) {
+			$parsed = dnshttp_dnssec_dnskey_parts($dnskey_line);
+			if($parsed) { $parsed["algorithm_name"] = dnshttp_dnssec_algorithm_name($parsed["algorithm"]); array_push($dnskey_parts, $parsed); }
+		}
+		echo helper_api_response(array(
+			"id"			=> $domain_row["id"],
+			"domain"		=> $domain_row["domain"],
+			"dnssec"		=> (int)$domain_row["dnssec"],
+			"mode"			=> $domain_row["dnssec_mode"],
+			"ds"			=> $domain_row["dnssec_ds"],
+			"dnskey"		=> $domain_row["dnssec_dnskey"],
+			"dnskey_fields"	=> $dnskey_parts,
+			"message"		=> $domain_row["dnssec_status"],
+			"updated"		=> $domain_row["dnssec_update"],
+			"pending"		=> ($action == "user_domain_dnssec_status") ? false : true,
+		), "OK", 200);
+		exit();
+
 	} else {
 		echo helper_api_response(null, "Parameter 'action' is invalid, please check the official documentation related to your dnshttp version for valid actions.", 400); exit();
 	}

@@ -111,6 +111,52 @@
 		}		
 	
 		/*************************************************************************
+			Enable / Disable DNSSEC on Domain
+		*************************************************************************/
+		# Only the local (master/user) side can be signed. A replicated domain carries the signatures
+		# of its master along with the rest of the zone, there is nothing to switch on here.
+		# The owner of a domain may switch it, same as changing its records - an administrator may
+		# do it for every domain.
+		if(@$_GET["op"] == "dnssec_on" OR @$_GET["op"] == "dnssec_off") {
+			$dnssec_allowed = false;
+			if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { $dnssec_allowed = true; }
+			if(@$current_user["fk_user"] > 0 AND @$current_user["fk_user"] == $user->user_id) { $dnssec_allowed = true; }
+
+			if(!is_numeric(@$_GET["bind_id"])) {
+				x_eventBoxPrep("DNSSEC of a replicated (slave) domain is maintained on its master server.", "error", _COOKIES_);
+			} elseif(!$dnssec_allowed) {
+				x_eventBoxPrep("You need the domain administrator permission to change DNSSEC on a domain you do not own.", "error", _COOKIES_);
+			} elseif(!$csrf->check(@$_GET['csrf'])) {
+				x_eventBoxPrep("CSRF Error - The form has expired or reloaded in a new browsers tab, please try again!", "error", _COOKIES_);
+			} elseif(!dnshttp_dnssec_schema($mysql)) {
+				x_eventBoxPrep("The DNSSEC columns are missing from the domain table. Please reload this page once so the database upgrade can run.", "error", _COOKIES_);
+			} elseif(@$_GET["op"] == "dnssec_on") {
+				if(dnshttp_dnssec_mode() === false) {
+					x_eventBoxPrep("DNSSEC cannot be enabled on this server: ".dnshttp_dnssec_unavailable_reason(), "error", _COOKIES_);
+				} else {
+					$binddnssec = array();
+					$binddnssec[0]["value"] = "Waiting for the background worker to generate the key material and write the signed configuration.";
+					$binddnssec[0]["type"]  = "s";
+					$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET dnssec = 1, dnssec_status = ?, dnssec_update = CURRENT_TIMESTAMP() WHERE id = ".$_GET["bind_id"]."", $binddnssec);
+					x_eventBoxPrep("DNSSEC has been requested for this domain. The next cronjob run signs the zone and reads out the DS records for your registrar.", "ok", _COOKIES_);
+					Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."");
+					exit();
+				}
+			} else {
+				# The keys are deliberately kept. Removing them would make the zone unresolvable for
+				# every validating resolver that still has the DS of the parent in cache, and the same
+				# keys are needed again if signing is switched back on.
+				$binddnssec = array();
+				$binddnssec[0]["value"] = "Signing switched off. The existing keys are kept - remove the DS record at the registrar of the parent zone FIRST, otherwise resolvers that validate will stop resolving this domain.";
+				$binddnssec[0]["type"]  = "s";
+				$mysql->query("UPDATE "._TABLE_DOMAIN_BIND_." SET dnssec = 0, dnssec_status = ?, dnssec_update = CURRENT_TIMESTAMP() WHERE id = ".$_GET["bind_id"]."", $binddnssec);
+				x_eventBoxPrep("DNSSEC has been switched off for this domain. Remove the DS record at your registrar before the next cronjob run, otherwise validating resolvers will fail on this domain.", "ok", _COOKIES_);
+				Header("Location: ./?site=domain_list&bind_id=".$_GET["bind_id"]."");
+				exit();
+			}
+		}
+
+		/*************************************************************************
 			Prefer / Unprefer  on Domain
 		*************************************************************************/
 		if(@$_GET["op"] == "prefer") {
@@ -353,6 +399,9 @@
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
 													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
+													// Replicated rows have no DNSSEC column of their own - they inherit whatever
+													// their master signed, so the badge only ever appears on local domains.
+													if(@$value["dnssec"] == "1") { echo '<span class="badge text-bg-info" title="DNSSEC signing enabled for this zone">DS</span> '; }
 												  ?></td><td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 														<?php echo "<a class='btn btn-dark btn-sm' title='Inspect all similar Domains' href='./?site=domain_list&domain=".base64_encode(trim(strtolower($value["domain"] ?? '') ?? ''))."'><i class=\"bi bi-copy\"></i></a>"; ?> 
@@ -389,6 +438,9 @@
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
 													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
+													// Replicated rows have no DNSSEC column of their own - they inherit whatever
+													// their master signed, so the badge only ever appears on local domains.
+													if(@$value["dnssec"] == "1") { echo '<span class="badge text-bg-info" title="DNSSEC signing enabled for this zone">DS</span> '; }
 												  ?></td><td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 														<?php echo "<a class='btn btn-dark btn-sm' title='Inspect all similar Domains' href='./?site=domain_list&domain=".base64_encode(trim(strtolower($value["domain"] ?? '') ?? ''))."'><i class=\"bi bi-copy\"></i></a>"; ?> 
@@ -425,6 +477,9 @@
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
 													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
+													// Replicated rows have no DNSSEC column of their own - they inherit whatever
+													// their master signed, so the badge only ever appears on local domains.
+													if(@$value["dnssec"] == "1") { echo '<span class="badge text-bg-info" title="DNSSEC signing enabled for this zone">DS</span> '; }
 												  ?></td>
 												  <td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
@@ -466,6 +521,9 @@
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
 													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
+													// Replicated rows have no DNSSEC column of their own - they inherit whatever
+													// their master signed, so the badge only ever appears on local domains.
+													if(@$value["dnssec"] == "1") { echo '<span class="badge text-bg-info" title="DNSSEC signing enabled for this zone">DS</span> '; }
 												  ?></td><td>
 													  <?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 														<?php echo "<a class='btn btn-dark btn-sm' title='Inspect all similar Domains' href='./?site=domain_list&domain=".base64_encode(trim(strtolower($value["domain"] ?? '') ?? ''))."'><i class=\"bi bi-copy\"></i></a>"; ?> 
@@ -559,8 +617,16 @@
 				function dnshttp_userui_del() {
 					window.location.href = "./?site=domain_list&op=del&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>";
 				}
-			
-			</script>				
+
+				function dnshttp_userui_dnssec_on() {
+					window.location.href = "./?site=domain_list&op=dnssec_on&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>";
+				}
+
+				function dnshttp_userui_dnssec_off() {
+					window.location.href = "./?site=domain_list&op=dnssec_off&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>";
+				}
+
+			</script>
 		
 			<!----------------- Modals -------------------->
 			<div class="modal" id="cpage_prefer_item_modal" tabindex="-1">
@@ -634,6 +700,44 @@
 				</div>
 			  </div>
 			</div>			
+
+			<div class="modal" id="cpage_dnssec_on_item_modal" tabindex="-1">
+			  <div class="modal-dialog">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title">Enable DNSSEC</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+					<p>Do you want this zone to be signed with DNSSEC? The background worker generates the key material and rewrites the bind configuration on its next run, which can take up to two hours.</p>
+					<p class="mb-0"><b>The zone is not validated yet at that point.</b> Once the keys exist, the DS record shown on this page has to be handed to the registrar of the parent zone. Only after the registrar has published it does the chain of trust exist.</p>
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-success" onClick="dnshttp_userui_dnssec_on()">Enable DNSSEC</button>
+				  </div>
+				</div>
+			  </div>
+			</div>
+
+			<div class="modal" id="cpage_dnssec_off_item_modal" tabindex="-1">
+			  <div class="modal-dialog">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title">Disable DNSSEC</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+					<p><b>Remove the DS record at the registrar of the parent zone first, and wait for it to expire from the caches.</b> A resolver that still sees a DS record but no signatures treats this domain as broken and stops answering for it entirely.</p>
+					<p class="mb-0">The keys themselves are kept, so signing can be switched back on with the same key material.</p>
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-danger" onClick="dnshttp_userui_dnssec_off()">Disable DNSSEC</button>
+				  </div>
+				</div>
+			  </div>
+			</div>
 
 			<div class="modal" id="cpage_del_item_modal" tabindex="-1">
 			  <div class="modal-dialog">
@@ -1213,6 +1317,37 @@
 										<button type="button" class="btn btn-warning" onClick="dnshttp_userui_changerecord()">Change Records</button>
 									  <?php } ?>
 									  
+								  <?php
+									// DNSSEC is a property of the zone this server is authoritative for, so it is
+									// offered on local (master and user) domains only. A replicated domain gets the
+									// signatures of its master transferred along with the rest of the zone data.
+									$dnssec_may_toggle = false;
+									if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { $dnssec_may_toggle = true; }
+									if(@$current_user["fk_user"] > 0 AND @$current_user["fk_user"] == $user->user_id) { $dnssec_may_toggle = true; }
+									if($c_domain_id_r != "api_id" AND $dnssec_may_toggle) {
+										$dnssec_mode_now   = dnshttp_dnssec_mode();
+										$dnssec_schema_now = dnshttp_dnssec_schema($mysql);
+								  ?>
+									  <br clear="">
+									  <br clear="">
+									  You can have this zone signed with DNSSEC. The signing itself is done by bind, this only writes the configuration and reads out the DS record for your registrar.<br />
+									  <?php if(!$dnssec_schema_now) { ?>
+										  <span class="text-danger">The DNSSEC columns are missing from the domain table - reload this page once so the database upgrade can run.</span><br />
+										  <button type="button" class="btn btn-success" disabled>Enable DNSSEC</button>
+										  <button type="button" class="btn btn-danger" disabled>Disable DNSSEC</button>
+									  <?php } elseif($dnssec_mode_now === false AND @$current_user["dnssec"] != 1) { ?>
+										  <span class="text-danger"><?php echo htmlspecialchars(dnshttp_dnssec_unavailable_reason() ?? ''); ?></span><br />
+										  <button type="button" class="btn btn-success" disabled>Enable DNSSEC</button>
+										  <button type="button" class="btn btn-danger" disabled>Disable DNSSEC</button>
+									  <?php } elseif(@$current_user["dnssec"] == 1) { ?>
+										  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_on_item_modal" disabled>Enable DNSSEC</button>
+										  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_off_item_modal">Disable DNSSEC</button>
+									  <?php } else { ?>
+										  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_on_item_modal">Enable DNSSEC</button>
+										  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cpage_dnssec_off_item_modal" disabled>Disable DNSSEC</button>
+									  <?php } ?>
+								  <?php } ?>
+
 								  <?php if(@$current_user["fk_user"] > 0) { ?>
 									  <br clear="">
 									  <br clear="">
@@ -1222,9 +1357,110 @@
 
 							</div>
 						</div>
-					</div>		
-				</div>		
+					</div>
+				</div>
 			
+				<!----------------- DNSSEC  -------------------->
+				<?php if($c_domain_id_r == "api_id") { ?>
+					<div class="card card-dark mb-4">
+					  <div class="card-header">
+						<h3 class="card-title">DNSSEC</h3>
+					  </div>
+					  <div class="card-body">
+						This is a replicated domain. If its master server signs the zone, the signatures are transferred
+						along with the rest of the zone data and this server answers with them - there is nothing to
+						configure here. DNSSEC is switched on for this domain on the master server that owns it.
+					  </div>
+					</div>
+				<?php } else { ?>
+					<div class="card card-dark mb-4">
+					  <div class="card-header">
+						<h3 class="card-title">DNSSEC</h3>
+					  </div>
+					  <div class="card-body">
+						<?php if(!dnshttp_dnssec_schema($mysql)) { ?>
+							<div class="callout callout-warning mb-0">The DNSSEC columns are missing from the domain table. Reload this page once so the database upgrade can run.</div>
+						<?php } elseif(@$current_user["dnssec"] != 1) { ?>
+							<p class="mb-0">This zone is served <b>unsigned</b>.
+							<?php if(dnshttp_dnssec_mode() === false) { echo "DNSSEC is not available on this server: ".htmlspecialchars(dnshttp_dnssec_unavailable_reason() ?? ''); } ?>
+							</p>
+							<?php if(trim((string)@$current_user["dnssec_status"]) != "") { ?>
+								<p class="mt-2 mb-0"><small><b>Last message:</b> <?php echo nl2br(htmlspecialchars($current_user["dnssec_status"] ?? '')); ?></small></p>
+							<?php } ?>
+						<?php } else { ?>
+							<table class="table table-sm table-borderless mb-3">
+								<tr>
+									<td style="width: 180px;"><b>State</b></td>
+									<td>
+										<?php if(trim((string)@$current_user["dnssec_ds"]) != "" OR trim((string)@$current_user["dnssec_dnskey"]) != "") { ?>
+											<span class="badge text-bg-success">Signed</span>
+										<?php } else { ?>
+											<span class="badge text-bg-warning">Waiting for key material</span>
+										<?php } ?>
+									</td>
+								</tr>
+								<tr>
+									<td><b>Configuration</b></td>
+									<td><?php
+										$dnssec_mode_shown = trim((string)@$current_user["dnssec_mode"]);
+										if($dnssec_mode_shown === "policy") { echo "dnssec-policy \"".htmlspecialchars(_BIND_DNSSEC_POLICY_)."\" (bind 9.16 and newer)"; }
+										elseif($dnssec_mode_shown === "legacy") { echo "auto-dnssec maintain (bind up to 9.18)"; }
+										else { echo "Not written yet - the background worker decides this on its next run."; }
+									?></td>
+								</tr>
+								<tr>
+									<td><b>Last check</b></td>
+									<td><?php echo htmlspecialchars((string)(@$current_user["dnssec_update"] ?? '')); ?></td>
+								</tr>
+							</table>
+							<?php if(trim((string)@$current_user["dnssec_status"]) != "") { ?>
+								<div class="callout callout-info mb-3"><?php echo nl2br(htmlspecialchars($current_user["dnssec_status"] ?? '')); ?></div>
+							<?php } ?>
+							<?php if(trim((string)@$current_user["dnssec_ds"]) != "" OR trim((string)@$current_user["dnssec_dnskey"]) != "") { ?>
+								<div class="callout callout-warning">
+									<b>One last step, and it happens at your registrar - not here.</b><br />
+									This zone is signed, but no resolver checks the signatures until the registry one level up
+									vouches for the key. Until that is done the domain resolves exactly as it did before, with
+									no DNSSEC protection.<br /><br />
+									Your registrar's form asks for <b>one</b> of the two formats below - never both. Which one
+									depends on the registry, so go by the field labels you see:
+									<ul class="mb-0">
+										<li>Fields called <b>Key Tag / Algorithm / Digest Type / Digest</b> &rarr; use the <b>DS</b> record.</li>
+										<li>Fields called <b>Flags / Protocol / Algorithm / Public Key</b> &rarr; use the <b>DNSKEY</b> record. This is what <b>.de</b> (DENIC) uses.</li>
+									</ul>
+								</div>
+
+								<?php if(trim((string)@$current_user["dnssec_dnskey"]) != "") { ?>
+									<b>DNSKEY &mdash; for .de and other registries that provision by key</b>
+									<?php
+										// Split into the individual fields: a registrar panel almost never accepts the
+										// whole record, it wants one input box per value.
+										foreach(preg_split('/\r\n|\r|\n/', (string)$current_user["dnssec_dnskey"]) as $dnskeyline) {
+											$dnskeyparts = dnshttp_dnssec_dnskey_parts($dnskeyline);
+											if(!$dnskeyparts) { continue; }
+									?>
+										<table class="table table-sm table-bordered mt-2 mb-2">
+											<tr><td style="width: 140px;">Flags</td><td><code><?php echo htmlspecialchars($dnskeyparts["flags"]); ?></code></td></tr>
+											<tr><td>Protocol</td><td><code><?php echo htmlspecialchars($dnskeyparts["protocol"]); ?></code></td></tr>
+											<tr><td>Algorithm</td><td><code><?php echo htmlspecialchars($dnskeyparts["algorithm"]); ?></code> &ndash; <?php echo htmlspecialchars(dnshttp_dnssec_algorithm_name($dnskeyparts["algorithm"])); ?></td></tr>
+											<tr><td>Public Key</td><td style="word-break: break-all;"><code><?php echo htmlspecialchars($dnskeyparts["key"]); ?></code></td></tr>
+										</table>
+									<?php } ?>
+									<small class="text-muted">If the form wants the whole record on one line instead:</small>
+									<pre class="p-2 mt-1 mb-3" style="background: #1e1e1e; color: #d4d4d4; white-space: pre-wrap; word-break: break-all;"><?php echo htmlspecialchars($current_user["dnssec_dnskey"] ?? ''); ?></pre>
+								<?php } ?>
+
+								<?php if(trim((string)@$current_user["dnssec_ds"]) != "") { ?>
+									<b>DS &mdash; for .com, .net, .org and most other registries</b>
+									<pre class="p-2 mt-2 mb-0" style="background: #1e1e1e; color: #d4d4d4; white-space: pre-wrap; word-break: break-all;"><?php echo htmlspecialchars($current_user["dnssec_ds"] ?? ''); ?></pre>
+									<small class="text-muted">Read left to right, the numbers after "DS" are Key Tag, Algorithm and Digest Type - the rest is the Digest.</small>
+								<?php } ?>
+							<?php } ?>
+						<?php } ?>
+					  </div>
+					</div>
+				<?php } ?>
+
 				<?php if($permsobj->hasPerm($user->user_id, "domain_admin") OR $user->user_rank == 0) { ?>
 				<!----------------- Table Element  -------------------->
 				<div class="card card-dark mb-4">
@@ -1286,6 +1522,9 @@
 												if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 												if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
 												if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
+												// Replicated rows have no DNSSEC column of their own - they inherit whatever
+												// their master signed, so the badge only ever appears on local domains.
+												if(@$value["dnssec"] == "1") { echo '<span class="badge text-bg-info" title="DNSSEC signing enabled for this zone">DS</span> '; }
 											  ?></td>
 											  <td <?php if(@$value["id"] == $current_user["id"] AND ((!$is_bind_dom AND !$is_bind_c) OR ($is_bind_dom AND $is_bind_c))) { ?> style="background: #424649 !important; color: white;" <?php } ?>>
 												<?php if(@$value["fk_server"] > 0) { if(@$value["id"] != $current_user["id"]) { echo "<a class='btn btn-dark btn-sm' title='Inspect this specific Domain' href='./?site=domain_list&api_id=".trim(strtolower($value["id"] ?? '') ?? '')."'><i class=\"bi bi-search\"></i></a>"; } }
@@ -1433,6 +1672,9 @@
 													if($value["oldzonefallback"] == "1") { echo '<span class="badge text-bg-danger" title="Fallback to previous stored zone, new zone data seems invalid...">OZF</span> '; }
 													if($value["okonce"] == "0") { echo '<span class="badge text-bg-warning" title="This domain has never been valid before...">NV</span> '; }
 													if($value["zonecheck"] == "0") { echo '<span class="badge text-bg-danger" title="Zone invalidated...">ZE</span> '; }
+													// Replicated rows have no DNSSEC column of their own - they inherit whatever
+													// their master signed, so the badge only ever appears on local domains.
+													if(@$value["dnssec"] == "1") { echo '<span class="badge text-bg-info" title="DNSSEC signing enabled for this zone">DS</span> '; }
 												  ?></td><td>
 													<?php if(@$value["fk_server"] > 0) { echo "<a class='btn btn-dark btn-sm' title='Inspect this specific Domain' href='./?site=domain_list&api_id=".trim(strtolower($value["id"] ?? '') ?? '')."'><i class=\"bi bi-search\"></i></a>"; }
 															else { echo "<a class='btn btn-dark btn-sm' title='Inspect this specific Domain' href='./?site=domain_list&bind_id=".trim(strtolower($value["id"] ?? '') ?? '')."'><i class=\"bi bi-search\"></i></a>"; } ?>

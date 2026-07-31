@@ -33,7 +33,7 @@
 		General Site Variables
 	*************************************************************************/
 	define('_GITHUB_',   			"https://github.com/bugfishtm/"); 										# URL to Documentation
-	define("_VERSION_", 			'4.1.3');																# Current Actual Code Version
+	define("_VERSION_", 			'4.1.4');																# Current Actual Code Version
 	
 	/*************************************************************************
 		Docker Define Var for installations
@@ -63,7 +63,31 @@
 		Include DNSHTTP Function Library
 	*************************************************************************/
 	require_once(_MAIN_PATH_."/_initialize/library.php");
-	
+
+	/*************************************************************************
+		DNSSEC Configuration Variables
+	*************************************************************************/
+	# Every one of these is optional. An instance that was installed before DNSSEC existed keeps
+	# its original settings.php and simply picks up the defaults below, so an upgrade needs no
+	# configuration change - the feature is available, but stays off on every individual zone
+	# until it is switched on there.
+	#
+	# _BIND_DNSSEC_MODE_ decides which configuration syntax is written into the zone stanzas:
+	#   'auto'   - derive it from the installed bind version (default)
+	#   'policy' - dnssec-policy, bind 9.16 and newer
+	#   'legacy' - auto-dnssec maintain, bind 9.9 up to 9.18
+	#   'off'    - never write DNSSEC configuration
+	# 'auto' writes nothing at all when the version cannot be read, because guessing wrong makes
+	# named reject the entire generated configuration.
+	if(!defined("_BIND_DNSSEC_"))                   { define("_BIND_DNSSEC_", true); }
+	if(!defined("_BIND_DNSSEC_MODE_"))              { define("_BIND_DNSSEC_MODE_", "auto"); }
+	if(!defined("_BIND_DNSSEC_POLICY_"))            { define("_BIND_DNSSEC_POLICY_", "default"); }
+	if(!defined("_BIND_DNSSEC_ALGORITHM_"))         { define("_BIND_DNSSEC_ALGORITHM_", "ECDSAP256SHA256"); }
+	if(!defined("_BIND_DNSSEC_KEY_DIR_"))           { define("_BIND_DNSSEC_KEY_DIR_", _CRON_BIND_FILE_CONFIG_DNSHTTP_."/keys"); }
+	if(!defined("_BIND_DNSSEC_KEYGEN_COMMAND_"))    { define("_BIND_DNSSEC_KEYGEN_COMMAND_", dnshttp_bind_tool_path("dnssec-keygen")); }
+	if(!defined("_BIND_DNSSEC_DSFROMKEY_COMMAND_")) { define("_BIND_DNSSEC_DSFROMKEY_COMMAND_", dnshttp_bind_tool_path("dnssec-dsfromkey")); }
+	if(!defined("_BIND_CHECKCONF_COMMAND_"))        { define("_BIND_CHECKCONF_COMMAND_", dnshttp_bind_tool_path("named-checkconf")); }
+
 	/*************************************************************************
 		Include important Classes and Functions
 	*************************************************************************/
@@ -168,6 +192,20 @@
 	$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN serial_c VARCHAR(24) DEFAULT NULL; ");
 	$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN set_no_replicate int(1) DEFAULT 0 COMMENT '1 - No Replication to Slaves | 0 - Replicate to Slaves (default)'; ");
 	$mysql->query("ALTER TABLE "._TABLE_SERVER_." ADD COLUMN ssl_insecure tinyint(1) DEFAULT 1 COMMENT '1 - Allow invalid/self-signed SSL Certificates | 0 - Require valid SSL'; ");
+	# DNSSEC state. Added by ALTER as well so an instance that was installed before the feature
+	# existed gains the columns on its first request instead of needing a reinstall. Every zone
+	# starts at dnssec = 0, which produces exactly the configuration the instance had before.
+	# Unlike the statements above these are asked for first rather than run blind: a failed query
+	# is written to the query log, so five ALTERs that can only ever fail again once the migration
+	# has happened would add five log rows to every single request.
+	if(!dnshttp_dnssec_schema($mysql)) {
+		$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN dnssec int(1) DEFAULT 0 COMMENT '1 - Sign this zone with DNSSEC | 0 - Unsigned (default)'; ");
+		$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN dnssec_mode varchar(16) DEFAULT NULL COMMENT 'policy | legacy - configuration syntax used for this zone on the last run'; ");
+		$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN dnssec_ds longtext NULL COMMENT 'DS records of this zone, to be handed to the registrar of the parent zone'; ");
+		$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN dnssec_dnskey longtext NULL COMMENT 'DNSKEY records of this zone, for registries that provision by key instead of by digest (DENIC/.de)'; ");
+		$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN dnssec_status longtext NULL COMMENT 'Last DNSSEC status or error message'; ");
+		$mysql->query("ALTER TABLE "._TABLE_DOMAIN_BIND_." ADD COLUMN dnssec_update datetime DEFAULT NULL COMMENT 'Last time the key material of this zone was read'; ");
+	}
 	mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 	
 	/*************************************************************************
@@ -252,6 +290,12 @@
 			  `okonce` int DEFAULT 0 COMMENT '1 if has ever been a valid zone | 0 is never been a valid zone',
 			  `oldzonefallback` int DEFAULT 0 COMMENT '1 new zone invalid, falling back to old | 0 new zone ok',
 			  `set_no_replicate` int(1) DEFAULT 0 COMMENT '1 - No Replication to Slaves | 0 - Replicate to Slaves (default)',
+			  `dnssec` int(1) DEFAULT 0 COMMENT '1 - Sign this zone with DNSSEC | 0 - Unsigned (default)',
+			  `dnssec_mode` varchar(16) DEFAULT NULL COMMENT 'policy | legacy - configuration syntax used for this zone on the last run',
+			  `dnssec_ds` longtext NULL COMMENT 'DS records of this zone, to be handed to the registrar of the parent zone',
+			  `dnssec_dnskey` longtext NULL COMMENT 'DNSKEY records of this zone, for registries that provision by key instead of by digest (DENIC/.de)',
+			  `dnssec_status` longtext NULL COMMENT 'Last DNSSEC status or error message',
+			  `dnssec_update` datetime DEFAULT NULL COMMENT 'Last time the key material of this zone was read',
 			  `creation` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Domain Entry Date | Auto Set',
 			  `modification` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Domain Update Date | Auto Set',		  
 			PRIMARY KEY (`id`)); ALTER TABLE `"._TABLE_DOMAIN_BIND_."` ADD UNIQUE `unique_index_binddomain`(`domain`, `domain_type`);"); $mysql->free_all();}		

@@ -166,6 +166,14 @@
 			'_USER_DOMAIN_MINIMUM_'                => '3600',
 			'_USER_DOMAIN_MAIL_'             	   => 'postmaster@{domain}',
 			'_SERVER_HOSTNAME_'             	   => $old['hostname'],
+			// DNSSEC. 'auto' derives the configuration syntax from the installed bind version;
+			// set it to 'policy' (bind 9.16 and newer) or 'legacy' (bind up to 9.18) to pin it,
+			// or to 'off' to take the feature away. Every zone still starts unsigned and is
+			// switched on individually in the domain view.
+			'_BIND_DNSSEC_'                        => 'true',
+			'_BIND_DNSSEC_MODE_'                   => 'auto',
+			'_BIND_DNSSEC_POLICY_'                 => 'default',
+			'_BIND_DNSSEC_ALGORITHM_'              => 'ECDSAP256SHA256',
 		];
 
 		switch ($method) {
@@ -196,6 +204,12 @@
 				break;
 		}
 
+		// Derived after the switch so a custom zone file folder is taken into account. The key
+		// directory lives inside the generated configuration folder, which the sync cronjob already
+		// owns and chowns to the bind user - bind has to be able to read (and under dnssec-policy
+		// write) its own key files.
+		$base['_BIND_DNSSEC_KEY_DIR_'] = rtrim(str_replace('//', '/', $base['_CRON_BIND_LIB_']), '/') . '/keys';
+
 		return $base;
 	}
 	
@@ -216,6 +230,7 @@
 		$boolKeys = [
 			'_CRON_FILES_FOLDER_FETCH_',
 			'_CRON_BIND_FILE_REWRITE_',
+			'_BIND_DNSSEC_',
 		];
 
 		foreach ($cfg as $key => $val) {
@@ -1218,6 +1233,38 @@
 				<tr class="align-middle">
 					<td>_USER_DOMAIN_MAIL_</td>
 					<td>Default Entry for SOA Record: Postmaster Mail (Responsible Party)</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_DNSSEC_</td>
+					<td>Whether DNSSEC signing may be used at all on this instance (true / false). Every zone still starts unsigned and is switched on individually.</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_DNSSEC_MODE_</td>
+					<td>Which configuration syntax is written for signed zones. 'auto' derives it from the installed bind version, 'policy' forces dnssec-policy (bind 9.16 and newer), 'legacy' forces auto-dnssec maintain (bind up to 9.18), 'off' disables it. With 'auto' and a bind version that cannot be read, nothing is written at all.</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_DNSSEC_POLICY_</td>
+					<td>Name of the dnssec-policy to attach to signed zones in 'policy' mode. 'default' is the built-in policy of bind - a policy of your own has to be defined in the bind options file.</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_DNSSEC_ALGORITHM_</td>
+					<td>Signing algorithm used for keys generated in 'legacy' mode (for example ECDSAP256SHA256 or RSASHA256). In 'policy' mode the policy decides this.</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_DNSSEC_KEY_DIR_</td>
+					<td>Directory the zone keys live in. Has to be readable (and under dnssec-policy writable) by the bind user.</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_DNSSEC_KEYGEN_COMMAND_</td>
+					<td>Path to the dnssec-keygen binary. Optional - derived from the named-compilezone path when it is not set.</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_DNSSEC_DSFROMKEY_COMMAND_</td>
+					<td>Path to the dnssec-dsfromkey binary, used to read out the DS records for your registrar. Optional - derived from the named-compilezone path when it is not set.</td>
+				</tr>
+				<tr class="align-middle">
+					<td>_BIND_CHECKCONF_COMMAND_</td>
+					<td>Path to the named-checkconf binary. Optional - used to verify the generated configuration before named is restarted onto it.</td>
 				</tr>
 			  </tbody>
 			</table>		  
