@@ -90,8 +90,9 @@
 	// files on this server when the zone is written out - that is the whole reason this exists.
 	// $GENERATE is deliberately left alone: it is a legitimate bind feature with no file access, and
 	// removing it would take a capability away from anyone writing zone data through the API.
-	// Note the record editor in the web UI does not round-trip $GENERATE, so a zone using it should
-	// be maintained through the API rather than opened and saved in the editor.
+	// The record editor in the web UI keeps $GENERATE (and every other directive, comment and
+	// record type it does not know) byte for byte, so a zone using it survives being opened and
+	// saved there. Only the records the user actually edits are written out again.
 	function dnshttp_zone_input_clean($zone) {
 		return preg_replace('/^[ \t]*\$INCLUDE\b[^\r\n]*/im', '; $INCLUDE removed - not permitted in user zone data', (string)$zone);
 	}

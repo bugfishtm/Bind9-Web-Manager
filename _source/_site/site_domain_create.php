@@ -104,7 +104,7 @@ _dmarc IN TXT \"v=DMARC1; p=none; rua=mailto:dmarc@".$new_domain."\"";
 			} else {
 				x_eventBoxPrep("Domain has been created, please start adding records to the domain!", "ok", _COOKIES_);
 			}
-			Header("Location: ./?site=domain_list&bind_id=".$checkserverid."");
+			Header("Location: ./?site=domain_list&op=changerecord&bind_id=".$checkserverid."");
 			exit();
 
 		} else {

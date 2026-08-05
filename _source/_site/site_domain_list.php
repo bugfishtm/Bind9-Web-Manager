@@ -568,6 +568,10 @@
 			<!----------------- Javascript for API Key Operations -------------------->
 			<script>
 				function dnshttp_userui_changerecord_save() {
+					if(!window.DNSZoneEditor) { alert("The record editor did not load. Reload the page and try again."); return; }
+					// Gives the user a last look at anything that would make bind refuse the zone,
+					// and switches off the unsaved-changes guard when they go ahead.
+					if(window.DNSZoneEditor.confirmSave && !window.DNSZoneEditor.confirmSave()) { return; }
 					const form = document.createElement('form');
 					form.method = 'POST';
 					form.action = './?site=domain_list&op=saverecords&<?php echo $c_domain_id_r; ?>=<?php echo $_GET[$c_domain_id_r]; ?>&csrf=<?php echo $csrf->get(); ?>';
@@ -759,21 +763,35 @@
 			
 			<?php if(@$_GET["op"] == "viewrecord") {  ?>
 			<div class="modal" id="cpage_rvv_item_modal" tabindex="-1" style="<?php if(@$_GET["op"] == "viewrecord") { echo "display: block;"; } ?> background: rgba(0,0,0,0.6);">
-			  <div class="modal-dialog">
+			  <div class="modal-dialog" style="min-width: 90% !important;">
 				<div class="modal-content">
 				  <div class="modal-header">
-					<h5 class="modal-title">Domain Record View</h5>
+					<h5 class="modal-title">Domain Record View<br /><small>Serial <?php echo htmlspecialchars($current_user["serial_c"] ?? ''); ?></small></h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick="dnshttp_userui_viewrecord_close()"></button>
 				  </div>
-				  <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
-					<p><?php echo nl2br(htmlspecialchars($current_user["content"] ?? '')); ?></p>
+				  <!-- Same editor as the change view, locked. The zone data of a replicated or
+					   locally fetched domain is not ours to write, but it is worth reading with
+					   the filters and the checks of the editor instead of as a wall of text. -->
+				  <div class="modal-body" id="dns-zone-editor"
+					   data-domain="<?php echo htmlentities(strtolower(trim($current_user["domain"] ?? ''))); ?>"
+					   data-origin="<?php echo htmlentities(rtrim(strtolower(trim($current_user["domain"] ?? '')), '.').'.'); ?>"
+					   data-default-ttl="<?php echo htmlentities(defined("_USER_DOMAIN_MINIMUM_") ? _USER_DOMAIN_MINIMUM_ : '3600'); ?>"
+					   data-readonly="1"
+					   data-readonly-text="<?php
+							if($c_domain_id_r == "api_id") { echo "This domain is replicated from another master server. Its zone data is maintained there."; }
+							elseif(@$current_user["fk_user"] > 0) { echo "Use 'Change Records' on this page to edit this zone."; }
+							else { echo "This zone was read from the local name server configuration and is maintained there."; }
+					   ?>"
+					   data-zone="<?php echo htmlentities($current_user["content"] ?? ''); ?>">
+					<noscript><pre style="white-space: pre-wrap;"><?php echo htmlspecialchars($current_user["content"] ?? ''); ?></pre></noscript>
 				  </div>
 				  <div class="modal-footer">
 					<button type="button" class="btn btn-secondary" onClick="dnshttp_userui_viewrecord_close()">Close</button>
 				  </div>
 				</div>
 			  </div>
-			</div>		
+			</div>
+			<script src="./_assets/_js/dnshttp_zone_editor.js"></script>
 			<?php } ?>
 			
 			<?php if(@$_GET["op"] == "changerecord") {  ?>
@@ -784,13 +802,18 @@
 					<h5 class="modal-title">Domain Record Change<br /><small>Serial <?php echo htmlspecialchars($current_user["serial_c"] ?? ''); ?>/<?php echo incrementSOASerial($current_user["serial_c"] ?? ''); ?> </small></h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick="dnshttp_userui_changerecord_close()"></button>
 				  </div>
-				  <div class="modal-body" id="dns-zone-editor"  data-zone="<?php
+				  <div class="modal-body" id="dns-zone-editor"
+					   data-domain="<?php echo htmlentities(strtolower(trim($current_user["domain"] ?? ''))); ?>"
+					   data-origin="<?php echo htmlentities(rtrim(strtolower(trim($current_user["domain"] ?? '')), '.').'.'); ?>"
+					   data-default-ttl="<?php echo htmlentities(defined("_USER_DOMAIN_MINIMUM_") ? _USER_DOMAIN_MINIMUM_ : '3600'); ?>"
+					   data-readonly="<?php echo ($c_domain_id_r == "api_id") ? '1' : '0'; ?>"
+					   data-zone="<?php
 						$c_serial_raw = trim($current_user["serial_c"] ?? '');
 						$c_zone_attr = htmlentities($current_user["content"] ?? '');
 						if($c_serial_raw !== '') { $c_zone_attr = preg_replace('/\b'.preg_quote($c_serial_raw, '/').'\b/', incrementSOASerial($c_serial_raw), $c_zone_attr, 1); }
 						echo $c_zone_attr;
 				  ?>">
-					
+					<noscript>The record editor needs JavaScript. Without it the zone data of this domain can only be changed through the API.</noscript>
 				  </div>
 				  <div class="modal-footer">
 					<button type="button" class="btn btn-secondary" onClick="dnshttp_userui_changerecord_close()">Close</button>
@@ -799,424 +822,10 @@
 				</div>
 			  </div>
 			</div>		
-			<script>
-			
-				(function () {
-				'use strict';
-				 
-				/* ── Config ─────────────────────────────────────────────────────────────── */
-				const RECORD_TYPES = ['A','AAAA','NS','MX','CNAME','TXT','SOA','PTR','SRV','CAA'];
-				const RDATA_HINTS = {
-				  A:    '1.2.3.4',
-				  AAAA: '2001:db8::1',
-				  NS:   'ns1.example.com.',
-				  MX:   '10 mail.example.com.',
-				  CNAME:'alias.example.com.',
-				  TXT:  '"v=spf1 include:example.com ~all"',
-				  PTR:  'hostname.example.com.',
-				  SRV:  '10 20 443 target.example.com.',
-				  CAA:  '0 issue "letsencrypt.org"',
-				  SOA:  'ns1 admin ( 2024010101 3600 900 604800 300 )',
-				};
-				const TYPE_COLORS = {
-				  A:'#2563eb', AAAA:'#7c3aed', NS:'#0891b2', MX:'#d97706',
-				  CNAME:'#16a34a', TXT:'#dc2626', SOA:'#6b7280', PTR:'#be185d',
-				  SRV:'#0f766e', CAA:'#9333ea',
-				};
-				 
-				/* ── Helpers ─────────────────────────────────────────────────────────────── */
-				function uid() { return '_' + Math.random().toString(36).slice(2, 9); }
-				 
-				function parseTTL(val) {
-				  if (!val) return 3600;
-				  const s = String(val).trim();
-				  if (/^\d+$/.test(s)) return parseInt(s, 10);
-				  const m = s.match(/^(\d+)([smhdw])/i);
-				  if (m) {
-					const u = { s:1, m:60, h:3600, d:86400, w:604800 };
-					return parseInt(m[1], 10) * (u[m[2].toLowerCase()] || 1);
-				  }
-				  return 3600;
-				}
-				 
-				function formatTTL(secs) {
-				  if (secs % 86400 === 0 && secs >= 86400) return (secs/86400) + 'd';
-				  if (secs % 3600  === 0 && secs >= 3600)  return (secs/3600)  + 'h';
-				  if (secs % 60    === 0 && secs >= 60)    return (secs/60)    + 'm';
-				  return String(secs);
-				}
-				 
-				/* ── Parser ──────────────────────────────────────────────────────────────── */
-				function parseZone(raw) {
-				  const zone = { origin: <?php echo json_encode($current_user["domain"]."."); ?>, ttl: 3600, records: [] };
-				  if (!raw || !raw.trim()) return zone;
-				 
-				  let text = raw;
-				  /* Collapse parenthesised multi-line blocks (SOA) */
-				  text = text.replace(/\([\s\S]*?\)/g, m =>
-					'( ' + m.replace(/[()]/g,'').replace(/\s+/g,' ').trim() + ' )');
-				  /* Strip comments */
-				  text = text.replace(/"[^"]*"|;[^\n]*/g, m => m.startsWith('"') ? m : '');
-				 
-				  const lines = text.split('\n');
-				  let lastName = '@';
-				  let defaultTTL = 3600;
-				 
-				  for (const raw of lines) {
-					const line = raw.trim();
-					if (!line) continue;
-				 
-					if (/^\$ORIGIN\s+/i.test(line)) { zone.origin = line.split(/\s+/)[1]; continue; }
-					if (/^\$TTL\s+/i.test(line)) { defaultTTL = parseTTL(line.split(/\s+/)[1]); zone.ttl = defaultTTL; continue; }
-				 
-					const tokens = line.split(/\s+/);
-					let i = 0;
-					let name;
-				 
-					if (/^\s/.test(raw)) {
-					  name = lastName;
-					} else {
-					  name = tokens[i++];
-					  lastName = name;
-					}
-				 
-					let ttl = defaultTTL, cls = 'IN';
-				 
-					if (i < tokens.length && /^\d+$/.test(tokens[i])) ttl = parseTTL(tokens[i++]);
-					if (i < tokens.length && /^(IN|CH|HS)$/i.test(tokens[i])) cls = tokens[i++].toUpperCase();
-					if (i < tokens.length && /^\d+$/.test(tokens[i])) ttl = parseTTL(tokens[i++]);
-				 
-					const type = tokens[i++]?.toUpperCase();
-					/* Keep every record type, not only the ones the dropdown offers. Dropping
-					   unknown types here meant that simply opening a zone and pressing Save
-					   silently deleted DS, DNSKEY, TLSA, SSHFP, SVCB, HTTPS, NAPTR, DNAME, ...
-					   because exportZone() only writes back what this parser kept. */
-					if (!type || !/^[A-Z][A-Z0-9-]*$/.test(type)) continue;
-				 
-					const rdata = tokens.slice(i).join(' ');
-					zone.records.push({ id: uid(), name, ttl, class: cls, type, rdata });
-				  }
-				  return zone;
-				}
-				 
-				/* ── Export ──────────────────────────────────────────────────────────────── */
-				function exportZone(zone) {
-				  const lines = [];
-				  if (zone.origin) lines.push('$ORIGIN ' + zone.origin);
-				  lines.push('$TTL ' + formatTTL(zone.ttl));
-				  lines.push('');
-				  for (const r of zone.records) {
-					lines.push([r.name, r.ttl, r.class, r.type, r.rdata].join('\t'));
-				  }
-				  return lines.join('\n');
-				}
-				 
-				/* ── State ───────────────────────────────────────────────────────────────── */
-				let zone = { origin: 'example.com.', ttl: 3600, records: [] };
-				let newRec = { name: '', ttl: '', type: 'A', rdata: '' };
-				 
-				/* ── Styles ──────────────────────────────────────────────────────────────── */
-				function injectStyles() {
-				  if (document.getElementById('dze-style')) return;
-				  const s = document.createElement('style');
-				  s.id = 'dze-style';
-				  s.textContent = `
-					.dze { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: #111; }
-					.dze *, .dze *::before, .dze *::after { box-sizing: border-box; }
-					.dze-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
-					.dze-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #f0f0ed; flex-wrap: wrap; }
-					.dze-header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-					.dze-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; flex-shrink: 0; }
-					.dze-origin-wrap { display: flex; align-items: center; gap: 6px; }
-					.dze-label { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #9ca3af; }
-					.dze-origin-inp { font-family: ui-monospace, monospace; font-size: 14px; font-weight: 600; color: #111; border: none; background: transparent; outline: none; min-width: 0; width: 200px; }
-					.dze-origin-inp:focus { color: #2563eb; }
-					.dze-meta { display: flex; align-items: center; gap: 16px; }
-					.dze-ttl-wrap { display: flex; align-items: center; gap: 6px; }
-					.dze-ttl-inp { font-family: ui-monospace, monospace; font-size: 13px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 3px 7px; width: 64px; color: #374151; background: #f9fafb; outline: none; }
-					.dze-ttl-inp:focus { border-color: #2563eb; background: #fff; }
-					.dze-count { font-size: 12px; color: #9ca3af; }
-					.dze-actions { display: flex; gap: 8px; }
-					.dze-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .12s; border: none; }
-					.dze-btn-sec { background: #f3f4f6; color: #374151; }
-					.dze-btn-sec:hover { background: #e5e7eb; }
-					.dze-btn-pri { background: #2563eb; color: #fff; }
-					.dze-btn-pri:hover { background: #1d4ed8; }
-					.dze-btn-ghost { background: transparent; color: #6b7280; padding: 4px 6px; }
-					.dze-btn-ghost:hover { background: #f3f4f6; color: #111; }
-					.dze-btn-danger:hover { background: #fef2f2; color: #dc2626; }
-					.dze-table-wrap { overflow-x: auto; }
-					table.dze-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-					.dze-table th { text-align: left; padding: 8px 10px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #9ca3af; background: #fafafa; border-bottom: 1px solid #f0f0ed; white-space: nowrap; }
-					.dze-table td { padding: 4px 6px; border-bottom: 1px solid #f7f7f5; vertical-align: middle; }
-					.dze-table tr:last-child td { border-bottom: none; }
-					.dze-table tr:hover td { background: #f9fafb; }
-					.dze-inp { font-family: ui-monospace, monospace; font-size: 12.5px; border: 1px solid transparent; border-radius: 5px; padding: 4px 6px; width: 100%; background: transparent; color: #111; outline: none; transition: border-color .1s, background .1s; }
-					.dze-inp:hover { border-color: #e5e7eb; background: #fff; }
-					.dze-inp:focus { border-color: #2563eb; background: #fff; box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
-					.dze-inp-wide { min-width: 180px; }
-					.dze-type-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: .04em; font-family: ui-monospace, monospace; }
-					.dze-type-sel { font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700; border: 1px solid transparent; border-radius: 5px; padding: 3px 5px; background: transparent; cursor: pointer; outline: none; }
-					.dze-type-sel:focus { border-color: #2563eb; background: #fff; }
-					.dze-add-row { display: grid; grid-template-columns: 1fr 80px 110px 1fr auto; gap: 6px; padding: 10px 10px; background: #f9fafb; border-top: 1px solid #e5e7eb; align-items: center; }
-					.dze-add-inp { font-family: ui-monospace, monospace; font-size: 12.5px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 5px 8px; width: 100%; background: #fff; color: #111; outline: none; }
-					.dze-add-inp:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
-					.dze-add-sel { font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700; border: 1px solid #e5e7eb; border-radius: 6px; padding: 5px 8px; background: #fff; cursor: pointer; outline: none; width: 100%; }
-					.dze-add-sel:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.1); }
-					.dze-empty { text-align: center; padding: 32px; color: #9ca3af; font-style: italic; }
-					.dze-toast { position: fixed; bottom: 20px; right: 20px; background: #111; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 9999; }
-					.dze-toast.show { opacity: 1; transform: translateY(0); }
-					@media (max-width: 600px) {
-					  .dze-add-row { grid-template-columns: 1fr 1fr; }
-					  .dze-header { flex-direction: column; align-items: flex-start; }
-					}
-				  `;
-				  document.head.appendChild(s);
-				}
-				 
-				/* ── Toast ────────────────────────────────────────────────────────────────── */
-				let toastTimer;
-				function toast(msg) {
-				  let el = document.getElementById('dze-toast');
-				  if (!el) { el = document.createElement('div'); el.id = 'dze-toast'; el.className = 'dze-toast'; document.body.appendChild(el); }
-				  el.textContent = msg;
-				  el.classList.add('show');
-				  clearTimeout(toastTimer);
-				  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
-				}
-				 
-				/* ── Render ──────────────────────────────────────────────────────────────── */
-				function typeColor(t) { return TYPE_COLORS[t] || '#6b7280'; }
-				 
-				function typeOptions(sel) {
-				  /* A type the zone uses but the dropdown does not list must still appear as an
-					 option, otherwise the select would silently rewrite it to the first entry. */
-				  const list = (sel && !RECORD_TYPES.includes(sel))
-					? RECORD_TYPES.concat([sel])
-					: RECORD_TYPES;
-				  return list.map(t =>
-					`<option value="${esc(t)}"${t===sel?' selected':''}>${esc(t)}</option>`
-				  ).join('');
-				}
-				 
-				function render() {
-				  const container = document.getElementById('dns-zone-editor');
-				  if (!container) return;
-				 
-				  const rows = zone.records.map(r => {
-					const col = typeColor(r.type);
-					return `<tr data-id="${r.id}">
-					  <td><input class="dze-inp" data-field="name" value="${esc(r.name)}" placeholder="@" spellcheck="false"></td>
-					  <td><input class="dze-inp" data-field="ttl" value="${formatTTL(r.ttl)}" placeholder="${formatTTL(zone.ttl)}" style="width:70px" spellcheck="false"></td>
-					  <td>
-						<select class="dze-type-sel" data-field="type" style="color:${col}">
-						  ${typeOptions(r.type)}
-						</select>
-					  </td>
-					  <td><input class="dze-inp dze-inp-wide" data-field="rdata" value="${esc(r.rdata)}" placeholder="${RDATA_HINTS[r.type]||''}" spellcheck="false"></td>
-					  <td>
-						<button class="dze-btn dze-btn-ghost dze-btn-danger" data-action="delete" data-id="${r.id}" title="Record löschen" aria-label="Record löschen">
-						  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-						</button>
-					  </td>
-					</tr>`;
-				  }).join('');
-				 
-				  const emptyMsg = zone.records.length === 0
-					? `<tr><td colspan="5" class="dze-empty">Keine Records. Füge unten einen hinzu.</td></tr>`
-					: '';
-				 
-				  const newTtlHint = formatTTL(zone.ttl);
-				 
-				  container.innerHTML = `
-				<div class="dze">
-				  <div class="dze-card">
-					<div class="dze-header">
-					  <div class="dze-header-left">
-						<span class="dze-dot"></span>
-						<div class="dze-origin-wrap">
-						  <span class="dze-label">Zone</span>
-						  <input class="dze-origin-inp" id="dze-origin" value="${esc(zone.origin)}" placeholder="example.com." spellcheck="false" aria-label="Zone Origin">
-						</div>
-					  </div>
-					  <div class="dze-meta">
-						<div class="dze-ttl-wrap">
-						  <span class="dze-label">TTL</span>
-						  <input class="dze-ttl-inp" id="dze-default-ttl" value="${formatTTL(zone.ttl)}" placeholder="3600" aria-label="Standard TTL">
-						</div>
-						<span class="dze-count">${zone.records.length} Record${zone.records.length !== 1 ? 's' : ''}</span>
-					  </div>
-					  <div class="dze-actions">
-						<button class="dze-btn dze-btn-sec" data-action="copy-zone" title="Zone-Datei kopieren">
-						  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-						  Zone kopieren
-						</button>
-					  </div>
-					</div>
-					<div class="dze-table-wrap">
-					  <table class="dze-table" aria-label="DNS Records">
-						<thead>
-						  <tr>
-							<th>Name</th>
-							<th>TTL</th>
-							<th>Typ</th>
-							<th>Daten (RDATA)</th>
-							<th></th>
-						  </tr>
-						</thead>
-						<tbody id="dze-tbody">
-						  ${rows}${emptyMsg}
-						</tbody>
-					  </table>
-					</div>
-					<div class="dze-add-row" role="group" aria-label="Neuen Record hinzufügen">
-					  <input class="dze-add-inp" id="dze-new-name"  value="${esc(newRec.name)}"  placeholder="Name (z.B. www oder @)" spellcheck="false" aria-label="Name">
-					  <input class="dze-add-inp" id="dze-new-ttl"   value="${esc(newRec.ttl)}"   placeholder="${newTtlHint}" spellcheck="false" aria-label="TTL">
-					  <select style="color: black !important;" class="dze-add-sel" id="dze-new-type"  aria-label="Record-Typ">${typeOptions(newRec.type)}</select>
-					  <input class="dze-add-inp" id="dze-new-rdata" value="${esc(newRec.rdata)}" placeholder="${RDATA_HINTS[newRec.type]||''}" spellcheck="false" id="dze-new-rdata" aria-label="RDATA">
-					  <button class="dze-btn dze-btn-pri" data-action="add-record">
-						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-						Hinzufügen
-					  </button>
-					</div>
-				  </div>
-				</div>`;
-				 
-				  bindEvents(container);
-				}
-				 
-				function esc(s) {
-				  return String(s||'')
-					.replace(/&/g,'&amp;')
-					.replace(/"/g,'&quot;')
-					.replace(/</g,'&lt;')
-					.replace(/>/g,'&gt;');
-				}
-				 
-				/* ── Events ──────────────────────────────────────────────────────────────── */
-				function bindEvents(container) {
-				  /* Origin */
-				  container.querySelector('#dze-origin').addEventListener('change', e => {
-					zone.origin = e.target.value.trim();
-				  });
-				 
-				  /* Default TTL */
-				  container.querySelector('#dze-default-ttl').addEventListener('change', e => {
-					const v = parseTTL(e.target.value);
-					if (v > 0) { zone.ttl = v; e.target.value = formatTTL(v); }
-					else e.target.value = formatTTL(zone.ttl);
-					container.querySelector('.dze-count').textContent =
-					  zone.records.length + ' Record' + (zone.records.length !== 1 ? 's' : '');
-				  });
-				 
-				  /* Inline record edits */
-				  container.querySelector('#dze-tbody').addEventListener('change', e => {
-					const tr = e.target.closest('tr[data-id]');
-					if (!tr) return;
-					const id = tr.dataset.id;
-					const field = e.target.dataset.field;
-					const rec = zone.records.find(r => r.id === id);
-					if (!rec || !field) return;
-					if (field === 'ttl') {
-					  const v = parseTTL(e.target.value);
-					  rec.ttl = v > 0 ? v : zone.ttl;
-					  e.target.value = formatTTL(rec.ttl);
-					} else if (field === 'type') {
-					  rec.type = e.target.value;
-					  e.target.style.color = typeColor(rec.type);
-					} else {
-					  rec[field] = e.target.value.trim();
-					}
-				  });
-				 
-				  /* New record type → update rdata placeholder */
-				  const newTypeSel = container.querySelector('#dze-new-type');
-				  const newRdataInp = container.querySelector('#dze-new-rdata');
-				  newTypeSel.addEventListener('change', e => {
-					newRec.type = e.target.value;
-					newRdataInp.placeholder = RDATA_HINTS[newRec.type] || '';
-				  });
-				 
-				  /* Buttons */
-				  container.addEventListener('click', e => {
-					const btn = e.target.closest('[data-action]');
-					if (!btn) return;
-					const action = btn.dataset.action;
-				 
-					if (action === 'delete') {
-					  const id = btn.dataset.id;
-					  zone.records = zone.records.filter(r => r.id !== id);
-					  render();
-					}
-				 
-					if (action === 'add-record') {
-					  const name  = container.querySelector('#dze-new-name').value.trim();
-					  const ttlRaw= container.querySelector('#dze-new-ttl').value.trim();
-					  const type  = container.querySelector('#dze-new-type').value;
-					  const rdata = container.querySelector('#dze-new-rdata').value.trim();
-					  if (!name || !rdata) {
-						toast('Name und Daten (RDATA) sind Pflichtfelder.');
-						return;
-					  }
-					  zone.records.push({
-						id: uid(),
-						name,
-						ttl: ttlRaw ? parseTTL(ttlRaw) : zone.ttl,
-						class: 'IN',
-						type,
-						rdata,
-					  });
-					  newRec = { name: '', ttl: '', type, rdata: '' };
-					  render();
-					}
-				 
-					if (action === 'copy-zone') {
-					  const text = exportZone(zone);
-					  if (navigator.clipboard) {
-						navigator.clipboard.writeText(text).then(() => toast('Zone-Datei kopiert!'));
-					  } else {
-						const ta = document.createElement('textarea');
-						ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-						document.body.appendChild(ta); ta.select();
-						document.execCommand('copy');
-						document.body.removeChild(ta);
-						toast('Zone-Datei kopiert!');
-					  }
-					}
-				  });
-				}
-				 
-				/* ── Init ────────────────────────────────────────────────────────────────── */
-				function init() {
-				  injectStyles();
-				  const container = document.getElementById('dns-zone-editor');
-				  if (!container) { console.warn('[dns-zone-editor] #dns-zone-editor not found'); return; }
-				 
-				  const raw = container.dataset.zone
-					|| window.dnsZoneData
-					|| '';
-				 
-				  zone = parseZone(raw);
-				  render();
-				 
-				  /* Public API */
-				  window.DNSZoneEditor = {
-					getZoneData: () => exportZone(zone),
-					getRecords:  () => zone.records.map(r => ({ ...r })),
-					setZoneData: (text) => { zone = parseZone(text); render(); },
-					addRecord:   (rec) => { zone.records.push({ id: uid(), class:'IN', ttl: zone.ttl, ...rec }); render(); },
-				  };
-				}
-				 
-				if (document.readyState === 'loading') {
-				  document.addEventListener('DOMContentLoaded', init);
-				} else {
-				  init();
-				}
-				 
-				})();			
-							
-			</script>
+			<!----------------- Record Editor -------------------->
+			<!-- The editor itself lives in its own file. It reads the zone out of the
+			     data attributes above and hands it back through window.DNSZoneEditor. -->
+			<script src="./_assets/_js/dnshttp_zone_editor.js"></script>
 			<?php } ?>
 		
 		<!----------------- Information Callout -------------------->
