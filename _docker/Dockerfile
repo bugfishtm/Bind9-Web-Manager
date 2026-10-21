@@ -1,13 +1,16 @@
 ############################################################################################################
 # Build Instructions
 ############################################################################################################
-FROM bugfishtm/sf-base:1.3
+FROM bugfishtm/dnshttp:4.2.1
 ENV DEBIAN_FRONTEND=noninteractive
 
 ##
 ## Install Updates
 ##
-RUN apt update -y && apt upgrade -y && apt-get clean
+# Update only what is available and clean up safely
+RUN (apt-get update --allow-releaseinfo-change || true) && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ##
 ## Apache Copy Website Content
@@ -46,18 +49,24 @@ RUN echo "upload_max_filesize = 512M" > /usr/local/etc/php/conf.d/uploads.ini \
     && echo "post_max_size = 512M" >> /usr/local/etc/php/conf.d/uploads.ini \
     && echo "max_execution_time = 1200" >> /usr/local/etc/php/conf.d/uploads.ini \
     && echo "memory_limit = 1024M" >> /usr/local/etc/php/conf.d/uploads.ini
+	
 ##
 ## Bind9 Daemon
 ##
 RUN cat > /etc/supervisor/conf.d/bind9.conf << 'EOF'
 [program:bind9]
-command=/usr/sbin/named -f -c /etc/bind/named.conf
+command=/usr/sbin/named -f -u bind -c /etc/bind/named.conf
 autostart=true
 autorestart=true
 user=root
 stdout_logfile=/var/log/bind9.log
 stderr_logfile=/var/log/bind9_error.log
 EOF
+
+##
+## Delete Suitefish Supervisor Configuration
+##
+RUN rm /etc/supervisor/conf.d/suitefish_suitefish.conf
 
 ##
 ## Add Entrypoint
