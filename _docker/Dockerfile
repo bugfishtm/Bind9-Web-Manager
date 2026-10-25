@@ -1,16 +1,14 @@
 ############################################################################################################
 # Build Instructions
 ############################################################################################################
-FROM bugfishtm/dnshttp:4.2.1
+FROM bugfishtm/sf-base:1.6
 ENV DEBIAN_FRONTEND=noninteractive
 
 ##
 ## Install Updates
 ##
 # Update only what is available and clean up safely
-RUN (apt-get update --allow-releaseinfo-change || true) && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN (apt-get update --allow-releaseinfo-change || true)
 
 ##
 ## Apache Copy Website Content
@@ -41,7 +39,7 @@ RUN chmod u+x /entrypoint.sh
 ##
 RUN echo "0 */2 * * * root /usr/bin/flock -n /var/run/cronjob.lock /usr/local/bin/php /var/www/html/_cronjob/sync.php 2>&1" > /etc/cron.d/suitefish \
  && chmod 0644 /etc/cron.d/suitefish
- 
+
 ##
 ## PHP Max Upload and Post Size Settings
 ##
@@ -59,14 +57,9 @@ command=/usr/sbin/named -f -u bind -c /etc/bind/named.conf
 autostart=true
 autorestart=true
 user=root
-stdout_logfile=/var/log/bind9.log
-stderr_logfile=/var/log/bind9_error.log
+stdout_logfile=/var/log/supervisor_bind_error.log
+stderr_logfile=/var/log/supervisor_bind_error.log
 EOF
-
-##
-## Delete Suitefish Supervisor Configuration
-##
-RUN rm /etc/supervisor/conf.d/suitefish_suitefish.conf
 
 ##
 ## Add Entrypoint

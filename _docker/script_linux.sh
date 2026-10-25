@@ -4,8 +4,7 @@ clear
 
 while true; do
     echo
-    echo "DNSHTTP Docker Image Script"
-    echo "PRODUCTION PRODUCTION PRODUCTION"
+    echo "Suitefish Docker Image Script"
     echo
     echo "Choose an option by entering a number (1-6):"
     echo "1. Rebuild the Image without Cache"
@@ -40,7 +39,7 @@ while true; do
             ;;
         6)
             echo
-            echo "DNSHTTP Docker Script reached its End of File"
+            echo "Suitefish Docker Script reached its End of File"
             echo "Goodbye!"
             echo
             exit 0

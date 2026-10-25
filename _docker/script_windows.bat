@@ -2,8 +2,7 @@
 cls
 :menu
 echo.
-echo DNSHTTP Docker Image Script
-echo PRODUCTION PRODUCTION PRODUCTION
+echo Suitefish Docker Image Script
 echo.
 echo Choose an option by entering a number (1-4):
 echo 1. Rebuild the Image without Cache
@@ -53,7 +52,7 @@ goto end
 
 :end
 echo.
-echo DNSHTTP Docker Script reached its End of File
+echo Suitefish Docker Script reached its End of File
 echo Goodbye!
 echo.
 pause
