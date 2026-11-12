@@ -602,6 +602,105 @@
 	}
 
 	/*************************************************************************
+		One-Time-Password (TOTP) Two-Factor Authentication
+	*************************************************************************/
+	# The OTP secret of an account lives in the user_2fa column. An empty column means OTP is off
+	# for that account. otp_last holds the last accepted 30 second time-step so a code that has
+	# been used once cannot be replayed within its validity window.
+	#
+	# A logged in session of an account with OTP enabled only counts as fully authenticated when
+	# the session has been marked as OTP verified for its current session key. This fails closed:
+	# a new session key (new login, restored session) always has to pass the OTP check again.
+
+	# Session key names
+	function dnshttp_otp_session_name()        { return _COOKIES_."dnshttp_otp_verified"; }
+	function dnshttp_otp_session_fails_name()  { return _COOKIES_."dnshttp_otp_fails"; }
+	function dnshttp_otp_session_setup_name()  { return _COOKIES_."dnshttp_otp_setup_secret"; }
+
+	# Generate a new Base32 secret (20 random bytes = 32 Base32 characters)
+	function dnshttp_otp_generate_secret() { return x_class_2fa::generateSecretKey(20); }
+
+	# Get the OTP secret of a user or false if OTP is disabled for this user
+	function dnshttp_otp_secret($mysql, $userid) {
+		if(!is_numeric($userid)) { return false; }
+		$r = $mysql->select("SELECT user_2fa FROM "._TABLE_USER_." WHERE id = '".intval($userid)."'", false);
+		if(is_array($r) AND trim($r["user_2fa"] ?? '') != "") { return trim($r["user_2fa"]); }
+		return false;
+	}
+
+	# Is OTP enabled for this user?
+	function dnshttp_otp_enabled($mysql, $userid) { return (dnshttp_otp_secret($mysql, $userid) !== false); }
+
+	# Check a code against a secret. Returns the matching time-step or false.
+	# One step of clock drift is accepted in both directions. Steps lower or equal to
+	# $last_step are refused to prevent the reuse of an already accepted code.
+	function dnshttp_otp_check_code($secret, $code, $last_step = null) {
+		$code = preg_replace('/\s+/', '', (string)$code);
+		if(!preg_match('/^[0-9]{6}$/', $code)) { return false; }
+		if(trim($secret ?? '') == "") { return false; }
+		$otp = new x_class_2fa($secret, 6);
+		$now = intval(floor(time() / 30));
+		for($i = -1; $i <= 1; $i++) {
+			$step = $now + $i;
+			if(is_numeric($last_step) AND $step <= intval($last_step)) { continue; }
+			if(hash_equals((string)$otp->generateCode($step * 30), $code)) { return $step; }
+		}
+		return false;
+	}
+
+	# Verify a code for a user with OTP enabled and remember the used time-step
+	function dnshttp_otp_verify_user($mysql, $userid, $code) {
+		if(!is_numeric($userid)) { return false; }
+		$r = $mysql->select("SELECT user_2fa, otp_last FROM "._TABLE_USER_." WHERE id = '".intval($userid)."'", false);
+		if(!is_array($r) OR trim($r["user_2fa"] ?? '') == "") { return false; }
+		$step = dnshttp_otp_check_code(trim($r["user_2fa"]), $code, $r["otp_last"] ?? null);
+		if($step === false) { return false; }
+		$mysql->query("UPDATE "._TABLE_USER_." SET otp_last = '".intval($step)."' WHERE id = '".intval($userid)."'");
+		return true;
+	}
+
+	# Enable OTP for a user with an already verified secret
+	function dnshttp_otp_enable($mysql, $userid, $secret, $step) {
+		if(!is_numeric($userid) OR !preg_match('/^[A-Z2-7]{16,128}$/', $secret ?? '')) { return false; }
+		$bind[0]["type"] = "s"; $bind[0]["value"] = $secret;
+		return $mysql->query("UPDATE "._TABLE_USER_." SET user_2fa = ?, otp_last = '".intval($step)."' WHERE id = '".intval($userid)."'", $bind);
+	}
+
+	# Disable OTP for a user
+	function dnshttp_otp_disable($mysql, $userid) {
+		if(!is_numeric($userid)) { return false; }
+		return $mysql->query("UPDATE "._TABLE_USER_." SET user_2fa = NULL, otp_last = NULL WHERE id = '".intval($userid)."'");
+	}
+
+	# Is the current session verified by OTP (bound to the current session key)?
+	function dnshttp_otp_session_verified() {
+		$key = @$_SESSION[_COOKIES_."x_users_key"];
+		$ok  = @$_SESSION[dnshttp_otp_session_name()];
+		if(!is_string($key) OR $key === "" OR !is_string($ok) OR $ok === "") { return false; }
+		return hash_equals($key, $ok);
+	}
+
+	# Mark the current session as verified by OTP
+	function dnshttp_otp_session_mark() {
+		$_SESSION[dnshttp_otp_session_name()] = (string)@$_SESSION[_COOKIES_."x_users_key"];
+		unset($_SESSION[dnshttp_otp_session_fails_name()]);
+	}
+
+	# Remove all OTP related session data
+	function dnshttp_otp_session_clear() {
+		unset($_SESSION[dnshttp_otp_session_name()]);
+		unset($_SESSION[dnshttp_otp_session_fails_name()]);
+		unset($_SESSION[dnshttp_otp_session_setup_name()]);
+	}
+
+	# Build the otpauth:// URI for authenticator apps
+	function dnshttp_otp_uri($username, $secret) {
+		$issuer = trim(strip_tags((defined("_TITLE_") AND trim(_TITLE_ ?? '') != "") ? _TITLE_ : "DNSHTTP"));
+		$issuer = str_replace(":", "", $issuer);
+		return "otpauth://totp/".rawurlencode($issuer).":".rawurlencode(str_replace(":", "", (string)$username))."?secret=".rawurlencode($secret)."&issuer=".rawurlencode($issuer)."&algorithm=SHA1&digits=6&period=30";
+	}
+
+	/*************************************************************************
 		Cronjob Execution
 	*************************************************************************/
 	$log_output = "";

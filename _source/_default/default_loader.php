@@ -46,6 +46,6 @@
 		case "blacklist": if($permsobj->hasPerm($user->user_id, "system") OR $user->user_rank == 0) { $csrf = new x_class_csrf(_COOKIES_."_s".@$_GET["site"].$tmp_id, _CSRF_VALID_LIMIT_TIME_); require_once("./_site/site_blacklist.php"); } else { Header("Location: ./?site=dashboard"); exit(); } break;
 		case "about": if($permsobj->hasPerm($user->user_id, "system") OR $user->user_rank == 0) { $csrf = new x_class_csrf(_COOKIES_."_s".@$_GET["site"].$tmp_id, _CSRF_VALID_LIMIT_TIME_); require_once("./_site/site_about.php"); } else { Header("Location: ./?site=dashboard"); exit(); } break;
 		case "profile": $csrf = new x_class_csrf(_COOKIES_."_s".@$_GET["site"].$tmp_id, _CSRF_VALID_LIMIT_TIME_); require_once("./_site/site_profile.php"); break;
-		case "logout": $user->logout(); x_eventBoxPrep("You have been logged out!", "ok", _COOKIES_); Header("Location: ./"); exit(); break;
+		case "logout": dnshttp_otp_session_clear(); $user->logout(); x_eventBoxPrep("You have been logged out!", "ok", _COOKIES_); Header("Location: ./"); exit(); break;
 		default: Header("Location: ./?site=dashboard"); exit();			
 	};

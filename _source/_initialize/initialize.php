@@ -33,7 +33,7 @@
 		General Site Variables
 	*************************************************************************/
 	define('_GITHUB_',   			"https://github.com/bugfishtm/"); 										# URL to Documentation
-	define("_VERSION_", 			'4.2.1');																# Current Actual Code Version
+	define("_VERSION_", 			'4.2.2');																# Current Actual Code Version
 	
 	/*************************************************************************
 		Docker Define Var for installations
@@ -183,6 +183,12 @@
 	*************************************************************************/
 	$user->user_add_field(" ext_api_key varchar(128) NULL COMMENT 'External API Key for Requests'");
 	$user->user_add_field(" last_activity datetime NULL COMMENT 'Upgrade Required'");
+
+	/*************************************************************************
+		Add fields for One-Time-Password (TOTP) Login Security
+	*************************************************************************/
+	$user->user_add_field(" user_2fa text DEFAULT NULL COMMENT 'Users 2FA key'");
+	$user->user_add_field(" otp_last bigint NULL COMMENT 'Last accepted OTP time-step (replay protection)'");
 	
 	/*************************************************************************
 		Add field for outdated Log Class

@@ -1,7 +1,7 @@
 ############################################################################################################
 # Build Instructions
 ############################################################################################################
-FROM bugfishtm/sf-base:1.6
+FROM bugfishtm/sf-base:1.7
 ENV DEBIAN_FRONTEND=noninteractive
 
 ##
@@ -22,6 +22,9 @@ RUN rm -rf /var/www/html/_pma
 ##
 RUN apt-get install -y bind9 bind9-utils dnsutils
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN ln -s /usr/bin/named-checkconf /usr/sbin/named-checkconf
+RUN ln -s /usr/bin/named-checkzone /usr/sbin/named-checkzone
+RUN ln -s /usr/bin/named-compilezone /usr/sbin/named-compilezone
 
 ##
 ## Make executable
@@ -57,8 +60,12 @@ command=/usr/sbin/named -f -u bind -c /etc/bind/named.conf
 autostart=true
 autorestart=true
 user=root
-stdout_logfile=/var/log/supervisor_bind_error.log
+stdout_logfile=/var/log/supervisor_bind_info.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
 stderr_logfile=/var/log/supervisor_bind_error.log
+stderr_logfile_maxbytes=50MB
+stderr_logfile_backups=10
 EOF
 
 ##

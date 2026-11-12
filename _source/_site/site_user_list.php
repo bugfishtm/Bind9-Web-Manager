@@ -155,6 +155,22 @@
 		}								
 				
 		/*************************************************************************
+			Reset One-Time-Password (OTP) of User
+		*************************************************************************/
+		if(@$_GET["op"] == "otp_reset") {
+			if ($csrf->check(@$_GET['csrf'])) {
+				if($current_user["user_rank"] == 0 AND $user->user_rank != 0) {
+					x_eventBoxPrep("Only the administrative super-user can reset the one-time password of the administrative super-user.", "error", _COOKIES_);
+				} else {
+					dnshttp_otp_disable($mysql, $current_user["id"]);
+					x_eventBoxPrep("The one-time password protection of this user has been reset. The user can now log in with the password only and set up a new one-time password on the profile page.", "ok", _COOKIES_);
+				}
+				Header("Location: ./?site=user_list&id=".$current_user["id"]."");
+				exit();
+			} else  { x_eventBoxPrep("CSRF Error - The form has expired or reloaded in a new browsers tab, please try again!", "error", _COOKIES_); }
+		}
+
+		/*************************************************************************
 			Generate / Regenerate new API Access Token
 		*************************************************************************/
 		if(@$_GET["op"] == "generate" || @$_GET["op"] == "regenerate") {
@@ -210,6 +226,10 @@
 		
 			function dnshttp_userui_unblock() {
 				window.location.href = "./?site=user_list&op=unblock&id=<?php echo $_GET["id"]; ?>&csrf=<?php echo $csrf->get(); ?>";
+			}
+
+			function dnshttp_userui_otp_reset() {
+				window.location.href = "./?site=user_list&op=otp_reset&id=<?php echo $_GET["id"]; ?>&csrf=<?php echo $csrf->get(); ?>";
 			}
 		
 			function dnshttp_userui_api_show() {
@@ -315,8 +335,26 @@
 			  </div>
 			</div>
 		  </div>
-		</div>		
-		
+		</div>
+
+		<div class="modal" id="cpage_otp_reset_item_modal" tabindex="-1">
+		  <div class="modal-dialog">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<h5 class="modal-title">Reset One-Time Password</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			  </div>
+			  <div class="modal-body">
+				<p>Do you really want to reset the one-time password protection of this user? The user will be able to log in with the password only, until a new one-time password has been set up on the profile page.</p>
+			  </div>
+			  <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-danger" onClick="dnshttp_userui_otp_reset()">Reset OTP</button>
+			  </div>
+			</div>
+		  </div>
+		</div>
+
 		<!----------------- Information Callout -------------------->
 		<div class="callout callout-info mb-3" role="alert">Here you can find details about the user '<b><?php echo htmlspecialchars($current_user["user_name"] ?? ''); ?></b>' with identification number #<?php echo @$_GET["id"]; ?>.</div>
 		<?php if($current_user["user_rank"] == 0) { ?> <div class="callout callout-warning mb-3" role="alert">This is the administrative super-user, and always has all privileges. </div> <?php } ?>
@@ -367,7 +405,25 @@
 						  <?php } ?>
 						</div>
 					  </form>
-					</div>		
+					</div>
+				</div>
+
+				<div class="card card-dark mb-4">
+				  <div class="card-header">
+					<div class="card-title">One-Time Password</div>
+				  </div>
+				  <div class="card-body">
+					<?php if(trim($current_user["user_2fa"] ?? '') != "") { ?>
+						<span class="badge text-bg-success"><i class="bi bi-shield-lock-fill"></i> Enabled</span> This user needs a one-time password from an authenticator app to log in.
+					<?php } else { ?>
+						<span class="badge text-bg-secondary"><i class="bi bi-shield-exclamation"></i> Disabled</span> This user can enable a one-time password on the profile page.
+					<?php } ?>
+				  </div>
+				  <?php if(trim($current_user["user_2fa"] ?? '') != "" AND ($current_user["user_rank"] != 0 OR $user->user_rank == 0)) { ?>
+					  <div class="card-footer">
+						<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cpage_otp_reset_item_modal">Reset OTP</button>
+					  </div>
+				  <?php } ?>
 				</div>
 
 				<div class="card card-dark mb-4">

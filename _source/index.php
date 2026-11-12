@@ -70,7 +70,16 @@
 		require_once("./_template/tpl_login.php");
 		exit();
 	}
-	
+
+	/*************************************************************************
+		User is logged In but has not passed the OTP Check yet.
+	*************************************************************************/
+	if(dnshttp_otp_enabled($mysql, @$_SESSION[_COOKIES_."x_users_id"]) AND !dnshttp_otp_session_verified()) {
+		$csrf = new x_class_csrf(_COOKIES_."_otp", _CSRF_VALID_LIMIT_TIME_);
+		require_once("./_template/tpl_otp.php");
+		exit();
+	}
+
 	/*************************************************************************
 		Default if everything else alright.
 	*************************************************************************/	
