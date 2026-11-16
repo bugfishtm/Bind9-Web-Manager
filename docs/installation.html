@@ -857,10 +857,18 @@ password: changeme  </p>
 <h2 id="installation-via-script">Installation via Script</h2>
 <p>In the github repository's <code>_scripts</code> folder, you'll find an installation script designed to install the full version with all features on a root server. This script is intended for use only on freshly installed servers and may corrupt running services or operations. In the github repository's <code>_scripts</code> folder, you'll find an installation script designed to install the full version with all features on a root/kvm server. </p>
 <p>Execute the following Commands and navigate through the installation shell process to install dnshttp on a fresh server with full root-level access.</p>
+<b>Ubuntu 24</b>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-o<span class="w"> </span>./installer.sh<span class="w"> </span>https://raw.githubusercontent.com/bugfishtm/Bind9-Web-Manager/refs/heads/main/_scripts/installer.sh
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>chmod<span class="w"> </span>u+x<span class="w"> </span>./installer.sh<span class="w">  </span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>sh<span class="w"> </span>./installer.sh<span class="w"> </span>install
 </span></code></pre></div>
+
+<b>Debian 13</b>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-o<span class="w"> </span>./installer.sh<span class="w"> </span>https://raw.githubusercontent.com/bugfishtm/Bind9-Web-Manager/refs/heads/main/_scripts/installer-debian13.sh
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>chmod<span class="w"> </span>u+x<span class="w"> </span>./installer.sh<span class="w">  </span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>sh<span class="w"> </span>./installer.sh<span class="w"> </span>install
+</span></code></pre></div>
+
 <hr>
 <h2 id="installation-via-docker">Installation via Docker</h2>
 <p>Here you can find the official Docker image related to this project. By clicking the link below, you'll be directed to the Docker Hub page where you can access and pull the image for use.</p>
